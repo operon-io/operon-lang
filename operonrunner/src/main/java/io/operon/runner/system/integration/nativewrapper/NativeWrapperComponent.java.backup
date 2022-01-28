@@ -1,0 +1,90 @@
+package io.operon.runner.system.integration.nativewrapper;
+
+import io.operon.runner.OperonContext;
+import io.operon.runner.util.RandomUtil;
+
+import java.util.Date;
+import java.util.Collections;
+import java.util.Collection;
+import java.util.List;
+import java.util.ArrayList;
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
+
+import io.operon.runner.statement.Statement;
+import io.operon.runner.node.AbstractNode;
+import io.operon.runner.node.Node;
+import io.operon.runner.node.json.*;
+import io.operon.runner.system.IntegrationComponent;
+import io.operon.runner.util.ErrorUtil;
+import io.operon.runner.Context;
+import io.operon.runner.processor.function.core.string.StringToBinary;
+
+import java.lang.reflect.Method;
+
+import io.operon.runner.system.ComponentSystemUtil;
+import io.operon.runner.system.integration.BaseComponent;
+import io.operon.runner.util.JsonUtil;
+
+import org.apache.logging.log4j.Logger;
+import io.operon.runner.model.exception.OperonGenericException;
+import io.operon.runner.model.exception.OperonComponentException;
+
+import io.operon.runner.nativeintegration.NativeRun;
+import org.graalvm.nativeimage.c.type.CCharPointer;
+import org.graalvm.nativeimage.c.type.CTypeConversion;
+import org.graalvm.nativeimage.c.type.CTypeConversion.CCharPointerHolder;
+import org.graalvm.nativeimage.CurrentIsolate;
+import org.graalvm.nativeimage.IsolateThread;
+
+import org.apache.logging.log4j.LogManager;
+
+
+public class NativeWrapperComponent extends BaseComponent implements IntegrationComponent {
+    private static Logger log = LogManager.getLogger(NativeWrapperComponent.class);
+
+    public NativeWrapperComponent() {}
+    
+    public JsonValue produce(JsonValue currentValue) throws OperonComponentException {
+        try {
+            String cvString = currentValue.evaluate().toString();
+            String configsString = this.getJsonConfiguration().evaluate().toString();
+            
+            //
+            // call native-component
+            //
+            IsolateThread currentThread = CurrentIsolate.getCurrentThread();
+            
+            CCharPointerHolder componentNameStringPH = CTypeConversion.toCString(this.getComponentName());
+            CCharPointerHolder componentIdStringPH = CTypeConversion.toCString(this.getComponentId());
+            CCharPointerHolder cvStringPH = CTypeConversion.toCString(cvString);
+            CCharPointerHolder configsStringPH = CTypeConversion.toCString(configsString);
+            
+            CCharPointer resultCCP = NativeRun.call_component(
+                currentThread,
+                componentNameStringPH.get(),
+                componentIdStringPH.get(),
+                cvStringPH.get(),
+                configsStringPH.get()
+            );
+            
+            String resultStr = CTypeConversion.toJavaString(resultCCP);
+            System.out.println("From Java: " + resultStr);
+            
+            componentNameStringPH.close();
+            componentIdStringPH.close();
+            cvStringPH.close();
+            configsStringPH.close();
+            
+            return currentValue;
+        } catch (OperonGenericException e) {
+            throw new OperonComponentException(e.getErrorJson());
+        }
+    }
+
+}

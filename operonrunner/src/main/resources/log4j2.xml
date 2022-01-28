@@ -1,0 +1,25 @@
+<Configuration status="INFO" debug="false" name="operon" packages="">
+    <Appenders>
+        <Console name="stdout" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %p %m%n"/>
+        </Console>
+        
+        <File name="fileout" fileName="log4j/target/operon-log4j2.log"
+            immediateFlush="false" append="false">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %p %m%n"/>
+        </File>
+    </Appenders>
+    
+    <Loggers>
+        <!-- INFO, WARN, OFF--><!-- was INFO -->
+        <!-- Cannot have two root loggers defined. -->
+        <!--Root level="OFF">
+            <AppenderRef ref="stdout" />
+        </Root-->
+        
+        <!-- DEBUG, OFF --><!-- Was DEBUG-->
+        <Root level="OFF">
+            <AppenderRef ref="fileout" />
+        </Root>
+    </Loggers>
+</Configuration>
