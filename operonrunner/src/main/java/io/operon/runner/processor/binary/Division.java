@@ -50,8 +50,10 @@ public class Division extends BaseBinaryNodeProcessor implements BinaryNodeProce
             
             NumberType lhsResultJN = (NumberType) lhsResult;
             NumberType rhsResultJN = (NumberType) rhsResult;
-            
             double doubleResult = lhsResultJN.getDoubleValue() / rhsResultJN.getDoubleValue();
+            if (Double.isInfinite(doubleResult)) {
+                return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "DIVISION", "Division by zero");
+            }
             String strResult = Double.toString(doubleResult);
             result.setDoubleValue(doubleResult);
             
@@ -171,11 +173,18 @@ public class Division extends BaseBinaryNodeProcessor implements BinaryNodeProce
         }
         
         else {
-            log.error("INCOMPATIBLE TYPES: " + lhsResult.getClass() + ", " + rhsResult.getClass());
+            //:OFF:log.error("INCOMPATIBLE TYPES: " + lhsResult.getClass() + ", " + rhsResult.getClass());
             
             String lhsType = ErrorUtil.mapTypeFromJavaClass(lhsResult);
             String rhsType = ErrorUtil.mapTypeFromJavaClass(rhsResult);
-            return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "DIVISION", "Not defined: " + lhsType + " " + binaryOperator + " " + rhsType);
+            return ErrorUtil.createErrorValueAndThrow(statement,
+                "OPERATOR", 
+                "DIVISION", 
+                "Not defined: " + lhsType + " " + binaryOperator + " " + rhsType +
+                    ", at line #" + this.getSourceCodeLineNumber() +
+                    ". lhs value: " + lhs.toString() + ", rhs value: " + rhs.toString()
+            
+            );
         }
         
     }

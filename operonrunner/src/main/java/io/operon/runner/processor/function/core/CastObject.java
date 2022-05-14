@@ -42,7 +42,7 @@ import org.apache.logging.log4j.LogManager;
  *
  */
 public class CastObject extends BaseArity1 implements Node, Arity1 {
-    private static Logger log = LogManager.getLogger(CastObject.class);
+     // no logger 
     
     public CastObject(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);

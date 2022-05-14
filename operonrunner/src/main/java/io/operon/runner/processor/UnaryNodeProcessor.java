@@ -29,5 +29,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 public interface UnaryNodeProcessor {
 
     public OperonValue process(Statement statement, Node node) throws OperonGenericException;
-
+	
+	public int getSourceCodeLineNumber();
+	public void setSourceCodeLineNumber(int ln);
 }

@@ -53,4 +53,9 @@ public class NullType extends OperonValue implements Node, AtomicOperonValue {
         return "null";
     }
 
+    @Override
+    public String toTomlString(OutputFormatter ofmt) {
+        return "null";
+    }
+
 }

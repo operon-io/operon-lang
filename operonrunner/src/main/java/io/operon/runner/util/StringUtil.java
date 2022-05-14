@@ -20,10 +20,15 @@ import java.security.MessageDigest;
 import java.io.IOException;
 import java.util.Random;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+
 import io.operon.runner.OperonContext;
 import io.operon.runner.statement.DefaultStatement;
 import io.operon.runner.model.exception.OperonGenericException;
 import io.operon.runner.util.ErrorUtil;
+import io.operon.runner.Main;
 
 public class StringUtil {
 
@@ -66,6 +71,13 @@ public class StringUtil {
                return null;
            }
         }
+    }
+
+    public static String loadFileAsString(String pathToFile) throws Exception {
+        Path path = Paths.get(pathToFile.toString());
+        String fileContent = null;
+        fileContent = new String(Files.readAllBytes(path), Main.defaultCharset);
+        return fileContent;
     }
 
     //

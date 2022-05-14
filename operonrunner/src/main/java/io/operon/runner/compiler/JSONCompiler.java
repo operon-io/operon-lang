@@ -54,19 +54,19 @@ import org.apache.logging.log4j.LogManager;
  *
  */
 public class JSONCompiler extends JSONBaseListener {
-    private static Logger log = LogManager.getLogger(JSONCompiler.class);
+     // no logger 
     private OperonContext operonContext;
     private Stack<Statement> statementStack;
     private Stack<Node> stack;
-    private OperonValue initialCurrentValue; // TODO: refactor this away (in the fromInputSource)?
     private Statement currentStatement;
-    private Long startTime;
+    private CompilerFlags[] flags;
     
-    public JSONCompiler() {
+    public JSONCompiler(CompilerFlags[] compilerFlags) {
         super();
         this.stack = new Stack<Node>();
         this.statementStack = new Stack<Statement>();
         currentStatement = new DefaultStatement(operonContext);
+        this.flags = compilerFlags;
     }
     
     @Override
@@ -93,8 +93,8 @@ public class JSONCompiler extends JSONBaseListener {
     
     @Override
     public void exitJson(JSONParser.JsonContext ctx) {
-        log.debug("EXIT Json :: Stack size :: " + this.stack.size());
-        log.debug("    >> TRYING TO PEEK");
+        //:OFF:log.debug("EXIT Json :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("    >> TRYING TO PEEK");
         Node n = this.stack.peek();
         assert (n != null): "exitJson :: null value from stack";
         //
@@ -103,19 +103,19 @@ public class JSONCompiler extends JSONBaseListener {
         //System.out.println("    >> PEEK RESULT: " + n.toString()); // was n.toString()
         if (this.currentStatement != null) {
             this.currentStatement.setNode(n);
-            log.debug("    >> NODE SET");
+            //:OFF:log.debug("    >> NODE SET");
         } else {
-            log.debug("    >> CURRENT STATEMENT WAS NULL !!!!!!!");
+            //:OFF:log.debug("    >> CURRENT STATEMENT WAS NULL !!!!!!!");
         }
     }
     
     @Override
     public void exitValue(JSONParser.ValueContext ctx) {
-        log.debug("EXIT Json_value :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Json_value :: Stack size :: " + this.stack.size());
         OperonValue jsonValue = new OperonValue(this.currentStatement);
         List<ParseTree> subNodes = this.getContextChildNodes(ctx);
         
-        log.debug("CHILD NODES :: " + subNodes.size() + " :: CHILD NODE [0] TYPE :: " + subNodes.get(0).getClass().getName());
+        //:OFF:log.debug("CHILD NODES :: " + subNodes.size() + " :: CHILD NODE [0] TYPE :: " + subNodes.get(0).getClass().getName());
         
         if (subNodes.size() > 0 
             && subNodes.get(0) instanceof RuleNode 
@@ -127,10 +127,10 @@ public class JSONCompiler extends JSONBaseListener {
         else if (subNodes.size() > 0 
             && subNodes.get(0) instanceof RuleNode 
             && subNodes.get(0) instanceof JSONParser.ArrayContext) {
-            log.debug("SETTING JSON VALUE --> JSON ARRAY.");
+            //:OFF:log.debug("SETTING JSON VALUE --> JSON ARRAY.");
             Node value = this.stack.pop();
             if (value == null) {
-                log.error("WARNING:: POPPED NULL VALUE!!!");
+                //:OFF:log.error("WARNING:: POPPED NULL VALUE!!!");
             }
             jsonValue.setValue(value); // set ArrayType from stack   
         }
@@ -141,7 +141,7 @@ public class JSONCompiler extends JSONBaseListener {
             if (token != null) {
                 StringType sNode = new StringType(this.currentStatement);
                 String symbolText = token.getSymbol().getText();
-                log.debug("TerminalNode. Text :: " + symbolText);
+                //:OFF:log.debug("TerminalNode. Text :: " + symbolText);
                 sNode.setValue(symbolText);
                 jsonValue.setValue(sNode);
             }
@@ -149,7 +149,7 @@ public class JSONCompiler extends JSONBaseListener {
             else if ( (token = ctx.getToken(JSONParser.NUMBER, 0)) != null) {
                 NumberType nNode = new NumberType(this.currentStatement);
                 String symbolText = token.getSymbol().getText().toLowerCase();
-                log.debug("TerminalNode. Text :: " + symbolText);
+                //:OFF:log.debug("TerminalNode. Text :: " + symbolText);
                 
                 int dotPos = symbolText.indexOf(".");
                 int expPos = symbolText.indexOf("e");
@@ -199,7 +199,7 @@ public class JSONCompiler extends JSONBaseListener {
             else if ( (token = ctx.getToken(JSONParser.SINGLE_QUOTED_STRING, 0)) != null) {
                 StringType sNode = new StringType(this.currentStatement);
                 String symbolText = token.getSymbol().getText();
-                log.debug("TerminalNode: String. Text :: " + symbolText);
+                //:OFF:log.debug("TerminalNode: String. Text :: " + symbolText);
                 //System.out.println("TerminalNode: String. Text :: " + symbolText);
                 symbolText = symbolText.substring(1, symbolText.length() - 1); // remove single quotes
                 symbolText = symbolText.replaceAll("\"", "\\\\\"");
@@ -209,10 +209,13 @@ public class JSONCompiler extends JSONBaseListener {
                 jsonValue.setValue(sNode);
             }
 
+            //
+            // """
+            //
             else if ( (token = ctx.getToken(JSONParser.MULTILINE_STRING, 0)) != null) {
                 StringType sNode = new StringType(this.currentStatement);
                 String symbolText = token.getSymbol().getText();
-                log.debug("TerminalNode: String. Text :: " + symbolText);
+                //:OFF:log.debug("TerminalNode: String. Text :: " + symbolText);
                 
                 // replace \r \n \t
                 StringBuilder sb = new StringBuilder();
@@ -229,6 +232,9 @@ public class JSONCompiler extends JSONBaseListener {
                     else if (c == '\t') {
                         sb.append("\\t");
                     }
+                    else if (c == '"') {
+                        sb.append("\\\"");
+                    }
                     else {
                         sb.append(c);
                     }
@@ -240,11 +246,13 @@ public class JSONCompiler extends JSONBaseListener {
                 jsonValue.setValue(sNode);
             }
 
-            else if ( (token = ctx.getToken(JSONParser.MULTILINE_PADDED_STRING, 0)) != null) {
-                //System.out.println("MULTILINE_PADDED_STRING");
+            //
+            // """|
+            // 
+            else if ( (token = ctx.getToken(JSONParser.MULTILINE_STRIPPED_STRING, 0)) != null) {
                 StringType sNode = new StringType(this.currentStatement);
                 String symbolText = token.getSymbol().getText();
-                log.debug("TerminalNode: String. Text :: " + symbolText);
+                //:OFF:log.debug("TerminalNode: String. Text :: " + symbolText);
                 
                 StringBuilder sb = new StringBuilder();
                 
@@ -263,7 +271,12 @@ public class JSONCompiler extends JSONBaseListener {
                                 sb.append("\\t");
                             }
                             else {
-                                sb.append(c);
+                                if (c == '"') {
+                                    sb.append("\\\"");
+                                }
+                                else {
+                                    sb.append(c);
+                                }
                             }
                         }
                     }
@@ -278,22 +291,43 @@ public class JSONCompiler extends JSONBaseListener {
                 jsonValue.setValue(sNode);
             }
 
+            //
+            // """>
+            //
             else if ( (token = ctx.getToken(JSONParser.MULTILINE_PADDED_LINES_STRING, 0)) != null) {
                 //System.out.println("MULTILINE_PADDED_LINES_STRING");
                 StringType sNode = new StringType(this.currentStatement);
                 String symbolText = token.getSymbol().getText();
-                log.debug("TerminalNode: String. Text :: " + symbolText);
+                //:OFF:log.debug("TerminalNode: String. Text :: " + symbolText);
                 
                 StringBuilder sb = new StringBuilder();
                 
+                // strip the whitespace and tabs from the beginning of each line
                 boolean strippingMode = false;
+                int initialStrippedCounter = 0;
+                int lineStrippedCounter = 0;
+                boolean initialStrippedCounterSet = false;
                 for (int i = 4; i < symbolText.length() - 3; i ++) {
                     char c = symbolText.charAt(i);
                     if (c != '\r' && c != '\n') {
                         if (strippingMode) {
                             if (c != ' ' && c != '\t') {
-                                sb.append(c);
                                 strippingMode = false;
+                                initialStrippedCounterSet = true;
+                                // Set rest of the white-spaces:
+                                //System.out.println("Line stripped counter2=" + lineStrippedCounter);
+                                for (int s = 0; s < lineStrippedCounter - initialStrippedCounter; s ++) {
+                                    sb.append(" ");
+                                }
+                                sb.append(c);
+                            }
+                            else {
+                                if (initialStrippedCounterSet == false) {
+                                    initialStrippedCounter += 1;
+                                }
+                                lineStrippedCounter += 1;
+                                //System.out.println("Line stripped counter1=" + lineStrippedCounter);
+                                
                             }
                         }
                         else {
@@ -301,7 +335,12 @@ public class JSONCompiler extends JSONBaseListener {
                                 sb.append("\\t");
                             }
                             else {
-                                sb.append(c);
+                                if (c == '"') {
+                                    sb.append("\\\"");
+                                }
+                                else {
+                                    sb.append(c);
+                                }
                             }
                         }
                     }
@@ -312,6 +351,7 @@ public class JSONCompiler extends JSONBaseListener {
                         if (c == '\n') {
                             sb.append("\\n");
                         }
+                        lineStrippedCounter = 0;
                         strippingMode = true;
                     }
                 }
@@ -334,7 +374,7 @@ public class JSONCompiler extends JSONBaseListener {
     
     @Override
     public void exitArray(JSONParser.ArrayContext ctx) {
-        log.debug("EXIT Json_array :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Json_array :: Stack size :: " + this.stack.size());
         List<ParseTree> ruleChildNodes = this.getContextChildRuleNodes(ctx);
         int childCount = ruleChildNodes.size();
         
@@ -363,11 +403,17 @@ public class JSONCompiler extends JSONBaseListener {
     
     @Override
     public void exitObj(JSONParser.ObjContext ctx) {
-        log.debug("EXIT Json_obj :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Json_obj :: Stack size :: " + this.stack.size());
         List<ParseTree> ruleChildNodes = this.getContextChildRuleNodes(ctx);
         int pairsCount = ruleChildNodes.size();
         
         ObjectType jsonObj = new ObjectType(this.currentStatement);
+        Map<String, PairType> index = null;
+        
+        if (this.flags != null && this.flags[0] == CompilerFlags.INDEX_ROOT) {
+            //System.out.println("Create index");
+            index = new HashMap<String, PairType>();
+        }
         
         List<PairType> jsonPairs = new ArrayList<PairType>();
         
@@ -380,17 +426,21 @@ public class JSONCompiler extends JSONBaseListener {
             PairType jsonPair = jsonPairs.get(i);
             try {
                 jsonObj.addPair(jsonPair);
+                if (index != null) {
+                    index.put(jsonPair.getKey(), jsonPair);
+                }
             } catch (OperonGenericException oge) {
                 throw new RuntimeException(oge.getMessage());
             }
         }
-        
+        jsonObj.setIndexedPairs(index);
+        //System.out.println("index=" + index);
         this.stack.push(jsonObj);
     }
     
     @Override
     public void exitPair(JSONParser.PairContext ctx) {
-        log.debug("EXIT Json_pair :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Json_pair :: Stack size :: " + this.stack.size());
         PairType jsonPair = new PairType(this.currentStatement);
 
         TerminalNode sKeyTN = ctx.STRING();
@@ -406,11 +456,7 @@ public class JSONCompiler extends JSONBaseListener {
         value.setValue(this.stack.pop());
         
         List<ParseTree> subNodes = this.getContextChildNodes(ctx);
-        if (subNodes.size() == 4) {
-            jsonPair.setOperonValueConstraint((OperonValueConstraint) this.stack.pop());
-        }
-        
-        log.debug("   PairType subNodes :: " + subNodes.size());
+        //:OFF:log.debug("   PairType subNodes :: " + subNodes.size());
         
         jsonPair.setPair(key, value);
         this.stack.push(jsonPair);
@@ -425,7 +471,7 @@ public class JSONCompiler extends JSONBaseListener {
     //     Sets the currentStatement as previous statement for @statement, and pushes @statement to stack.
     //
     private void setPreviousStatementForStatement(Statement statement) {
-        log.debug("    >> Set previousStatement: " + this.getCurrentStatement().getId());
+        //:OFF:log.debug("    >> Set previousStatement: " + this.getCurrentStatement().getId());
         this.getStatementStack().push(this.getCurrentStatement());
         statement.setPreviousStatement(this.getCurrentStatement());
         this.getStatementStack().push(statement);
@@ -438,7 +484,7 @@ public class JSONCompiler extends JSONBaseListener {
     private void restorePreviousScope() {
         this.getStatementStack().pop(); // Remove functionStatement from the statementStack
         Statement previousStatement = this.getStatementStack().pop();
-        log.debug("    >> Set currentStatement with previousStatement: " + previousStatement.getId());
+        //:OFF:log.debug("    >> Set currentStatement with previousStatement: " + previousStatement.getId());
         this.setCurrentStatement(previousStatement);
     }
     

@@ -51,7 +51,7 @@ import org.apache.logging.log4j.LogManager;
  * 
  */
 public class BaseContext {
-    private static Logger log = LogManager.getLogger(BaseContext.class);
+     // no logger 
     
     private Context parentContext;
     private String ownNamespace;

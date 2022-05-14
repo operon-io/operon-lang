@@ -41,7 +41,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class Assign extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(Assign.class);
+     // no logger 
     private String valueRef;
     private List<String> namespaces;
     private boolean valueBoundToOperator = false;
@@ -53,7 +53,7 @@ public class Assign extends AbstractNode implements Node {
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER Assign.evaluate()");
+        //:OFF:log.debug("ENTER Assign.evaluate()");
         // Value resolution strategy:
         
         // TODO: check from modules, which have the matching namespace
@@ -65,7 +65,7 @@ public class Assign extends AbstractNode implements Node {
         
         //System.out.println("ValueRef :: evaluate, stmtClass=" + this.getStatement().getClass().getName());
         //System.out.println("VR >> stmt id=" + stmtId + ", stmt = " + this.getStatement() + ", prototype: " + this.getStatement().isPrototype());
-        log.debug("    >> Check value [" + getValueRef() + "] from stmt: " + this.getStatement().getId());
+        //:OFF:log.debug("    >> Check value [" + getValueRef() + "] from stmt: " + this.getStatement().getId());
         //System.out.println("    >> Check value [" + getValueRef() + "] from stmt: " + stmtId);
         
         // **************************************** DEBUG
@@ -140,7 +140,7 @@ public class Assign extends AbstractNode implements Node {
             // Key didn't exist, check from parent-scopes:
             //
             if (updated == false) {
-                log.debug("    >> Value not resolved, checking from parent-scopes.");
+                //:OFF:log.debug("    >> Value not resolved, checking from parent-scopes.");
                 Statement parent = this.getStatement().getPreviousStatement();
                 while (parent != null && updated == false) {
                     if (parent != null) {
@@ -201,7 +201,7 @@ public class Assign extends AbstractNode implements Node {
                 //
                 // NOTE: here we might be in a module-context, or in the main-context
                 //
-                log.debug("    >> Value not resolved, checking from Context's Let-statements.");
+                //:OFF:log.debug("    >> Value not resolved, checking from Context's Let-statements.");
                 LetStatement letStatement = (LetStatement) this.getStatement().getOperonContext().getLetStatements().get(getKey);
                 if (letStatement != null) {
                     letStatement.setEvaluatedValue(newValue);
@@ -217,10 +217,10 @@ public class Assign extends AbstractNode implements Node {
             //
             if (updated == false && this.getNamespaces().size() > 0) {
                 String ns1 = this.getNamespaces().get(0);
-                log.debug("Checking from module :: " + ns1);
+                //:OFF:log.debug("Checking from module :: " + ns1);
                 Context module = this.getStatement().getOperonContext().getModules().get(ns1);
                 if (module != null) {
-                    log.debug("ValueRef :: resolved module");
+                    //:OFF:log.debug("ValueRef :: resolved module");
                     
                     Map<String, LetStatement> letStatements = module.getLetStatements();
                     
@@ -229,7 +229,7 @@ public class Assign extends AbstractNode implements Node {
                         LetStatement letStatement = (LetStatement) letStatements.get(this.getValueRef());
                         
                         if (letStatement != null) {
-                            log.debug("ValueRef :: found LetStatement from Module, evaluating it 1");
+                            //:OFF:log.debug("ValueRef :: found LetStatement from Module, evaluating it 1");
                             letStatement.setEvaluatedValue(newValue);
                             
                             updated = true;
@@ -240,7 +240,7 @@ public class Assign extends AbstractNode implements Node {
                             letStatement = (LetStatement) letStatements.get(subGetKey);
                             
                             if (letStatement != null) {
-                                log.debug("ValueRef :: found LetStatement from Module, evaluating it 2");
+                                //:OFF:log.debug("ValueRef :: found LetStatement from Module, evaluating it 2");
                                 letStatement.setEvaluatedValue(newValue);
                                 
                                 updated = true;

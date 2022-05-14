@@ -37,10 +37,10 @@ import org.apache.logging.log4j.Logger;
  * 
  */
 public class Not extends BaseUnaryNodeProcessor implements UnaryNodeProcessor {
-    protected static Logger log = LogManager.getLogger(Not.class);
+     // no logger 
     
     public OperonValue process(Statement statement, Node node) throws OperonGenericException {
-        log.debug("Not :: enter process");
+        //:OFF:log.debug("Not :: enter process");
         this.preprocess(statement, node); // unbox and copy bindings
         
         String unaryOperator = "Not";
@@ -62,7 +62,8 @@ public class Not extends BaseUnaryNodeProcessor implements UnaryNodeProcessor {
         }
         
         else {
-            return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "NEGATE", "Not a boolean-value: " + nodeResult.getClass().getName());
+            return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "NEGATE", "Not a boolean-value: " + 
+                nodeResult.getClass().getName() + ", at line #" + this.getSourceCodeLineNumber());
         }
         
     }

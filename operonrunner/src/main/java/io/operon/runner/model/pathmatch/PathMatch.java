@@ -35,7 +35,7 @@ import org.apache.logging.log4j.LogManager;
 // Container for parts that consist the matching expr.
 //
 public class PathMatch extends OperonValue implements Node { 
-    private static Logger log = LogManager.getLogger(PathMatch.class); 
+     // no logger  
 
     private List<PathMatchPart> pathMatchParts;
 

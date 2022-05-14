@@ -38,7 +38,7 @@ import org.apache.logging.log4j.LogManager;
 //   Realizes the input Paths (from Array, i.e. [~]) into Array or Object.
 //
 public class Build extends AbstractNode implements Node, java.io.Serializable {
-    private static Logger log = LogManager.getLogger(Build.class);
+     // no logger 
 
     private Node configs;
     
@@ -47,7 +47,7 @@ public class Build extends AbstractNode implements Node, java.io.Serializable {
     }
 // Merge object?
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER Build.evaluate()");
+        //:OFF:log.debug("ENTER Build.evaluate()");
         System.out.println("Build.evaluate()");
         OperonValue currentValue = this.getStatement().getCurrentValue();
         

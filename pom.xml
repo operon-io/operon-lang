@@ -5,11 +5,36 @@
  
     <groupId>io.operon</groupId>
     <artifactId>operon-core-parent</artifactId>
-    <version>0.9.0-RELEASE</version>
+    <version>0.9.5-RELEASE</version>
     <packaging>pom</packaging>
  
     <name>Operon.IO Parent</name>
     <url>http://maven.apache.org</url>
+    <description>Operon is a programming language which can be easily embedded with JVM-based 
+                 languages (Java, Scala, Groovy, Kotlin, Clojure, etc.) or run standalone with the native-version. 
+                 Operon is especially great for transforming and handling JSON-data.
+    </description>
+
+    <scm>
+      <connection>scm:git:https://github.com/operon-io/operon-lang.git</connection>
+      <developerConnection>scm:git:https://github.com/operon-io/operon-lang.git</developerConnection>
+      <url>https://github.com/operon-io/operon-lang</url>
+    </scm>
+
+    <developers>
+      <developer>
+        <id>tuomas</id>
+        <name>Tuomas</name>
+        <email>tuomas@operon.io</email>
+        <url>https://operon.io</url>
+        <organization>Operon.io</organization>
+        <organizationUrl>https://operon.io</organizationUrl>
+        <roles>
+          <role>architect</role>
+          <role>developer</role>
+        </roles>
+      </developer>
+    </developers>
 
     <licenses>
       <license>
@@ -22,9 +47,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>3.8.1</junit.version>
-        <!--maven.compiler.source>1.8</maven.compiler.source-->
-        <!--maven.compiler.target>1.8</maven.compiler.target-->
-        <!--maven.compiler.release>11</maven.compiler.release-->
         <antlr4.visitor>true</antlr4.visitor>
         <antlr4.listener>true</antlr4.listener>
         <antlr.version>4.9.3</antlr.version>
@@ -32,12 +54,6 @@
         <java.version>11</java.version>
         <gpg.keyname>6A2BE74C</gpg.keyname>
     </properties>
-
-    <modules>
-        <module>jsonparser</module>
-        <module>operonparser</module>
-        <module>operonrunner</module>
-    </modules>
 
     <dependencies>
         <dependency>
@@ -100,9 +116,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>3.2.0</version>
-        <!--configuration>
-          <destDir>LATEST</destDir>
-        </configuration-->
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -112,25 +125,44 @@
           </execution>
         </executions>
       </plugin>
+      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
-    <extensions>
-        <extension>
-            <groupId>org.apache.maven.wagon</groupId>
-            <artifactId>wagon-ssh</artifactId>
-            <version>3.4.3</version>
-        </extension>
-    </extensions>
   </build>
   
-  <distributionManagement>
-    <!-- This is to deploy into Operon's own maven-repository -->
-    <repository>
-        <id>operon-site</id>
-        <url>sftp://operon.io/var/www/operon.io/public/maven-repository</url>
-    </repository>
-    <!--snapshotRepository>
-      <id>ossrh</id>
-      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository-->
-  </distributionManagement>
+  <profiles>
+    
+    <profile>
+      <id>main</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <modules>
+        <module>jsonparser</module>
+        <module>operonparser</module>
+        <module>operonrunner</module>
+      </modules>
+    </profile>
+    
+    <profile>
+      <id>dev</id>
+      <modules>
+        <module>jsonparser</module>
+        <module>operonparser</module>
+      </modules>
+    </profile>
+  </profiles>
+
 </project>

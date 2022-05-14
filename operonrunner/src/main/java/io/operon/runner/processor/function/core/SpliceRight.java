@@ -37,7 +37,7 @@ import org.apache.logging.log4j.LogManager;
 // Splicing -node may only be used for ArrayType.
 //
 public class SpliceRight extends BaseArity1 implements Node, Arity1 {
-    private static Logger log = LogManager.getLogger(SpliceRight.class);
+     // no logger 
     
     private OperonValue valueToApplyAgainst;
     
@@ -47,7 +47,7 @@ public class SpliceRight extends BaseArity1 implements Node, Arity1 {
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER SpliceRight.evaluate(). Stmt: " + this.getStatement().getId());
+        //:OFF:log.debug("ENTER SpliceRight.evaluate(). Stmt: " + this.getStatement().getId());
         
         if (this.getValueToApplyAgainst() == null) {
             this.setValueToApplyAgainst(this.getStatement().getCurrentValue());
@@ -77,7 +77,7 @@ public class SpliceRight extends BaseArity1 implements Node, Arity1 {
         OperonValue jsonValue = this.getParam1().evaluate();
         
         if ((jsonValue instanceof NumberType) == false ) {
-            log.debug("ERROR: spliceUntil expr :: " + jsonValue.getClass().getName());
+            //:OFF:log.debug("ERROR: spliceUntil expr :: " + jsonValue.getClass().getName());
             ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION", "spliceRight", "Number expected");
             return null;
         }
@@ -104,7 +104,7 @@ public class SpliceRight extends BaseArity1 implements Node, Arity1 {
             result.addValue( ((ArrayType) this.getValueToApplyAgainst()).getValues().get(i));
         }
         
-        log.debug("    INT :: " + intValue);
+        //:OFF:log.debug("    INT :: " + intValue);
         
         return result;
     }
@@ -113,7 +113,7 @@ public class SpliceRight extends BaseArity1 implements Node, Arity1 {
         OperonValue jsonValue = this.getParam1().evaluate();
         
         if ((jsonValue instanceof NumberType) == false ) {
-            log.debug("ERROR: spliceUntil expr :: " + jsonValue.getClass().getName());
+            //:OFF:log.debug("ERROR: spliceUntil expr :: " + jsonValue.getClass().getName());
             ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION", "spliceRight", "Number expected");
             return null;
         }
@@ -140,7 +140,7 @@ public class SpliceRight extends BaseArity1 implements Node, Arity1 {
             result.addPair( ((ObjectType) this.getValueToApplyAgainst()).getPairs().get(i));
         }
         
-        log.debug("    INT :: " + intValue);
+        //:OFF:log.debug("    INT :: " + intValue);
         
         return result;
     }
@@ -149,7 +149,7 @@ public class SpliceRight extends BaseArity1 implements Node, Arity1 {
         OperonValue jsonValue = this.getParam1().evaluate();
 
         if ((jsonValue instanceof NumberType) == false ) {
-            log.debug("ERROR: SpliceRight expr :: " + jsonValue.getClass().getName());
+            //:OFF:log.debug("ERROR: SpliceRight expr :: " + jsonValue.getClass().getName());
             ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION", "spliceRight", "Number expected");
             return null;
         }
@@ -176,7 +176,7 @@ public class SpliceRight extends BaseArity1 implements Node, Arity1 {
         for (int i = startIndex; i < strLength; i ++) {
             resultSb.append( ((StringType) this.getValueToApplyAgainst()).getJavaStringValue().charAt(i));
         }
-        log.debug("    INT :: " + intValue);
+        //:OFF:log.debug("    INT :: " + intValue);
         result.setFromJavaString(resultSb.toString());
         return result;
     }
@@ -185,7 +185,7 @@ public class SpliceRight extends BaseArity1 implements Node, Arity1 {
         OperonValue jsonValue = this.getParam1().evaluate();
         
         if ((jsonValue instanceof NumberType) == false ) {
-            log.debug("ERROR: spliceUntil expr :: " + jsonValue.getClass().getName());
+            //:OFF:log.debug("ERROR: spliceUntil expr :: " + jsonValue.getClass().getName());
             ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION", "spliceRight", "Number expected");
             return null;
         }
@@ -212,7 +212,7 @@ public class SpliceRight extends BaseArity1 implements Node, Arity1 {
             result.getPathParts().add( ((Path) this.getValueToApplyAgainst()).getPathParts().get(i));
         }
         
-        log.debug("    INT :: " + intValue);
+        //:OFF:log.debug("    INT :: " + intValue);
         
         return result;
     }

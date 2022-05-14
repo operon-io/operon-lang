@@ -46,7 +46,7 @@ import org.apache.logging.log4j.LogManager;
 
 public class ArraySwap extends BaseArity2 implements Node, Arity2, SupportsAttributes {
 
-    private static Logger log = LogManager.getLogger(ArraySwap.class);
+     // no logger 
 
     public ArraySwap(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);

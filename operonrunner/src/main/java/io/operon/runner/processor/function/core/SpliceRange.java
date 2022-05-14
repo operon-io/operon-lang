@@ -37,7 +37,7 @@ import org.apache.logging.log4j.LogManager;
 // 
 //
 public class SpliceRange extends BaseArity2 implements Node, Arity2 {
-    private static Logger log = LogManager.getLogger(SpliceRange.class);
+     // no logger 
     
     private OperonValue valueToApplyAgainst;
     
@@ -47,7 +47,7 @@ public class SpliceRange extends BaseArity2 implements Node, Arity2 {
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER SpliceRange.evaluate(). Stmt: " + this.getStatement().getId());
+        //:OFF:log.debug("ENTER SpliceRange.evaluate(). Stmt: " + this.getStatement().getId());
         
         if (this.getValueToApplyAgainst() == null) {
             this.setValueToApplyAgainst(this.getStatement().getCurrentValue());
@@ -77,13 +77,13 @@ public class SpliceRange extends BaseArity2 implements Node, Arity2 {
         OperonValue jsonValueRhs = this.getParam2().evaluate();
 
         if ((jsonValueLhs instanceof NumberType) == false ) {
-            log.debug("ERROR: spliceRange lhs expr :: " + jsonValueLhs.getClass().getName());
+            //:OFF:log.debug("ERROR: spliceRange lhs expr :: " + jsonValueLhs.getClass().getName());
             ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION", "spliceRange", "Invalid input type. Expected Number for left-hand side.");
             return null;
         }
         
         if ((jsonValueRhs instanceof NumberType) == false ) {
-            log.debug("ERROR: spliceRange rhs expr :: " + jsonValueRhs.getClass().getName());
+            //:OFF:log.debug("ERROR: spliceRange rhs expr :: " + jsonValueRhs.getClass().getName());
             ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION", "spliceRange", "Invalid input type. Expected Number for right-hand side.");
             return null;
         }
@@ -158,13 +158,13 @@ public class SpliceRange extends BaseArity2 implements Node, Arity2 {
         OperonValue jsonValueRhs = this.getParam2().evaluate();
 
         if ((jsonValueLhs instanceof NumberType) == false ) {
-            log.debug("ERROR: spliceRange lhs expr :: " + jsonValueLhs.getClass().getName());
+            //:OFF:log.debug("ERROR: spliceRange lhs expr :: " + jsonValueLhs.getClass().getName());
             ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION", "spliceRange", "Invalid input type. Expected Number for left-hand side.");
             return null;
         }
         
         if ((jsonValueRhs instanceof NumberType) == false ) {
-            log.debug("ERROR: spliceRange rhs expr :: " + jsonValueRhs.getClass().getName());
+            //:OFF:log.debug("ERROR: spliceRange rhs expr :: " + jsonValueRhs.getClass().getName());
             ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION", "spliceRange", "Invalid input type. Expected Number for right-hand side.");
             return null;
         }
@@ -208,7 +208,7 @@ public class SpliceRange extends BaseArity2 implements Node, Arity2 {
         }
         
         for (int i = 0; i < intValueRhs; i ++) {
-            log.debug(">>>> i = " + i);
+            //:OFF:log.debug(">>>> i = " + i);
             result.addPair( ((ObjectType) this.getValueToApplyAgainst()).getPairs().get(intValueLhs + direction*i - 1));
         }
         
@@ -220,13 +220,13 @@ public class SpliceRange extends BaseArity2 implements Node, Arity2 {
         OperonValue jsonValueRhs = this.getParam2().evaluate();
 
         if ((jsonValueLhs instanceof NumberType) == false ) {
-            log.debug("ERROR: spliceRange lhs expr :: " + jsonValueLhs.getClass().getName());
+            //:OFF:log.debug("ERROR: spliceRange lhs expr :: " + jsonValueLhs.getClass().getName());
             ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION", "spliceRange", "Invalid input type. Expected Number for left-hand side.");
             return null;
         }
         
         if ((jsonValueRhs instanceof NumberType) == false ) {
-            log.debug("ERROR: spliceRange rhs expr :: " + jsonValueRhs.getClass().getName());
+            //:OFF:log.debug("ERROR: spliceRange rhs expr :: " + jsonValueRhs.getClass().getName());
             ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION", "spliceRange", "Invalid input type. Expected Number for right-hand side.");
             return null;
         }
@@ -282,13 +282,13 @@ public class SpliceRange extends BaseArity2 implements Node, Arity2 {
         OperonValue jsonValueRhs = this.getParam2().evaluate();
 
         if ((jsonValueLhs instanceof NumberType) == false ) {
-            log.debug("ERROR: spliceRange lhs expr :: " + jsonValueLhs.getClass().getName());
+            //:OFF:log.debug("ERROR: spliceRange lhs expr :: " + jsonValueLhs.getClass().getName());
             ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION", "spliceRange", "Invalid input type. Expected Number for left-hand side.");
             return null;
         }
         
         if ((jsonValueRhs instanceof NumberType) == false ) {
-            log.debug("ERROR: spliceRange rhs expr :: " + jsonValueRhs.getClass().getName());
+            //:OFF:log.debug("ERROR: spliceRange rhs expr :: " + jsonValueRhs.getClass().getName());
             ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION", "spliceRange", "Invalid input type. Expected Number for right-hand side.");
             return null;
         }

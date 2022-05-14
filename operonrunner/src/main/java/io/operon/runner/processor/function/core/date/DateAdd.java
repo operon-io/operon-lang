@@ -166,7 +166,7 @@ public class DateAdd extends AbstractNode implements Node, Arity3 {
     }
 
     //
-    // Example result: {"Year": 2021, "Month": 8, "Day": 13, "Hour": 10, "Minute": 8, "Second": 0, "Millisecond": 1}
+    // Example result: {"Year": 2033, "Month": 3, "Day": 3, "Hour": 3, "Minute": 3, "Second": 3, "Millisecond": 3}
     //
     public static ObjectType getDateAddObjectType(Statement stmt, ObjectType date, int amountToAdd, String fieldToUpdate) throws OperonGenericException {
             ObjectType result = new ObjectType(stmt);

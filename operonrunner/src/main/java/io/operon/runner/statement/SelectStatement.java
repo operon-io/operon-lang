@@ -32,7 +32,7 @@ import io.operon.runner.model.exception.BreakSelect;
 import org.apache.logging.log4j.LogManager;
 
 public class SelectStatement extends BaseStatement implements Statement {
-    private static Logger log = LogManager.getLogger(DefaultStatement.class);
+     // no logger 
     
     private Node configs;
     private boolean configsResolved = false;
@@ -43,7 +43,7 @@ public class SelectStatement extends BaseStatement implements Statement {
     }
     
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("Select-statement :: evaluate()");
+        //:OFF:log.debug("Select-statement :: evaluate()");
         OperonValue result = null;
         try {
             //
@@ -74,16 +74,16 @@ public class SelectStatement extends BaseStatement implements Statement {
                 
                 //System.out.println("SelectStatement :: apply ExceptionHandler: " + e.getMessage());
                 //System.out.println("  CV: " + e.getCurrentValue());
-                log.debug("SelectStatement :: apply ExceptionHandler: " + e.getMessage());
+                //:OFF:log.debug("SelectStatement :: apply ExceptionHandler: " + e.getMessage());
                 ExceptionHandler eh = this.getExceptionHandler();
                 eh.setException(e);
                 result = eh.evaluate(e);
-                log.debug("SelectStatement :: applied ExceptionHandler");
+                //:OFF:log.debug("SelectStatement :: applied ExceptionHandler");
             }
             else {
-                log.debug("SelectStatement :: exceptionHandler missing, throw to upper-level");
+                //:OFF:log.debug("SelectStatement :: exceptionHandler missing, throw to upper-level");
                 //System.out.println("error is null? " + e);
-                log.debug("  >> error: " + e.getClass().getName() + ", message: " + e.getMessage());
+                //:OFF:log.debug("  >> error: " + e.getClass().getName() + ", message: " + e.getMessage());
                 //
                 // Throw the exception to upper-level, since no ExceptionHandler was found:
                 //
@@ -97,7 +97,7 @@ public class SelectStatement extends BaseStatement implements Statement {
             OperonValueConstraint c = this.getOperonValueConstraint();
             OperonValueConstraint.evaluateConstraintAgainstOperonValue(this.getEvaluatedValue(), c);
         }
-        log.debug("Select statement return :: " + this.getEvaluatedValue());
+        ////:OFF:log.debug("Select statement return :: " + this.getEvaluatedValue());
         return this.getEvaluatedValue();
     }
 
@@ -114,7 +114,7 @@ public class SelectStatement extends BaseStatement implements Statement {
     }
 
     public void resolveConfigs() throws OperonGenericException {
-        log.debug("Select, resolveConfigs");
+        //:OFF:log.debug("Select, resolveConfigs");
         ObjectType conf = this.getConfigs();
         if (conf == null) {
             return;

@@ -40,6 +40,10 @@ import io.operon.runner.model.exception.OperonGenericException;
 //
 // This can update Array or Object, by index, key or Path.
 //
+// When the update-key / index is not found, the error is thrown,
+// except when the updateKey-value (NOTE: key = $target) is an Object. In this case the addOrUpdate
+// method is called.
+//
 // ObjectUpdate and ArrayUpdate -functions are utilized (delegated to),
 // when the update-key is String / Number / Array.
 //
@@ -51,6 +55,12 @@ import io.operon.runner.model.exception.OperonGenericException;
 //
 public class GenericUpdate extends BaseArity2 implements Node, Arity2 {
     
+    //
+    // If this is set by Update -pattern, then try to use addOrUpdate
+    // when updating objects.
+    //
+    private boolean isUpsert = false;
+    
     public GenericUpdate(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
         this.setParam2AsOptional(true);
@@ -59,7 +69,6 @@ public class GenericUpdate extends BaseArity2 implements Node, Arity2 {
 
     public OperonValue evaluate() throws OperonGenericException {        
         try {
-            //System.out.println("GenericUpdate.evaluate()");
             OperonValue currentValue = this.getStatement().getCurrentValue();
             
             OperonValue updateKeyValue = null;
@@ -71,6 +80,7 @@ public class GenericUpdate extends BaseArity2 implements Node, Arity2 {
                 updateValueNode = this.getParam1(); // $value
             }
             else {
+                System.out.println("resolve update key");
                 updateKeyValue = NumberType.create(this.getStatement(), 0.0, (byte) 1); // position 0 => update all.
                 updateValueNode = this.getParam1(); //$value
             }
@@ -83,9 +93,22 @@ public class GenericUpdate extends BaseArity2 implements Node, Arity2 {
                 StringType updateKeyJson = (StringType) updateKeyValue;
                 String updateKeyStr = updateKeyJson.getJavaStringValue();
                 currentValueEvaluated = currentValue.evaluate();
-                ObjectType obj = (ObjectType) currentValueEvaluated;
-                ObjectType objCopy = (ObjectType) obj.copy();
-                result = ObjectUpdate.doUpdateByKey(objCopy, updateKeyStr, updateValueNode);
+                
+                if (this.isUpsert() == false) {
+                    ObjectType obj = (ObjectType) currentValueEvaluated;
+                    ObjectType objCopy = (ObjectType) obj.copy();
+                    result = ObjectUpdate.doUpdateByKey(objCopy, updateKeyStr, updateValueNode);
+                }
+                else {
+                    //
+                    // WARNING: yet untested!
+                    //
+                    ObjectType obj = (ObjectType) currentValueEvaluated;
+                    PairType pair = new PairType(this.getStatement());
+                    pair.setPair("\"" + updateKeyStr + "\"", (OperonValue) updateValueNode);
+                    obj.addOrUpdatePair(pair);
+                    return obj;
+                }
             }
             
             else if (updateKeyValue instanceof NumberType) {
@@ -125,6 +148,26 @@ public class GenericUpdate extends BaseArity2 implements Node, Arity2 {
                 }
             }
             
+            else if (updateKeyValue instanceof ObjectType) {
+                currentValueEvaluated = currentValue.evaluate();
+                if (currentValueEvaluated instanceof ObjectType) {
+                    for (PairType pair : ((ObjectType) updateValueNode).getPairs()) {
+                        ((ObjectType) currentValueEvaluated).addOrUpdatePair(pair);
+                    }
+                }
+                else if (currentValueEvaluated instanceof ArrayType) {
+                    for (Node node : ((ArrayType) currentValueEvaluated).getValues()) {
+                        OperonValue evaluatedNode = node.evaluate();
+                        if (evaluatedNode instanceof ObjectType) {
+                            for (PairType pair : ((ObjectType) updateValueNode).getPairs()) {
+                                ((ObjectType) evaluatedNode).addOrUpdatePair(pair);
+                            }
+                        }
+                    }
+                }
+                result = currentValueEvaluated;
+            }
+            
             else if (updateKeyValue instanceof ArrayType) {
                 //System.out.println("GenericUpdate updateKeyValue Array");
                 ArrayType updateIndexList = (ArrayType) updateKeyValue;
@@ -149,7 +192,7 @@ public class GenericUpdate extends BaseArity2 implements Node, Arity2 {
             
             else if (updateKeyValue instanceof Path) {
                 //System.out.println("GenericUpdate updateKeyValue Path");
-                result = updatePathValue(currentValue, (Path) updateKeyValue, updateValueNode);
+                result = updatePathValue(currentValue, (Path) updateKeyValue, updateValueNode, this.isUpsert());
             }
             
             return result;
@@ -164,12 +207,21 @@ public class GenericUpdate extends BaseArity2 implements Node, Arity2 {
     //
     // Update the value refered by Path
     //
-    public static OperonValue updatePathValue(OperonValue valueToUpdate, Path pathToUpdate, Node updateValueNode) throws OperonGenericException {
+    public static OperonValue updatePathValue(OperonValue valueToUpdate, Path pathToUpdate, Node updateValueNode, boolean isUpsert) throws OperonGenericException {
         //
         // Initial result for the first update:
         //
-        OperonValue pathValue = PathValue.get(valueToUpdate, pathToUpdate);
-
+        OperonValue pathValue = null;
+        try {
+            pathValue = PathValue.get(valueToUpdate, pathToUpdate);
+        } catch (OperonGenericException oge) {
+            if (isUpsert) {
+                pathValue = new EmptyType(updateValueNode.getStatement());
+            }
+            else {
+                throw oge;
+            }
+        }
         //System.out.println("SET pathValue=" + pathValue);
         updateValueNode.getStatement().setCurrentValue(pathValue);
 
@@ -179,7 +231,6 @@ public class GenericUpdate extends BaseArity2 implements Node, Arity2 {
         //System.out.println("Updating path: " + pathToUpdate);
         PathPart lastPathPart = pathToUpdate.getPathParts().get(pathToUpdate.getPathParts().size() - 1);
         OperonValue currentParentValue = valueToUpdate;
-        //System.out.println(">> 1");
         
         //
         // This algorithm starts the updates from the bottom,
@@ -249,7 +300,15 @@ public class GenericUpdate extends BaseArity2 implements Node, Arity2 {
             //System.out.println("Try to final update result KeyPathPart, cv=" + valueToUpdate);
             try {
                 ObjectType objCopy = (ObjectType) valueToUpdate.evaluate().copy();
-                result = ObjectUpdate.doUpdateByKey(objCopy, ((KeyPathPart) lastPathPart).getKey(), result);
+                if (isUpsert == false) {
+                    result = ObjectUpdate.doUpdateByKey(objCopy, ((KeyPathPart) lastPathPart).getKey(), result);
+                }
+                else {
+                    PairType pair = new PairType(valueToUpdate.getStatement());
+                    pair.setPair("\"" + ((KeyPathPart) lastPathPart).getKey() + "\"", result);
+                    objCopy.addOrUpdatePair(pair);
+                    result = objCopy;
+                }
             } catch (Exception e) {
                 return ErrorUtil.createErrorValueAndThrow(valueToUpdate.getStatement(), "FUNCTION", "update", e.getMessage());
             }
@@ -257,12 +316,23 @@ public class GenericUpdate extends BaseArity2 implements Node, Arity2 {
         else {// (lastPathPart instanceof PosPathPart)
             //System.out.println("Try to final update result PosPathPart, cv=" + valueToUpdate);
             try {
+                //
+                // TODO: if upsert, then append if does not exist(?)
+                //
                 result = ArrayUpdate.updateSingleIndex(((PosPathPart) lastPathPart).getPos(), (ArrayType) valueToUpdate.evaluate(), result);
             } catch (Exception e) {
                 return ErrorUtil.createErrorValueAndThrow(valueToUpdate.getStatement(), "FUNCTION", "update", e.getMessage());
             }
         }
         return result;
+    }
+
+    public boolean isUpsert() {
+        return this.isUpsert;
+    }
+    
+    public void setIsUpsert(boolean iupsrt) {
+        this.isUpsert = iupsrt;
     }
 
 }

@@ -71,7 +71,7 @@ import org.apache.logging.log4j.LogManager;
 
 
 public class CipherComponent extends BaseComponent implements IntegrationComponent {
-    private static Logger log = LogManager.getLogger(CipherComponent.class);
+     // no logger 
 
     public CipherComponent() {}
     
@@ -252,7 +252,7 @@ public class CipherComponent extends BaseComponent implements IntegrationCompone
                     info.mode = Mode.DECRYPT;
                     break;
                 default:
-                    log.debug("digest -producer: no mapping for configuration key: " + key);
+                    //:OFF:log.debug("digest -producer: no mapping for configuration key: " + key);
                     System.err.println("digest -producer: no mapping for configuration key: " + key);
                     ErrorUtil.createErrorValueAndThrow(currentValue.getStatement(), "DIGEST", "ERROR", "digest -producer: no mapping for configuration key: " + key);
             }

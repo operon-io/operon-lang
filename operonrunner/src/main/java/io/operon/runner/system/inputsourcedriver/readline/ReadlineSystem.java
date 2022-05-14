@@ -52,7 +52,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class ReadlineSystem implements InputSourceDriver {
-    private static Logger log = LogManager.getLogger(ReadlineSystem.class);
+     // no logger 
 
     private ObjectType jsonConfiguration; // optional: json-configuration for the component
     private boolean isRunning;
@@ -91,7 +91,7 @@ public class ReadlineSystem implements InputSourceDriver {
             
             handleFrame(ocm.resolveContext("correlationId"), info);
         } catch (OperonGenericException e) {
-            log.error("Exception :: " + e.toString());
+            //:OFF:log.error("Exception :: " + e.toString());
             ctx.setException(e);
         } catch (Exception ex) {
             OperonGenericException oge = new OperonGenericException(ex.getMessage());
@@ -120,7 +120,7 @@ public class ReadlineSystem implements InputSourceDriver {
     
     public void stop() {
         this.isRunning = false;
-        log.info("Stopped");
+        //:OFF:log.info("Stopped");
     }
     
     public void setJsonConfiguration(ObjectType jsonConfig) { this.jsonConfiguration = jsonConfig; }

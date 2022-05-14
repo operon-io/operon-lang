@@ -1,8 +1,8 @@
 grammar OperonModule;
 
-//
-// License: Operon-license v1. https://operon.io/operon-license
-//
+// 
+// License: https://operon.io/operon-license
+// 
 
 import OperonBase;
 

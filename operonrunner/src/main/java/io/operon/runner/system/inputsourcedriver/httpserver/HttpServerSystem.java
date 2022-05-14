@@ -69,7 +69,7 @@ import org.apache.logging.log4j.LogManager;
 
 public class HttpServerSystem implements InputSourceDriver {
 
-    private static Logger log = LogManager.getLogger(HttpServerSystem.class);
+     // no logger 
     private ObjectType jsonConfiguration; // json-configuration for the component
     private boolean isRunning;
     private long pollCounter = 0L;
@@ -206,7 +206,7 @@ public class HttpServerSystem implements InputSourceDriver {
             System.err.println("httpserver :: error while shutting down the http-server");
         }
         this.isRunning = false;
-        log.info("Stopped");
+        //:OFF:log.info("Stopped");
     }
     
     private void debug(Info info, String msg) {

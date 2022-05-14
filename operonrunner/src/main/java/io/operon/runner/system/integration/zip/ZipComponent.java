@@ -54,7 +54,7 @@ import org.apache.logging.log4j.LogManager;
 // This component is a "producer".
 //
 public class ZipComponent extends BaseComponent implements IntegrationComponent, java.io.Serializable {
-    private static Logger log = LogManager.getLogger(ZipComponent.class);
+     // no logger 
 
     private ObjectType jsonConfiguration; // optional: json-configuration for the component
     private boolean isRunning;
@@ -64,7 +64,7 @@ public class ZipComponent extends BaseComponent implements IntegrationComponent,
     public ZipComponent() {}
 
     public OperonValue produce(OperonValue currentValue) throws OperonComponentException {
-        log.debug("zip :: produce");
+        //:OFF:log.debug("zip :: produce");
         try {
             Info info = resolve(currentValue);
             OperonValue result = this.handleTask(currentValue, info);
@@ -162,7 +162,7 @@ public class ZipComponent extends BaseComponent implements IntegrationComponent,
                     }
                     break;
                 default:
-                    log.debug("zip -producer: no mapping for configuration key: " + key);
+                    //:OFF:log.debug("zip -producer: no mapping for configuration key: " + key);
                     System.err.println("zip -producer: no mapping for configuration key: " + key);
                     ErrorUtil.createErrorValueAndThrow(currentValue.getStatement(), "ZIP", "ERROR", "zip -producer: no mapping for configuration key: " + key);
             }
@@ -175,7 +175,6 @@ public class ZipComponent extends BaseComponent implements IntegrationComponent,
     private class Info {
         private ZipType zipType = ZipType.GZIP;
         private Mode mode = Mode.AUTO;
-        private long timeZipIterations = 3L; // How many iterations for time-zip, more iterations might allow better compression, but is not guaranteed.
     }
 
     private enum ZipType {

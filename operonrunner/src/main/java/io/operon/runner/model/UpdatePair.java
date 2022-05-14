@@ -22,11 +22,20 @@ import io.operon.runner.node.type.Path;
 public class UpdatePair {
 
     private Path path;
+    private boolean isObject = false; // set true by compiler if update value is object, e.g. Select: $ << {foo: 123};
     private Node updateValue;
     
     public UpdatePair() {
     }
 
+    public void setIsObject(boolean isObj) {
+        this.isObject = isObj;
+    }
+    
+    public boolean getIsObject() {
+        return this.isObject;
+    }
+    
     public Path getPath() {
         return this.path;
     }

@@ -39,7 +39,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class ArrayFlatten extends BaseArity0 implements Node, Arity0 {
-    private static Logger log = LogManager.getLogger(ArrayFlatten.class);
+     // no logger 
     
     public ArrayFlatten(Statement statement) {
         super(statement);
@@ -50,7 +50,7 @@ public class ArrayFlatten extends BaseArity0 implements Node, Arity0 {
         try {
             OperonValue currentValue = this.getStatement().getCurrentValue();
             ArrayType array = (ArrayType) currentValue.evaluate();
-            //log.debug("FLATTEN CV :: " + array);
+            ////:OFF:log.debug("FLATTEN CV :: " + array);
             
             //ArrayType result = new ArrayType(this.getStatement());
             List<Node> resultList = new ArrayList<Node>();
@@ -75,7 +75,7 @@ public class ArrayFlatten extends BaseArity0 implements Node, Arity0 {
                 }
                 
             }
-            log.debug("FLATTEN :: " + this.getStatement().getId());
+            //:OFF:log.debug("FLATTEN :: " + this.getStatement().getId());
             array.setValues(resultList);
             return array;
         } catch (Exception e) {

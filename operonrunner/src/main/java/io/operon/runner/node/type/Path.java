@@ -40,7 +40,7 @@ import org.apache.logging.log4j.LogManager;
 // Example: Path(.Persons[1].fname)
 //
 public class Path extends OperonValue implements Node, AtomicOperonValue { 
-    private static Logger log = LogManager.getLogger(Path.class); 
+     // no logger  
     
     //
     // This is the "root"-object of the Path. This is either an Array or Object.
@@ -60,7 +60,7 @@ public class Path extends OperonValue implements Node, AtomicOperonValue {
     }
  
     public Path evaluate() throws OperonGenericException { 
-        log.debug("Path :: evaluate");
+        //:OFF:log.debug("Path :: evaluate");
         this.setUnboxed(true);
         return this;
     } 
@@ -207,6 +207,37 @@ public class Path extends OperonValue implements Node, AtomicOperonValue {
         
         if (yf.pathEnd != Character.MIN_VALUE) {
             sb.append(yf.pathEnd);
+        }
+        
+        return sb.toString();
+    }
+    
+    @Override
+    public String toTomlString(OutputFormatter ofmt) {
+        if (ofmt == null) {ofmt = new OutputFormatter();}
+        StringBuilder sb = new StringBuilder();
+        if (ofmt.pathPrefix != null) {
+            sb.append(ofmt.pathPrefix);
+        }
+        
+        if (ofmt.pathStart != Character.MIN_VALUE) {
+            sb.append(ofmt.pathStart);
+        }
+        
+        if (ofmt.pathInnerStart != Character.MIN_VALUE) {
+            sb.append(ofmt.pathInnerStart);
+        }
+        
+        for (PathPart pp : this.getPathParts()) {
+            sb.append(pp.toString());
+        }
+        
+        if (ofmt.pathInnerEnd != Character.MIN_VALUE) {
+            sb.append(ofmt.pathInnerEnd);
+        }
+        
+        if (ofmt.pathEnd != Character.MIN_VALUE) {
+            sb.append(ofmt.pathEnd);
         }
         
         return sb.toString();

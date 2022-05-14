@@ -40,8 +40,10 @@ import org.apache.logging.log4j.LogManager;
 // ~.[1] => path:merge(~[2])
 // #> Array: [value1, value2]
 //
+// WARNING: THIS IS NOT COMPLETED!
+//
 public class Merge extends BaseArity1 implements Node, Arity1 {
-    private static Logger log = LogManager.getLogger(Merge.class);
+     // no logger 
 
     public Merge(Statement stmnt, List<Node> params) throws OperonGenericException {
         super(stmnt);
@@ -49,7 +51,7 @@ public class Merge extends BaseArity1 implements Node, Arity1 {
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER Merge.evaluate(). Stmt: " + this.getStatement().getId());
+        //:OFF:log.debug("ENTER Merge.evaluate(). Stmt: " + this.getStatement().getId());
         
         Path a = (Path) this.getStatement().getCurrentValue().evaluate();
         Path b = (Path) this.getParam1().evaluate();
@@ -164,7 +166,8 @@ public class Merge extends BaseArity1 implements Node, Arity1 {
             }
         }
         else {
-            result = GenericUpdate.updatePathValue(aValue, commonPath, bSubValue);
+            boolean isUpsert = true;
+            result = GenericUpdate.updatePathValue(aValue, commonPath, bSubValue, isUpsert);
         }
         
 

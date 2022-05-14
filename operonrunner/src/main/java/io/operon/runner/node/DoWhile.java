@@ -44,7 +44,7 @@ import org.apache.logging.log4j.LogManager;
  *  
  */ 
 public class DoWhile extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(DoWhile.class); 
+     // no logger  
 
     private Node doExpr; // Do expr
     private Node predicateExpr; // While (predicateExpr);

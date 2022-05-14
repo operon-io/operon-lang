@@ -34,7 +34,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class Filter extends AbstractNode implements Node, SupportsAttributes {
-    private static Logger log = LogManager.getLogger(Filter.class);
+     // no logger 
 
     private OperonValue valueToApplyAgainst;
     
@@ -55,7 +55,7 @@ public class Filter extends AbstractNode implements Node, SupportsAttributes {
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER Filter.evaluate()");
+        //:OFF:log.debug("ENTER Filter.evaluate()");
         OperonValue currentValue = this.getValueToApplyAgainst();
         if (currentValue == null) {
             currentValue = this.getStatement().getCurrentValue();
@@ -84,7 +84,7 @@ public class Filter extends AbstractNode implements Node, SupportsAttributes {
         }
         
         else if (evaluatedCurrentValue instanceof ObjectType) {
-            log.debug("    Filter.evaluate() :: ObjectType");
+            //:OFF:log.debug("    Filter.evaluate() :: ObjectType");
             ObjectType objToFilter = (ObjectType) evaluatedCurrentValue;
             //System.out.println("    Filter.evaluate() :: ObjectType :: " + objToFilter);
             //System.out.println("      Filter.evaluate() :: CV :: " + currentValue);
@@ -95,7 +95,7 @@ public class Filter extends AbstractNode implements Node, SupportsAttributes {
         }
 
         else if (evaluatedCurrentValue instanceof Path) {
-            log.debug("    Filter.evaluate() :: Path");
+            //:OFF:log.debug("    Filter.evaluate() :: Path");
             Path pathToFilter = (Path) evaluatedCurrentValue;
             OperonValue result = evaluatePath(pathToFilter);
             this.getStatement().setCurrentValue((OperonValue) result);
@@ -103,13 +103,17 @@ public class Filter extends AbstractNode implements Node, SupportsAttributes {
         }
         
         else if (evaluatedCurrentValue instanceof StringType) {
-            log.debug("    Filter.evaluate() :: StringType");
+            //:OFF:log.debug("    Filter.evaluate() :: StringType");
             StringType strToFilter = (StringType) evaluatedCurrentValue;
             OperonValue result = evaluateString(strToFilter);
             this.getStatement().setCurrentValue((OperonValue) result);
             return result;
         }
-        return ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FILTER", "TYPE", "Wrong type for filter-expression :: " + evaluatedCurrentValue);
+        
+        else if (evaluatedCurrentValue instanceof EmptyType) {
+            return ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FILTER", "TYPE", "Wrong type for filter-expression :: empty. Line #" + this.getSourceCodeLineNumber());
+        }
+        return ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FILTER", "TYPE", "Wrong type for filter-expression :: " + evaluatedCurrentValue + ". Line #" + this.getSourceCodeLineNumber());
     }
 
     private OperonValue evaluateArray(ArrayType arrayToFilter) throws OperonGenericException {
@@ -118,9 +122,9 @@ public class Filter extends AbstractNode implements Node, SupportsAttributes {
         // FilterList e.g. [1,3, @ > 7]
         if (this.getFilterListExpression() instanceof FilterList) {
             //System.out.println("Filter::evaluateArray::filterList");
-            log.debug("FILTER :: FilterList");
+            //:OFF:log.debug("FILTER :: FilterList");
             FilterList filterList = (FilterList) this.getFilterListExpression();
-            log.debug("     FilterExprList size :: " + filterList.getFilterExprList().size());
+            //:OFF:log.debug("     FilterExprList size :: " + filterList.getFilterExprList().size());
             filterList.setValueToApplyAgainst(arrayToFilter);
             filterList.setResolvedConfigs(this.getResolvedConfigs());
             OperonValue result = filterList.evaluate();
@@ -129,7 +133,7 @@ public class Filter extends AbstractNode implements Node, SupportsAttributes {
         }
 
         else {
-            log.debug("   FILTER :: Entered else. ");
+            //:OFF:log.debug("   FILTER :: Entered else. ");
             //System.out.println("FILTER Array, iterate");
             int arraySize = arrayToFilter.getValues().size();
             Info info = this.getResolvedConfigs();
@@ -162,7 +166,7 @@ public class Filter extends AbstractNode implements Node, SupportsAttributes {
                     OperonValue evaluated = this.getFilterListExpression().evaluate();
                     
                     if (evaluated instanceof NumberType) {
-                        log.debug("    FILTER :: Evaluating against number");
+                        //:OFF:log.debug("    FILTER :: Evaluating against number");
                         int index = (int) ((NumberType) evaluated).getDoubleValue();
                         //System.out.println("    FILTER :: Evaluating against number :: " + index + ", i = " + i);
                         if (index < 0) {
@@ -224,7 +228,7 @@ public class Filter extends AbstractNode implements Node, SupportsAttributes {
                     }
                     
                     else {
-                        ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FILTER", "TYPE", "Array-filter predicate did not evaluate into boolean or number.");
+                        ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FILTER", "TYPE", "Array-filter predicate did not evaluate into boolean or number. Line #" + this.getSourceCodeLineNumber());
                     }
                 }
             }
@@ -250,7 +254,7 @@ public class Filter extends AbstractNode implements Node, SupportsAttributes {
                             OperonValue evaluated = filterExprCopy.evaluate();
 
                             if (evaluated instanceof NumberType) {
-                                log.debug("    FILTER :: Evaluating against number");
+                                //:OFF:log.debug("    FILTER :: Evaluating against number");
                                 int index = (int) ((NumberType) evaluated).getDoubleValue();
                                 //System.out.println("    FILTER :: Evaluating against number :: " + index + ", i = " + i);
                                 if (index < 0) {
@@ -301,7 +305,7 @@ public class Filter extends AbstractNode implements Node, SupportsAttributes {
                                 }
                                 
                                 else {
-                                    return ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FILTER", "TYPE", "Array-filter predicate did not evaluate into boolean or number.");
+                                    return ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FILTER", "TYPE", "Array-filter predicate did not evaluate into boolean or number. Line #" + this.getSourceCodeLineNumber());
                                 }
                             }
                             
@@ -325,12 +329,12 @@ public class Filter extends AbstractNode implements Node, SupportsAttributes {
                                 }
                                 
                                 else {
-                                    return ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FILTER", "TYPE", "Array-filter predicate did not evaluate into boolean or number.");
+                                    return ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FILTER", "TYPE", "Array-filter predicate did not evaluate into boolean or number. Line #" + this.getSourceCodeLineNumber());
                                 }
                             }
 
                             else {
-                                return ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FILTER", "TYPE", "Array-filter predicate did not evaluate into boolean or number.");
+                                return ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FILTER", "TYPE", "Array-filter predicate did not evaluate into boolean or number. Line #" + this.getSourceCodeLineNumber());
                             }
                         } catch (Exception e) {
                             // Do smthg
@@ -343,7 +347,7 @@ public class Filter extends AbstractNode implements Node, SupportsAttributes {
             }
         }
         
-        //log.debug("    >> RETURN :: " + arrayResult);
+        ////:OFF:log.debug("    >> RETURN :: " + arrayResult);
         return arrayResult;
     }
     
@@ -352,9 +356,9 @@ public class Filter extends AbstractNode implements Node, SupportsAttributes {
         StringBuilder sbResult = new StringBuilder();
         
         if (this.getFilterListExpression() instanceof FilterList) {
-            log.debug("FILTER :: FilterList");
+            //:OFF:log.debug("FILTER :: FilterList");
             FilterList filterList = (FilterList) this.getFilterListExpression();
-            log.debug("     FilterExprList size :: " + filterList.getFilterExprList().size());
+            //:OFF:log.debug("     FilterExprList size :: " + filterList.getFilterExprList().size());
             filterList.setValueToApplyAgainst(strToFilter);
             filterList.setResolvedConfigs(this.getResolvedConfigs());
             OperonValue result = filterList.evaluate();
@@ -402,7 +406,7 @@ public class Filter extends AbstractNode implements Node, SupportsAttributes {
                 }
                 
                 else {
-                    ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FILTER", "TYPE", "String-filter predicate did not evaluate into supported type.");
+                    ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FILTER", "TYPE", "String-filter predicate did not evaluate into supported type. Line #" + this.getSourceCodeLineNumber());
                 }                
             }
         }
@@ -414,9 +418,9 @@ public class Filter extends AbstractNode implements Node, SupportsAttributes {
         Path resultPath = new Path(this.getStatement());
         
         if (this.getFilterListExpression() instanceof FilterList) {
-            log.debug("FILTER :: FilterList");
+            //:OFF:log.debug("FILTER :: FilterList");
             FilterList filterList = (FilterList) this.getFilterListExpression();
-            log.debug("     FilterExprList size :: " + filterList.getFilterExprList().size());
+            //:OFF:log.debug("     FilterExprList size :: " + filterList.getFilterExprList().size());
             filterList.setValueToApplyAgainst(pathToFilter);
             filterList.setResolvedConfigs(this.getResolvedConfigs());
             OperonValue result = filterList.evaluate();
@@ -496,7 +500,7 @@ public class Filter extends AbstractNode implements Node, SupportsAttributes {
                 }
                 
                 else {
-                    ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FILTER", "TYPE", "Path-filter predicate did not evaluate into supported type.");
+                    ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FILTER", "TYPE", "Path-filter predicate did not evaluate into supported type. Line #" + this.getSourceCodeLineNumber());
                 }                
             }
         }
@@ -508,10 +512,10 @@ public class Filter extends AbstractNode implements Node, SupportsAttributes {
         ObjectType objResult = new ObjectType(this.getStatement());
         
         if (this.getFilterListExpression() instanceof FilterList) {
-            log.debug("FILTER :: FilterList");
+            //:OFF:log.debug("FILTER :: FilterList");
             //System.out.println("FILTER obj :: FilterList");
             FilterList filterList = (FilterList) this.getFilterListExpression();
-            log.debug("     FilterExprList size :: " + filterList.getFilterExprList().size());
+            //:OFF:log.debug("     FilterExprList size :: " + filterList.getFilterExprList().size());
             filterList.setValueToApplyAgainst(objToFilter);
             filterList.setResolvedConfigs(this.getResolvedConfigs());
             OperonValue result = filterList.evaluate();
@@ -740,7 +744,7 @@ public class Filter extends AbstractNode implements Node, SupportsAttributes {
                 }
                 
                 else {
-                    ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FILTER", "TYPE", "Object-filter predicate did not evaluate into supported type. Got: " + this.getFilterListExpression().getClass().getName());
+                    ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FILTER", "TYPE", "Object-filter predicate did not evaluate into supported type. Got: " + this.getFilterListExpression().getClass().getName() + ". Line #" + this.getSourceCodeLineNumber());
                 }
             }
 

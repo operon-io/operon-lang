@@ -35,7 +35,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class Choice extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(Choice.class);
+     // no logger 
     private List<Node> whens;
     private List<Node> thens;
     private Node otherwise;
@@ -71,7 +71,7 @@ public class Choice extends AbstractNode implements Node {
     }
     
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER Choice.evaluate()");
+        //:OFF:log.debug("ENTER Choice.evaluate()");
         this.setEvaluatedValue(null); // Intialize the value, especially between map-operator calls.
         
         //
@@ -142,7 +142,7 @@ public class Choice extends AbstractNode implements Node {
             }
             else {
                 //System.out.println("Throw to upper-level");
-                log.debug("Choice :: exceptionHandler missing, throw to upper-level");
+                //:OFF:log.debug("Choice :: exceptionHandler missing, throw to upper-level");
                 //
                 // Throw the exception to upper-level, since no ExceptionHandler was found:
                 //

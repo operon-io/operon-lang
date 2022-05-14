@@ -45,7 +45,7 @@ import org.apache.logging.log4j.LogManager;
 // TODO: pos() is not supported?
 //
 public class ArrayGroupBy extends BaseArity1 implements Node, Arity1 {
-    private static Logger log = LogManager.getLogger(ArrayGroupBy.class);
+     // no logger 
     
     public ArrayGroupBy(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
@@ -59,7 +59,7 @@ public class ArrayGroupBy extends BaseArity1 implements Node, Arity1 {
     }
 
     public ObjectType evaluate() throws OperonGenericException {
-        log.debug("groupBy :: evaluate()");
+        //:OFF:log.debug("groupBy :: evaluate()");
         try {
             OperonValue currentValue = this.getStatement().getCurrentValue();
             ArrayType arrayToGroup = (ArrayType) currentValue.evaluate();
@@ -193,7 +193,7 @@ public class ArrayGroupBy extends BaseArity1 implements Node, Arity1 {
         
         if (groupByExpr instanceof FunctionRef) {
             for (int i = 0; i < arrayToGroup.getValues().size(); i ++) {
-                log.debug("loop, i == " + i);
+                //:OFF:log.debug("loop, i == " + i);
                 valueToGroup = (OperonValue) arrayToGroup.getValues().get(i);
                 FunctionRef groupFnRef = (FunctionRef) groupByExpr;
                 groupFnRef.getParams().clear();
@@ -213,7 +213,7 @@ public class ArrayGroupBy extends BaseArity1 implements Node, Arity1 {
         }
         else if (groupByExpr instanceof LambdaFunctionRef) {
             for (int i = 0; i < arrayToGroup.getValues().size(); i ++) {
-                log.debug("loop, i == " + i);
+                //:OFF:log.debug("loop, i == " + i);
                 valueToGroup = (OperonValue) arrayToGroup.getValues().get(i);
                 LambdaFunctionRef groupFnRef = (LambdaFunctionRef) groupByExpr;
                 groupFnRef.getParams().clear();

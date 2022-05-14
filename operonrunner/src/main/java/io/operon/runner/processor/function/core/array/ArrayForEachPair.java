@@ -44,7 +44,7 @@ import org.apache.logging.log4j.LogManager;
 // Tests predicate-expression (given as functionRef) for each value in an array
 // 
 public class ArrayForEachPair extends BaseArity2 implements Node, Arity2, SupportsAttributes {
-    private static Logger log = LogManager.getLogger(ArrayForEachPair.class);
+     // no logger 
     
     public ArrayForEachPair(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
@@ -89,7 +89,7 @@ public class ArrayForEachPair extends BaseArity2 implements Node, Arity2, Suppor
             
             if (evaluatedNode instanceof FunctionRef) {
                 for (int i = 0; i < arrayA.getValues().size(); i ++) {
-                    log.debug("loop, i == " + i);
+                    //:OFF:log.debug("loop, i == " + i);
                     valueA = ArrayGet.baseGet(this.getStatement(), arrayA, i + 1);
                     valueB = ArrayGet.baseGet(this.getStatement(), arrayB, i + 1);
                     
@@ -106,7 +106,7 @@ public class ArrayForEachPair extends BaseArity2 implements Node, Arity2, Suppor
             }
             else if (evaluatedNode instanceof LambdaFunctionRef) {
                 for (int i = 0; i < arrayA.getValues().size(); i ++) {
-                    log.debug("loop, i == " + i);
+                    //:OFF:log.debug("loop, i == " + i);
                     valueA = ArrayGet.baseGet(this.getStatement(), arrayA, i + 1);
                     valueB = ArrayGet.baseGet(this.getStatement(), arrayB, i + 1);
                     

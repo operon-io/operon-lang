@@ -31,6 +31,7 @@ import java.util.TimerTask;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.Calendar;
+import java.text.SimpleDateFormat;
 
 import io.operon.runner.OperonContext;
 import io.operon.runner.model.OperonConfigs;
@@ -46,6 +47,7 @@ import io.operon.runner.node.type.*;
 import io.operon.runner.system.InputSourceDriver;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.system.BaseSystem;
+import io.operon.runner.system.inputsourcedriver.timer.cron.*;
 import io.operon.runner.statement.FromStatement;
 import io.operon.runner.processor.function.core.date.DateNow;
 import io.operon.runner.processor.function.core.DurationToMillis;
@@ -55,8 +57,35 @@ import io.operon.runner.model.exception.OperonGenericException;
 
 import org.apache.logging.log4j.LogManager;
 
+/*
+    NOTE: when using cron, the expression is parsed as follows:
+    
+    When using 5 fields:
+    ┌───────────── minute (0 - 59)
+    │ ┌───────────── hour (0 - 23)
+    │ │ ┌───────────── day of the month (1 - 31)
+    │ │ │ ┌───────────── month (1 - 12 or Jan/January - Dec/December)
+    │ │ │ │ ┌───────────── day of the week (0 - 6 or Sun/Sunday - Sat/Saturday)
+    │ │ │ │ │                                   
+    │ │ │ │ │
+    │ │ │ │ │
+    * * * * *
+    
+    When using 6 fields:
+    ┌───────────── second (0 - 59)
+    │ ┌───────────── minute (0 - 59)
+    │ │ ┌───────────── hour (0 - 23)
+    │ │ │ ┌───────────── day of the month (1 - 31)
+    │ │ │ │ ┌───────────── month (1 - 12 or Jan/January - Dec/December)
+    │ │ │ │ │ ┌───────────── day of the week (0 - 6 or Sun/Sunday - Sat/Saturday)
+    │ │ │ │ │ │                                   
+    │ │ │ │ │ │
+    │ │ │ │ │ │
+    * * * * * *
+
+*/
 public class TimerSystem implements InputSourceDriver {
-    private static Logger log = LogManager.getLogger(TimerSystem.class);
+     // no logger 
 
     private ObjectType jsonConfiguration; // optional: json-configuration for the component
     private boolean isRunning;
@@ -67,6 +96,8 @@ public class TimerSystem implements InputSourceDriver {
     
     private short errorCount = 0;
     private static Calendar cal = null;
+    private boolean isReadyToFire = true;
+    private Info info;
     
     public TimerSystem() {}
     
@@ -86,10 +117,15 @@ public class TimerSystem implements InputSourceDriver {
         OperonContext ctx = null;
         try {
             Info info = this.resolve();
+            this.info = info;
             if (info.debug) {
-                System.out.println("Timer");
-                System.out.println("- period: " + info.period);
-                System.out.println("- initialDelay: " + info.initialDelay);
+                if (info.cron == null) {
+                    System.out.println("Timer :: period: " + info.period);
+                }
+                System.out.println("Timer :: initialDelay: " + info.initialDelay);
+                if (info.cron != null) {
+                    System.out.println("Timer :: cron-expression: " + info.cron);
+                }
             }
             this.isRunning = true;
             
@@ -123,28 +159,118 @@ public class TimerSystem implements InputSourceDriver {
                     try {
                         handleFrame(ocm, info);
                     } catch (Exception e) {
-                        System.err.println("ERROR :: " + e.getMessage());
+                        System.err.println("Timer :: ERROR :: " + e.getMessage());
                     }
                 }
             };
             
-            this.timer = new Timer("Timer");
+            this.timer = null;
              
             long delay = info.initialDelay;
-            Long period = info.period; //1000L (1 second); // 1 day = 1000L * 60L * 60L * 24L;
-            if (period == null) {
-                System.err.println("TIMER :: Missing mandatory \"period\" -option.");
-                return;
-            }
-            this.timer.scheduleAtFixedRate(repeatedTask, delay, period);
             
+            if (info.cron == null) {
+                //
+                // Period-based timer
+                //
+                this.timer = new Timer(info.timerId);
+                long period = info.period; //1000L (1 second); // 1 day = 1000L * 60L * 60L * 24L;
+                this.timer.scheduleAtFixedRate(repeatedTask, delay, period);
+            }
+            else {
+                //
+                // Cron-based timer
+                //
+                SimpleDateFormat dateFormatter = new SimpleDateFormat("y-MM-dd HH:mm:ss");
+                Schedule cronSchedule = Schedule.create(info.cron);
+                Date baseDate = new Date();
+                if (info.debug) {
+                    System.out.println("Timer :: scheduling cron from base date: " + baseDate);
+                }
+                Thread.sleep(delay); // initial delay
+                long nextExecutionTs = 0L;
+                Date previousExecution = baseDate;
+                do {
+                    if (info.contextManagement != OperonContextManager.ContextStrategy.ALWAYS_CREATE_NEW) {
+                        //
+                        // We can fire only after context is ready.
+                        //
+                        ctx = ocm.resolveContext("correlationId");
+                        if (ctx.isReady() && this.isReadyToFire) {
+                            this.isReadyToFire = false;
+                            Date nextExecution = cronSchedule.next(previousExecution);
+                            if (nextExecutionTs < nextExecution.getTime()) {
+                                nextExecutionTs = nextExecution.getTime();
+                                if (this.timer == null) {
+                                    this.timer = new Timer("cron-job-" + nextExecution.getTime());
+                                }
+                                
+                                repeatedTask = new TimerTask() {
+                                    public void run() {
+                                        try {
+                                            handleFrame(ocm, info);
+                                        } catch (Exception e) {
+                                            System.err.println("Timer :: ERROR :: " + e.getMessage());
+                                        }
+                                    }
+                                };
+                                
+                                this.timer.schedule(repeatedTask, nextExecution);
+                                previousExecution = nextExecution;
+                                if (info.debug) {
+                                    System.out.println("Timer :: scheduled next: " + nextExecution);
+                                }
+                                Thread.sleep(1000);
+                            }
+                        }
+                        else {
+                            Thread.sleep(300);
+                        }
+                    }
+                    else {
+                        //
+                        // When contextManagement is always_create_new, we do not concern about the context's readiness:
+                        //
+                        Date nextExecution = cronSchedule.next(previousExecution);
+                        if (nextExecutionTs < nextExecution.getTime()) {
+                            nextExecutionTs = nextExecution.getTime();
+                            //System.out.println("Timer :: scheduling cron-job, counter = " + pollCounter);
+                            Timer t = new Timer("cron-job-" + nextExecution.getTime());
+                            repeatedTask = new TimerTask() {
+                                public void run() {
+                                    try {
+                                        handleFrame(ocm, info);
+                                    } catch (Exception e) {
+                                        System.err.println("Timer :: ERROR :: " + e.getMessage());
+                                    }
+                                }
+                            };
+                            t.schedule(repeatedTask, nextExecution);
+                            previousExecution = nextExecution;
+                            if (info.debug) {
+                                System.out.println("Timer :: scheduled next: " + nextExecution);
+                            }
+                            Thread.sleep(1000);
+                        }
+                        else {
+                            // TODO: adjust sleep time by how much we need to wait.
+                            Thread.sleep(300);
+                        }
+                    }
+                
+                } while (this.isRunning);
+            }
+
+            //
             // Prevent ISD from quitting
+            //
             while (this.isRunning) {
                 Thread.sleep(100);
             }
-            this.timer.cancel(); // Stop the timer
+            if (info.cron == null) {
+                this.timer.cancel(); // Stop the period-timer
+            }
         } catch (OperonGenericException e) {
-            log.error("Exception :: " + e.toString());
+            //:OFF://:OFF:log.error("Exception :: " + e.toString());
             System.err.println("ERROR :: " + e.getMessage());
             ctx.setException(e);
             this.errorCount += 1;
@@ -167,6 +293,7 @@ public class TimerSystem implements InputSourceDriver {
     //
     public void handleFrame(OperonContextManager ocm, Info info) throws OperonGenericException, IOException {
         this.pollCounter += 1;
+        //System.out.println("handleFrame :: " + pollCounter);
         try {
             // Acquire OperonContext
             OperonContext ctx = ocm.resolveContext("correlationId");
@@ -205,22 +332,37 @@ public class TimerSystem implements InputSourceDriver {
             if (info.times > 0 && this.pollCounter >= info.times) {
                 this.stop();
             }
+            if (info.cron != null) {
+                //System.out.println("Canceling cron-timer");
+                // TODO!
+                //Thread t = Thread.currentThread();
+                //t.interrupt();
+            }
+            //System.out.println("set isReadyToFire: true, time = " + new Date());
+            this.isReadyToFire = true;
         } catch (Exception e) {
+            System.err.println("ERROR :: " + e.getMessage());
             this.errorCount += 1;
             if (this.errorCount >= 10) {
                 System.err.println("ERROR :: " + e.getMessage());
                 System.err.println("timer: too many errors. Stopping.");
                 this.stop();
             }
+            this.isReadyToFire = true;
         }
     }
     
     public void requestNext() {}
     
     public void stop() {
-        this.timer.cancel(); // Stop the timer
+        if (this.info.debug) {
+            System.out.println("Timer :: stopping");
+        }
+        if (this.info.cron == null) {
+            this.timer.cancel(); // Stop the period-timer
+        }
         this.isRunning = false;
-        log.info("Stopped");
+        //:OFF://:OFF:log.info("Stopped");
     }
     
     public void setJsonConfiguration(ObjectType jsonConfig) { this.jsonConfiguration = jsonConfig; }
@@ -288,6 +430,10 @@ public class TimerSystem implements InputSourceDriver {
                         info.timestamp = true;
                     }
                     break;
+                case "\"cron\"":
+                    String cronStr = ((StringType) pair.getValue().evaluate()).getJavaStringValue();
+                    info.cron = cronStr;
+                    break;
                 case "\"debug\"":
                     Node debugValue = pair.getValue().evaluate();
                     if (debugValue instanceof FalseType) {
@@ -321,11 +467,12 @@ public class TimerSystem implements InputSourceDriver {
     }
     
     private class Info {
-        private String timerId;
+        private String timerId = "Timer";
         private long initialDelay = 0L;
         private long period = 1000L;
         private long times = 0L; // how many times to execute
         private boolean timestamp = true;
+        private String cron; // cron-expression
         private boolean debug = false;
         // contextManagement is preferred option for ISD
         private OperonContextManager.ContextStrategy contextManagement = OperonContextManager.ContextStrategy.SINGLETON;

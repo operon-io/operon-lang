@@ -53,4 +53,9 @@ public class TrueType extends OperonValue implements Node, AtomicOperonValue {
         return "true";
     }
 
+    @Override
+    public String toTomlString(OutputFormatter ofmt) {
+        return "true";
+    }
+
 }

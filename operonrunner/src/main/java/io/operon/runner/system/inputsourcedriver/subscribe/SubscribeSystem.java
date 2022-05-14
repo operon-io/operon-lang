@@ -66,7 +66,7 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 //   127.0.0.1:6379> publish bar '"foobar"'
 //
 public class SubscribeSystem implements InputSourceDriver {
-    private static Logger log = LogManager.getLogger(SubscribeSystem.class);
+     // no logger 
 
     private ObjectType jsonConfiguration; // optional: json-configuration for the component
     private boolean isRunning;
@@ -166,7 +166,7 @@ public class SubscribeSystem implements InputSourceDriver {
             }
         } catch (OperonGenericException e) {
             //System.err.println("2 ERROR :: " + e.getMessage());
-            log.error("Exception :: " + e.toString());
+            //:OFF:log.error("Exception :: " + e.toString());
             ctx.setException(e);
         } catch (IOException ex) {
             //System.err.println("3 ERROR :: " + ex.getMessage());
@@ -229,7 +229,7 @@ public class SubscribeSystem implements InputSourceDriver {
     
     public void stop() {
         this.isRunning = false;
-        log.info("Stopped");
+        //:OFF:log.info("Stopped");
     }
     
     public void setJsonConfiguration(ObjectType jsonConfig) { this.jsonConfiguration = jsonConfig; }

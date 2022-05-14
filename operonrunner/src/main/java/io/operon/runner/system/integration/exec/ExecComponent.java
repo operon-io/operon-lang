@@ -73,7 +73,7 @@ import org.apache.logging.log4j.LogManager;
 //       One possibility is to wrap those inside shell-files and execute those with exec.
 //
 public class ExecComponent extends BaseComponent implements IntegrationComponent {
-    private static Logger log = LogManager.getLogger(ExecComponent.class);
+     // no logger 
 
     public ExecComponent() {}
     
@@ -204,7 +204,7 @@ public class ExecComponent extends BaseComponent implements IntegrationComponent
                     }
                     break;
                 default:
-                    log.debug("exec -producer: no mapping for configuration key: " + key);
+                    //:OFF:log.debug("exec -producer: no mapping for configuration key: " + key);
                     System.err.println("exec -producer: no mapping for configuration key: " + key);
                     ErrorUtil.createErrorValueAndThrow(currentValue.getStatement(), "EXEC", "ERROR", "exec -producer: no mapping for configuration key: " + key);
             }

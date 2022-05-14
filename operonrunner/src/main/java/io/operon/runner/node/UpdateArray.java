@@ -35,7 +35,7 @@ import org.apache.logging.log4j.LogManager;
 // Used in Update_array -expr
 //
 public class UpdateArray extends AbstractNode implements Node, java.io.Serializable {
-    private static Logger log = LogManager.getLogger(UpdateArray.class);
+     // no logger 
 
     private Node configs;
     private Node updatePathsExpr;
@@ -57,7 +57,7 @@ public class UpdateArray extends AbstractNode implements Node, java.io.Serializa
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER UpdateArray.evaluate()");
+        //:OFF:log.debug("ENTER UpdateArray.evaluate()");
         //System.out.println("ENTER UpdateArray.evaluate()");
         OperonValue currentValue = this.getStatement().getCurrentValue();
         Node updatePathsExpr = this.getUpdatePathsExpr();

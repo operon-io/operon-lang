@@ -50,9 +50,9 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class Main {
-    private static Logger log = LogManager.getLogger(Main.class);
+     // no logger 
     
-    public static final String VERSION = "0.9.9.0";
+    public static final String VERSION = "0.9.3.0";
     public static final boolean isNative = false;
     
     public static final int SUCCESS_VALUE = 0;
@@ -182,7 +182,7 @@ public class Main {
                 }
                 String query = Main.readFile(arg, Main.defaultCharset);
                 //System.out.println("query="+query);
-                log.debug("QUERY :: " + query);
+                //:OFF:log.debug("QUERY :: " + query);
                 OperonRunner runner = new OperonRunner();
                 runner.setQuery(query);
                 //Thread q1 = new Thread(runner, "Default Query");
@@ -340,7 +340,7 @@ public class Main {
                     String fileName = option2;
                     String query = Main.readFile(fileName, Main.defaultCharset);
                     String testsContent = Main.readFile("operon.tests", Main.defaultCharset);
-                    log.debug("QUERY :: " + query);
+                    //:OFF:log.debug("QUERY :: " + query);
                     OperonRunner runner = new OperonRunner();
                     runner.setQuery(query);
                     runner.setTestsContent(testsContent);

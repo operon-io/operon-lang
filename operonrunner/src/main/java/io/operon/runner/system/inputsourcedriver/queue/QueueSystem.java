@@ -66,7 +66,7 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 // RPUSH '"bar"'
 // 
 public class QueueSystem implements InputSourceDriver {
-    private static Logger log = LogManager.getLogger(QueueSystem.class);
+     // no logger 
 
     private ObjectType jsonConfiguration; // optional: json-configuration for the component
     private boolean isRunning;
@@ -173,7 +173,7 @@ public class QueueSystem implements InputSourceDriver {
             }
         } catch (OperonGenericException e) {
             //System.err.println("2 ERROR :: " + e.getMessage());
-            log.error("Exception :: " + e.toString());
+            //:OFF:log.error("Exception :: " + e.toString());
             ctx.setException(e);
         } catch (IOException ex) {
             //System.err.println("3 ERROR :: " + ex.getMessage());
@@ -319,7 +319,7 @@ public class QueueSystem implements InputSourceDriver {
     
     public void stop() {
         this.isRunning = false;
-        log.info("Stopped");
+        //:OFF:log.info("Stopped");
     }
     
     public void setJsonConfiguration(ObjectType jsonConfig) { this.jsonConfiguration = jsonConfig; }

@@ -37,7 +37,7 @@ import org.apache.logging.log4j.LogManager;
 // Throws the Java Exception with given JSON-value
 //
 public class TryCatch extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(TryCatch.class);
+     // no logger 
     
     private Node tryExpr;
     private Node catchExpr;
@@ -49,7 +49,7 @@ public class TryCatch extends AbstractNode implements Node {
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER TryCatch.evaluate(). Stmt: " + this.getStatement().getId());
+        //:OFF:log.debug("ENTER TryCatch.evaluate(). Stmt: " + this.getStatement().getId());
         
         //
         // Create a new stmt where the tryExpr is executed in.

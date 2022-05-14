@@ -39,7 +39,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class InputSource {
-    private static Logger log = LogManager.getLogger(InputSource.class);
+     // no logger 
     
     private transient InputSourceDriver system; // E.g. json, file, http, timer, etc... Loaded dynamically, as an ISD-component.
     private String name;
@@ -154,13 +154,13 @@ public class InputSource {
         else {
             // Assign correct component for the inputSourceSystem
             // This could be e.g. "http", "file", "timer", or some other basic-component.
-            log.debug("Compiler :: loading inputSourceDriver :: " + this.getName());
+            //:OFF:log.debug("Compiler :: loading inputSourceDriver :: " + this.getName());
             
             // load component dynamically:
             try {
-                log.debug("  - loading isd-componentsDefinitionObj");
+                //:OFF:log.debug("  - loading isd-componentsDefinitionObj");
                 ObjectType isdComponentObj = ComponentSystemUtil.loadInputSourceDriverComponentDefinition(this.getName(), "components.json");
-                log.debug("  - isd componentsDefinitionObj loaded");
+                //:OFF:log.debug("  - isd componentsDefinitionObj loaded");
                 System.out.println("ISD componentsDefinitionObj loaded :: " + isdComponentObj);
                 String componentLink = ""; // link to .jar -file
                 
@@ -169,10 +169,10 @@ public class InputSource {
                 
                 for (PairType pair : isdComponentObj.getPairs()) {
                     String key = pair.getKey();
-                    log.debug("  - key :: " + key);
+                    //:OFF:log.debug("  - key :: " + key);
                     if (key.equals("\"resolveUri\"")) {
                         componentLink = ((StringType) pair.getValue().evaluate()).getJavaStringValue();
-                        log.debug("  - linking isd-component :: " + componentLink);
+                        //:OFF:log.debug("  - linking isd-component :: " + componentLink);
                     }
                     //
                     // "configuration": {"foo": {...}}
@@ -190,9 +190,9 @@ public class InputSource {
                 
                 String JAR_URL = "jar:" + componentLink + "!/";
                 
-                log.debug("  - loading component");
+                //:OFF:log.debug("  - loading component");
                 Class isdClass = ComponentSystemUtil.loadComponent(JAR_URL, componentLink);
-                log.debug("  - component class loaded");
+                //:OFF:log.debug("  - component class loaded");
                 
                 InputSourceDriver isdInstance = (InputSourceDriver) isdClass.getDeclaredConstructor().newInstance();
                 if (this.getConfiguration() != null && this.getConfiguration().getPairs().size() > 0) {

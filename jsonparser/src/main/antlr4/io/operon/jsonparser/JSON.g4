@@ -1,6 +1,6 @@
-//
-// License: Operon-license v1. https://operon.io/operon-license
-//
+// 
+// License: https://operon.io/operon-license
+// 
 
 // Derived from http://json.org
 grammar JSON;
@@ -34,7 +34,7 @@ value
    | EMPTY_VALUE
    | RAW_STRING
    | SINGLE_QUOTED_STRING
-   | MULTILINE_PADDED_STRING
+   | MULTILINE_STRIPPED_STRING
    | MULTILINE_PADDED_LINES_STRING
    | MULTILINE_STRING
    ;
@@ -67,7 +67,7 @@ RAW_STRING
 // Initial paddings for each line are ignored.
 // The lines are concatenated and new-lines removed.
 //
-MULTILINE_PADDED_STRING
+MULTILINE_STRIPPED_STRING
    : '"""|' (MULTILINE_ESC | SAFECODEPOINT)* '"""'
    ;
 

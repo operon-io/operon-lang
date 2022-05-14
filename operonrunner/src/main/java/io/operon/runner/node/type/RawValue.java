@@ -38,6 +38,12 @@ public class RawValue extends OperonValue implements Node, AtomicOperonValue {
         return this;
     }
     
+    public static RawValue createFromString(Statement stmt, String value) {
+        RawValue result = new RawValue(stmt);
+        result.setValue(value.getBytes());
+        return result;
+    }
+    
     public void setValue(byte[] value) {
         this.value = value;
     }
@@ -167,6 +173,12 @@ public class RawValue extends OperonValue implements Node, AtomicOperonValue {
         else {
             return "\"Bytes(" + this.getBytes().length + ")\"";
         }
+    }
+
+    @Override
+    public String toTomlString(OutputFormatter ofmt) {
+        if (ofmt == null) {ofmt = new OutputFormatter();}
+        return this.toFormattedString(ofmt);   
     }
 
 }

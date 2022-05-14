@@ -39,14 +39,14 @@ import org.apache.logging.log4j.LogManager;
  * 
  */
 public class Eq extends BaseBinaryNodeProcessor implements BinaryNodeProcessor {
-    private static Logger log = LogManager.getLogger(Eq.class);
+     // no logger 
     public OperonValue process(Statement statement, Node lhs, Node rhs) throws OperonGenericException {
         this.preprocess(statement, lhs, rhs);
         
-        log.debug(" EQ :: LHS bindings size :: " + lhs.getBindings().size());
-        log.debug(" EQ :: LHS-pp bindings size :: " + lhsResult.getBindings().size());
-        log.debug(" EQ :: RHS-pp bindings size :: " + rhsResult.getBindings().size());
-        log.debug(">>>> LHS-binding-mode :: " + lhs.getDoBindings());
+        //:OFF:log.debug(" EQ :: LHS bindings size :: " + lhs.getBindings().size());
+        //:OFF:log.debug(" EQ :: LHS-pp bindings size :: " + lhsResult.getBindings().size());
+        //:OFF:log.debug(" EQ :: RHS-pp bindings size :: " + rhsResult.getBindings().size());
+        //:OFF:log.debug(">>>> LHS-binding-mode :: " + lhs.getDoBindings());
         
         String binaryOperator = "=";
         
@@ -56,12 +56,12 @@ public class Eq extends BaseBinaryNodeProcessor implements BinaryNodeProcessor {
         
         else if (lhsResult instanceof NumberType && rhsResult instanceof NumberType) {
             if ( ((NumberType) lhsResult).getDoubleValue() == ((NumberType) rhsResult).getDoubleValue() ) {
-                log.debug("EQ : Return TrueType");
+                //:OFF:log.debug("EQ : Return TrueType");
                 TrueType resultTrue = new TrueType(statement);
                 statement.setCurrentValue(resultTrue);
                 return resultTrue;
             }
-            log.debug("EQ : Return FalseType 1 :: " + ((NumberType) lhsResult).getDoubleValue() + ", " + ((NumberType) rhsResult).getDoubleValue());
+            //:OFF:log.debug("EQ : Return FalseType 1 :: " + ((NumberType) lhsResult).getDoubleValue() + ", " + ((NumberType) rhsResult).getDoubleValue());
             FalseType resultFalse = new FalseType(statement);
             statement.setCurrentValue(resultFalse);
             return resultFalse;
@@ -193,28 +193,28 @@ public class Eq extends BaseBinaryNodeProcessor implements BinaryNodeProcessor {
         */
         
         else if (lhsResult instanceof TrueType && rhsResult instanceof TrueType) {
-            log.debug("EQ : Return TrueType");
+            //:OFF:log.debug("EQ : Return TrueType");
             TrueType resultTrue = new TrueType(statement);
             statement.setCurrentValue(resultTrue);
             return resultTrue;
         }
 
         else if (lhsResult instanceof FalseType && rhsResult instanceof TrueType) {
-            log.debug("EQ : Return FalseType 2");
+            //:OFF:log.debug("EQ : Return FalseType 2");
             FalseType resultFalse = new FalseType(statement);
             statement.setCurrentValue(resultFalse);
             return resultFalse;
         }
         
         else if (lhsResult instanceof TrueType && rhsResult instanceof FalseType) {
-            log.debug("EQ : Return FalseType 3");
+            //:OFF:log.debug("EQ : Return FalseType 3");
             FalseType resultFalse = new FalseType(statement);
             statement.setCurrentValue(resultFalse);
             return resultFalse;
         }
         
         else if (lhsResult instanceof FalseType && rhsResult instanceof FalseType) {
-            log.debug("EQ : Return TrueType");
+            //:OFF:log.debug("EQ : Return TrueType");
             TrueType resultTrue = new TrueType(statement);
             statement.setCurrentValue(resultTrue);
             return resultTrue;
@@ -291,12 +291,27 @@ public class Eq extends BaseBinaryNodeProcessor implements BinaryNodeProcessor {
             // When comparing dynamically calculated result,
             // OperonValue and NumberType
             // TODO: if OperonValue, then should compute the correct type first (both: lhs and rhs)
-            log.error("INCOMPATIBLE TYPES: " + lhsResult.getClass() + ", " + rhsResult.getClass());
+            //:OFF:log.error("INCOMPATIBLE TYPES: " + lhsResult.getClass() + ", " + rhsResult.getClass());
             
             String lhsType = ErrorUtil.mapTypeFromJavaClass(lhsResult);
             String rhsType = ErrorUtil.mapTypeFromJavaClass(rhsResult);
             //System.out.println("Create error: lhsType: " + lhsType + ", rhsType: " + rhsType);
-            return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "EQ", "Not defined: " + lhsType + " " + binaryOperator + " " + rhsType);
+            String lhsValue = lhs.toString();
+            String rhsValue = rhs.toString();
+            if (lhsValue.length() > 100) {
+                lhsValue = lhsValue.substring(0, 100);
+            }
+            if (rhsValue.length() > 100) {
+                rhsValue = rhsValue.substring(0, 100);
+            }
+            return ErrorUtil.createErrorValueAndThrow(statement,
+                "OPERATOR", 
+                "EQ", 
+                "Not defined: " + lhsType + " " + binaryOperator + " " + rhsType +
+                    ", at line #" + this.getSourceCodeLineNumber() +
+                    ". lhs value: " + lhs.toString() + ", rhs value: " + rhs.toString()
+            
+            );
         }
         
     }

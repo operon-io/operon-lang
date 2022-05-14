@@ -37,7 +37,7 @@ import org.apache.logging.log4j.LogManager;
 
 public class ArrayUpdate extends BaseArity2 implements Node, Arity2, SupportsAttributes {
 
-    private static Logger log = LogManager.getLogger(ArrayUpdate.class);
+     // no logger 
 
     public ArrayUpdate(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);

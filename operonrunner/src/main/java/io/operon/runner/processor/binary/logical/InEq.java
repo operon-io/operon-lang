@@ -39,17 +39,17 @@ import org.apache.logging.log4j.LogManager;
  * 
  */
 public class InEq extends BaseBinaryNodeProcessor implements BinaryNodeProcessor {
-    private static Logger log = LogManager.getLogger(InEq.class);
+     // no logger 
     
     public OperonValue process(Statement statement, Node lhs, Node rhs) throws OperonGenericException {
         this.preprocess(statement, lhs, rhs);
         
         //System.out.println("InEq process()");
         
-        log.debug(" InEq :: LHS bindings size :: " + lhs.getBindings().size());
-        log.debug(" InEq :: LHS-pp bindings size :: " + lhsResult.getBindings().size());
-        log.debug(" InEq :: RHS-pp bindings size :: " + rhsResult.getBindings().size());
-        log.debug(">>>> LHS-binding-mode :: " + lhs.getDoBindings());
+        //:OFF:log.debug(" InEq :: LHS bindings size :: " + lhs.getBindings().size());
+        //:OFF:log.debug(" InEq :: LHS-pp bindings size :: " + lhsResult.getBindings().size());
+        //:OFF:log.debug(" InEq :: RHS-pp bindings size :: " + rhsResult.getBindings().size());
+        //:OFF:log.debug(">>>> LHS-binding-mode :: " + lhs.getDoBindings());
         
         String binaryOperator = "!=";
         
@@ -59,12 +59,12 @@ public class InEq extends BaseBinaryNodeProcessor implements BinaryNodeProcessor
         
         else if (lhsResult instanceof NumberType && rhsResult instanceof NumberType) {
             if ( (((NumberType) lhsResult).getDoubleValue() == ((NumberType) rhsResult).getDoubleValue()) == false ) {
-                log.debug("InEQ : Return TrueType");
+                //:OFF:log.debug("InEQ : Return TrueType");
                 TrueType resultTrue = new TrueType(statement);
                 statement.setCurrentValue(resultTrue);
                 return resultTrue;
             }
-            log.debug("InEQ : Return FalseType 1 :: " + ((NumberType) lhsResult).getDoubleValue() + ", " + ((NumberType) rhsResult).getDoubleValue());
+            //:OFF:log.debug("InEQ : Return FalseType 1 :: " + ((NumberType) lhsResult).getDoubleValue() + ", " + ((NumberType) rhsResult).getDoubleValue());
             FalseType resultFalse = new FalseType(statement);
             statement.setCurrentValue(resultFalse);
             return resultFalse;
@@ -276,11 +276,18 @@ public class InEq extends BaseBinaryNodeProcessor implements BinaryNodeProcessor
             // When comparing dynamically calculated result,
             // OperonValue and NumberType
             // TODO: if OperonValue, then should compute the correct type first (both: lhs and rhs)
-            log.error("INCOMPATIBLE TYPES: " + lhsResult.getClass() + ", " + rhsResult.getClass());
+            //:OFF:log.error("INCOMPATIBLE TYPES: " + lhsResult.getClass() + ", " + rhsResult.getClass());
             
             String lhsType = ErrorUtil.mapTypeFromJavaClass(lhsResult);
             String rhsType = ErrorUtil.mapTypeFromJavaClass(rhsResult);
-            return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "InEQ", "Not defined: " + lhsType + " " + binaryOperator + " " + rhsType);
+            return ErrorUtil.createErrorValueAndThrow(statement,
+                "OPERATOR", 
+                "InEQ", 
+                "Not defined: " + lhsType + " " + binaryOperator + " " + rhsType +
+                    ", at line #" + this.getSourceCodeLineNumber() +
+                    ". lhs value: " + lhs.toString() + ", rhs value: " + rhs.toString()
+            
+            );
         }
         
     }

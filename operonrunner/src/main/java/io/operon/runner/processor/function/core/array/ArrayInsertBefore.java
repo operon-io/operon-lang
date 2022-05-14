@@ -46,7 +46,7 @@ import org.apache.logging.log4j.LogManager;
 
 public class ArrayInsertBefore extends BaseArity2 implements Node, Arity2, SupportsAttributes {
 
-    private static Logger log = LogManager.getLogger(ArrayInsertBefore.class);
+     // no logger 
 
     public ArrayInsertBefore(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);

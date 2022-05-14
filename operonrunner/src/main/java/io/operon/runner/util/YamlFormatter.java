@@ -24,7 +24,7 @@ public class YamlFormatter {
     public byte rawOutput = (byte) 0; // see from RawValue
     //
     // Current amount of spaces. This keeps track of the current indentation.
-    // ArrayType and ObjectType toFormattedString() change this value when they are executed.
+    // ArrayType and ObjectType toYamlString() change this value when they are executed.
     //
     public short spaces = (short) 0;
     

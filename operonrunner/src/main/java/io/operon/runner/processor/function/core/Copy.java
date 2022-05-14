@@ -41,7 +41,7 @@ import org.apache.logging.log4j.LogManager;
  *
  */
 public class Copy extends BaseArity0 implements Node, Arity0 {
-    private static Logger log = LogManager.getLogger(Copy.class);
+     // no logger 
     
     public Copy(Statement statement) throws OperonGenericException {
         super(statement);

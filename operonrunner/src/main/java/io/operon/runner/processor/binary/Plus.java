@@ -39,13 +39,13 @@ import org.apache.logging.log4j.LogManager;
  * 
  */
 public class Plus extends BaseBinaryNodeProcessor implements BinaryNodeProcessor {
-    private static Logger log = LogManager.getLogger(Plus.class);
+     // no logger 
 
     private String binaryOperator = "+";
 
     public OperonValue process(Statement statement, Node lhs, Node rhs) throws OperonGenericException {
         this.preprocess(statement, lhs, rhs);
-        log.debug("OP PLUS");
+        //:OFF:log.debug("OP PLUS");
         
         if ( customBindingCheck(lhs, rhs, binaryOperator) ) {
             return doCustomBinding(statement, lhs, rhs, binaryOperator);
@@ -84,7 +84,7 @@ public class Plus extends BaseBinaryNodeProcessor implements BinaryNodeProcessor
             }
             result.setPrecision(resultPrecision);
             
-            //log.debug("    >> Both NumberType. Result :: " + result);
+            ////:OFF:log.debug("    >> Both NumberType. Result :: " + result);
             statement.setCurrentValue(result);
             return result;
         }
@@ -126,6 +126,7 @@ public class Plus extends BaseBinaryNodeProcessor implements BinaryNodeProcessor
         
         //
         // {} + {}
+        // TODO: if pairs have the same key, then we could use RHS to override the LHS.
         //
         else if (lhsResult instanceof ObjectType && rhsResult instanceof ObjectType) {
             ObjectType result = new ObjectType(statement);
@@ -137,7 +138,7 @@ public class Plus extends BaseBinaryNodeProcessor implements BinaryNodeProcessor
             List<PairType> pairs = addFrom.getPairs();
             
             for (PairType pair : pairs) {
-                result.addPair(pair);
+                result.addPair(pair); // TODO: we could use method that allows overriding the existing key.
             }
             statement.setCurrentValue(result);
             return result;
@@ -288,7 +289,7 @@ public class Plus extends BaseBinaryNodeProcessor implements BinaryNodeProcessor
                 outputStream.write(lhsBytes);
                 outputStream.write(rhsBytes);
             } catch (IOException ioe) {
-                return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "PLUS", "Error occured while adding String and Raw");
+                return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "PLUS", "Error occured while adding String and Raw, line #" + this.getSourceCodeLineNumber());
             }
             byte resultBytes[] = outputStream.toByteArray();
             result.setValue(resultBytes);
@@ -305,7 +306,7 @@ public class Plus extends BaseBinaryNodeProcessor implements BinaryNodeProcessor
                 outputStream.write(lhsBytes);
                 outputStream.write(rhsBytes);
             } catch (IOException ioe) {
-                return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "PLUS", "Error occured while adding Raw and Boolean");
+                return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "PLUS", "Error occured while adding Raw and Boolean, line #" + this.getSourceCodeLineNumber());
             }
             byte resultBytes[] = outputStream.toByteArray();
             result.setValue(resultBytes);
@@ -322,7 +323,7 @@ public class Plus extends BaseBinaryNodeProcessor implements BinaryNodeProcessor
                 outputStream.write(lhsBytes);
                 outputStream.write(rhsBytes);
             } catch (IOException ioe) {
-                return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "PLUS", "Error occured while adding Raw and Boolean");
+                return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "PLUS", "Error occured while adding Raw and Boolean, line #" + this.getSourceCodeLineNumber());
             }
             byte resultBytes[] = outputStream.toByteArray();
             result.setValue(resultBytes);
@@ -339,7 +340,7 @@ public class Plus extends BaseBinaryNodeProcessor implements BinaryNodeProcessor
                 outputStream.write(lhsBytes);
                 outputStream.write(rhsBytes);
             } catch (IOException ioe) {
-                return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "PLUS", "Error occured while adding Raw and Null");
+                return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "PLUS", "Error occured while adding Raw and Null, line #" + this.getSourceCodeLineNumber());
             }
             byte resultBytes[] = outputStream.toByteArray();
             result.setValue(resultBytes);
@@ -356,7 +357,7 @@ public class Plus extends BaseBinaryNodeProcessor implements BinaryNodeProcessor
                 outputStream.write(lhsBytes);
                 outputStream.write(rhsBytes);
             } catch (IOException ioe) {
-                return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "PLUS", "Error occured while adding Number and Raw");
+                return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "PLUS", "Error occured while adding Number and Raw, line #" + this.getSourceCodeLineNumber());
             }
             byte resultBytes[] = outputStream.toByteArray();
             result.setValue(resultBytes);
@@ -373,7 +374,7 @@ public class Plus extends BaseBinaryNodeProcessor implements BinaryNodeProcessor
                 outputStream.write(lhsBytes);
                 outputStream.write(rhsBytes);
             } catch (IOException ioe) {
-                return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "PLUS", "Error occured while adding Boolean and Raw");
+                return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "PLUS", "Error occured while adding Boolean and Raw, line #" + this.getSourceCodeLineNumber());
             }
             byte resultBytes[] = outputStream.toByteArray();
             result.setValue(resultBytes);
@@ -390,7 +391,7 @@ public class Plus extends BaseBinaryNodeProcessor implements BinaryNodeProcessor
                 outputStream.write(lhsBytes);
                 outputStream.write(rhsBytes);
             } catch (IOException ioe) {
-                return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "PLUS", "Error occured while adding Boolean and Raw");
+                return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "PLUS", "Error occured while adding Boolean and Raw, line #" + this.getSourceCodeLineNumber());
             }
             byte resultBytes[] = outputStream.toByteArray();
             result.setValue(resultBytes);
@@ -407,7 +408,7 @@ public class Plus extends BaseBinaryNodeProcessor implements BinaryNodeProcessor
                 outputStream.write(lhsBytes);
                 outputStream.write(rhsBytes);
             } catch (IOException ioe) {
-                return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "PLUS", "Error occured while adding Null and Raw");
+                return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "PLUS", "Error occured while adding Null and Raw, line #" + this.getSourceCodeLineNumber());
             }
             byte resultBytes[] = outputStream.toByteArray();
             result.setValue(resultBytes);
@@ -416,11 +417,18 @@ public class Plus extends BaseBinaryNodeProcessor implements BinaryNodeProcessor
         }
         
         else {
-            log.error("INCOMPATIBLE TYPES: " + lhsResult.getClass() + ", " + rhsResult.getClass());
+            //:OFF:log.error("INCOMPATIBLE TYPES: " + lhsResult.getClass() + ", " + rhsResult.getClass());
             
             String lhsType = ErrorUtil.mapTypeFromJavaClass(lhsResult);
             String rhsType = ErrorUtil.mapTypeFromJavaClass(rhsResult);
-            return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "PLUS", "Not defined: " + lhsType + " " + binaryOperator + " " + rhsType);
+            return ErrorUtil.createErrorValueAndThrow(statement,
+                "OPERATOR", 
+                "PLUS", 
+                "Not defined: " + lhsType + " " + binaryOperator + " " + rhsType +
+                    ", at line #" + this.getSourceCodeLineNumber() +
+                    ". lhs value: " + lhs.toString() + ", rhs value: " + rhs.toString()
+            
+            );
         }
         
     }

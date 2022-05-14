@@ -31,14 +31,14 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 public class EndValueType extends OperonValue implements Node, AtomicOperonValue {
-    private static Logger log = LogManager.getLogger(EndValueType.class);
+     // no logger 
     
     public EndValueType(Statement stmnt) {
         super(stmnt);
     }
 
     public EndValueType evaluate() throws OperonGenericException {
-        log.debug("EndValueType :: Evaluate");
+        //:OFF:log.debug("EndValueType :: Evaluate");
         this.setUnboxed(true);
         return this;
     }
@@ -55,6 +55,11 @@ public class EndValueType extends OperonValue implements Node, AtomicOperonValue
 
     @Override
     public String toYamlString(YamlFormatter yf) {
+        return "end";
+    }
+
+    @Override
+    public String toTomlString(OutputFormatter ofmt) {
         return "end";
     }
 

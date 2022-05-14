@@ -42,7 +42,7 @@ import org.apache.logging.log4j.LogManager;
  *
  */
 public class Uuid extends BaseArity0 implements Node, Arity0 {
-    private static Logger log = LogManager.getLogger(Uuid.class);
+     // no logger 
     
     public Uuid(Statement statement) throws OperonGenericException {
         super(statement);

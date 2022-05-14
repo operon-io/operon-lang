@@ -63,6 +63,7 @@ public class PathNext extends BaseArity0 implements Node, Arity0 {
         try {
             //System.out.println("path:next() evaluate");
             Path path = (Path) this.getStatement().getCurrentValue();
+            //System.out.println("  - path: " + path);
             OperonValue pathRoot = path.getObjLink();
             
             Path resultPath = path.copy();
@@ -77,6 +78,8 @@ public class PathNext extends BaseArity0 implements Node, Arity0 {
             
             PathPart lastPathPart = path.getPathParts().get(path.getPathParts().size() - 1);
             Path parentPath = PathParentPath.getParentPath(path);
+            
+            //System.out.println("  - parentPath: " + parentPath);
             
             if (lastPathPart instanceof PosPathPart) {
                 int pos = ((PosPathPart) lastPathPart).getPos();
@@ -126,7 +129,7 @@ public class PathNext extends BaseArity0 implements Node, Arity0 {
                 //     from the obj.
                 // set the lastKeyPart with new key.
                 String key = ((KeyPathPart) lastPathPart).getKey();
-                //System.out.println(">> else: KeyPathPart: key=" + key);
+                //System.out.println(">> KeyPathPart: key=" + key);
                 //System.out.println(">>  : parentPath=" + parentPath);
                 if (parentPath.getPathParts().size() > 0) {
                     pathValue = PathValue.get(pathRoot, parentPath);
@@ -140,7 +143,7 @@ public class PathNext extends BaseArity0 implements Node, Arity0 {
                 String nextKey = null;
                 for (PairType p : obj.getPairs()) {
                     String pairKey = p.getKey().substring(1, p.getKey().length() - 1);
-                    //System.out.println("pairKey=" + pairKey);
+                    //System.out.println("  - pairKey=" + pairKey);
                     if (keyFound) {
                         nextKey = pairKey;
                         break;
@@ -162,6 +165,7 @@ public class PathNext extends BaseArity0 implements Node, Arity0 {
                     return resultPath;
                 }
                 else {
+                    //System.out.println("next key :: null");
                     return new NullType(this.getStatement());
                 }
             }

@@ -1,8 +1,8 @@
 grammar OperonBase;
 
-//
-// License: Operon-license v1. https://operon.io/operon-license
-//
+// 
+// License: https://operon.io/operon-license
+// 
 
 //
 // object key: namespace to be imported
@@ -41,34 +41,35 @@ exception_stmt
     ;
 
 expr
-    : (json (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan)*
-    | assign_expr (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan | function_ref_curry)*
-    | computed_value_ref (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan | function_ref_curry)*
-    | value_ref (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan | function_ref_curry)*
-    | lambda_function_call (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan)*
+    : (json                         continuation*
+    | assign_expr                   continuation_with_curry*
+    | computed_value_ref            continuation_with_curry*
+    | value_ref                     continuation_with_curry*
+    | lambda_function_call          continuation*
     | lambda_function_ref
     | auto_invoke_ref
-    | function_call (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan)*
+    | function_call                 continuation*
     | function_ref
-    | function_ref_invoke (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan)*
-    | function_ref_invoke_full (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan)*
-    | json_type_function_shortcut (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan)*
-    | integration_call (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan)*
-    | choice (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan)*
-    | map_expr (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan)*
-    | filter_full_expr (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan)*
-    | where_expr (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan)*
+    | function_ref_invoke           continuation*
+    | function_ref_invoke_full      continuation*
+    | json_type_function_shortcut   continuation*
+    | io_call              continuation*
+    | choice                        continuation*
+    | map_expr                      continuation*
+    | filter_full_expr              continuation*
+    | where_expr                    continuation*
     | path_matches
-    | update_expr (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan)*
-    | build_expr (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan)*
-    | update_array_expr (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan)*
-    | loop_expr (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan)*
-    | do_while_expr (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan)*
-    | while_expr (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan)*
-    | try_catch (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan)*
-    | parentheses_expr (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan)*
+    | obj_update_expr               continuation*
+    | update_expr                   continuation*
+    | build_expr                    continuation*
+    | update_array_expr             continuation*
+    | loop_expr                     continuation*
+    | do_while_expr                 continuation*
+    | while_expr                    continuation*
+    | try_catch                     continuation*
+    | parentheses_expr              continuation*
     | throw_exception
-    | aggregate_expr (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan)*
+    | aggregate_expr                continuation*
     | flow_break
     | break_loop
     | continue_loop
@@ -87,9 +88,17 @@ expr
     | expr (AND | OR) expr
     ;
 
+continuation
+    : (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan)
+    ;
+
+continuation_with_curry
+    : (filter_expr | obj_access | obj_dynamic_access | obj_deep_scan | obj_dynamic_deep_scan | function_ref_curry)
+    ;
+
 flow_break
- : '|' expr (';' | 'End')?
- ;
+    : '|' expr (';' | 'End')?
+    ;
 
 try_catch
     : 'Try' (':' | pattern_configs)? expr 'Catch' expr (END | END_MARK | 'End:Try')
@@ -115,7 +124,7 @@ obj_access
     ;
 
 //
-// {foo, bar, baz: {foo}..foo
+// $..foo
 //
 obj_deep_scan
     : OBJ_DEEP_SCAN ID
@@ -180,6 +189,10 @@ path_matches
 
 dynamic_key_match_part
     : '.' '(' expr ')'
+    ;
+
+obj_update_expr
+    : ('Update' | '<<') (':' | pattern_configs)? json_obj+ (END | END_MARK | 'End:Update')
     ;
 
 update_expr
@@ -370,12 +383,12 @@ root_input_source
     ;
 
 // First ID = component name
-// Second ID = integration unique identifier (must be unique in a registry)
+// Second ID = io-component's unique identifier (must be unique in a registry)
 // Examples:
 //   -> out:debug:{"printValue": false} # full form with configuration
 //   -> operon:{"port": 8082}   # no identifier but configuration
 //   -> out # only component. Uses default configuration
-integration_call
+io_call
     : '->' ID ':' ID ':' json_obj
     | '->' ID ':' json_obj
     | '->' ID ':' ID
@@ -440,8 +453,16 @@ compiler_obj_config_lookup
    : ('<?config:' | '<?env:') ID '>'
    ;
 
+//
+// TODO: add support for hiding a field
+//
+//   {foo {hidden} <String>: "bar"}
+// Perhaps use literal "{hidden}" for this?
+// Another option is to use double comma "::" for hidden-option, but that's not operonic.
+//
 json_pair
-   : (STRING | ID) json_value_constraint? (':' (json_value | expr))?
+   //: (STRING | ID) json_value_constraint? (':' (json_value | expr))?
+   : (STRING | ID) json_obj? json_value_constraint? (':' (json_value | expr))?
    ;
 
 json_value_constraint
@@ -478,7 +499,7 @@ json_value
      | JSON_NULL
      | EMPTY_VALUE
      | RAW_STRING
-     | MULTILINE_PADDED_STRING
+     | MULTILINE_STRIPPED_STRING
      | MULTILINE_PADDED_LINES_STRING
      | MULTILINE_STRING
      | END_VALUE)
@@ -521,10 +542,6 @@ CURRENT_VALUE
 
 OBJ_SELF_REFERENCE
     : '_'
-    ;
-
-OBJ_ROOT_REFERENCE
-    : '_$'
     ;
 
 ROOT_VALUE
@@ -623,20 +640,27 @@ RAW_STRING
 // Initial paddings for each line are ignored.
 // The lines are concatenated and new-lines removed.
 //
-MULTILINE_PADDED_STRING
-   : '"""|' (MULTILINE_ESC | SAFECODEPOINT)* '"""'
+// NOTE: the non-greedy operator ?
+//
+MULTILINE_STRIPPED_STRING
+   : '"""|' (MULTILINE_ESC | SAFECODEPOINT)*? '"""'
    ;
 
 //
-// Initial paddings for each line are ignored.
+// Initial paddings for each line are retained.
 // The lines are concatenated and new-lines kept.
 //
+// NOTE: the non-greedy operator ?
+//
 MULTILINE_PADDED_LINES_STRING
-   : '""">' (MULTILINE_ESC | SAFECODEPOINT)* '"""'
+   : '""">' (MULTILINE_ESC | SAFECODEPOINT)*? '"""'
    ;
 
+//
+// NOTE: the non-greedy operator ?
+//
 MULTILINE_STRING
-   : '"""' (MULTILINE_ESC | SAFECODEPOINT)* '"""'
+   : '"""' (MULTILINE_ESC | SAFECODEPOINT)*? '"""'
    ;
 
 fragment ESC
@@ -644,7 +668,8 @@ fragment ESC
    ;
 
 fragment MULTILINE_ESC
-   : '\r' | '\n' | '\t' | ('\\' (["\\/bfrnt] | UNICODE))
+   : '\r' | '\n' | '\t' | '"' | ('\\' (["\\/bfrnt] | UNICODE))
+   //: '\r' | '\n' | '\t' | '"' | ('\\' (["\\/bfrnt] | UNICODE))
    ;
 
 //

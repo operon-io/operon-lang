@@ -29,14 +29,14 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class EmptyType extends OperonValue implements Node, AtomicOperonValue {
-    private static Logger log = LogManager.getLogger(EmptyType.class);
+     // no logger 
     
     public EmptyType(Statement stmnt) {
         super(stmnt);
     }
 
     public EmptyType evaluate() throws OperonGenericException {
-        log.debug("EmptyType :: Evaluate");
+        //:OFF:log.debug("EmptyType :: Evaluate");
         this.setUnboxed(true);
         return this;
     }
@@ -53,6 +53,11 @@ public class EmptyType extends OperonValue implements Node, AtomicOperonValue {
 
     @Override
     public String toYamlString(YamlFormatter yf) {
+        return "";
+    }
+
+    @Override
+    public String toTomlString(OutputFormatter ofmt) {
         return "";
     }
 

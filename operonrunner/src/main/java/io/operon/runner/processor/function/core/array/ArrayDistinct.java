@@ -39,7 +39,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class ArrayDistinct extends BaseArity0 implements Node, Arity0 {
-    private static Logger log = LogManager.getLogger(ArrayDistinct.class);
+     // no logger 
     
     public ArrayDistinct(Statement statement) {
         super(statement);
@@ -71,7 +71,7 @@ public class ArrayDistinct extends BaseArity0 implements Node, Arity0 {
                 }
             }
             array.setValues(resultList);
-            //log.debug("DISTINCT :: " + this.getStatement().getId());
+            ////:OFF:log.debug("DISTINCT :: " + this.getStatement().getId());
             return array;
         } catch (Exception e) {
             ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION", "array:" + this.getFunctionName(), e.getMessage());

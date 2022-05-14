@@ -47,7 +47,7 @@ import org.apache.logging.log4j.LogManager;
  *  
  */ 
 public class Map extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(Map.class); 
+     // no logger  
 
     private Node mapExpr; // i.e. "[1,2,3] Map map_expr End" (here the mapExpr is the map_expr)
 
@@ -78,7 +78,7 @@ public class Map extends AbstractNode implements Node {
             try {
                 result = this.handleObject(result, info);
             } catch (IOException | ClassNotFoundException e) {
-                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "MAP", "OBJECT", e.getMessage());
+                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "MAP", "OBJECT", e.getMessage() + ", line #" + this.getSourceCodeLineNumber());
             }
         }
         else if (result instanceof StreamValue) {
@@ -92,7 +92,7 @@ public class Map extends AbstractNode implements Node {
         }
         else {
             //System.out.println(">> CV=error cannot iterate");
-            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "MAP", "ITERATE", "Map: cannot iterate the value.");
+            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "MAP", "ITERATE", "Map: cannot iterate the value, line #" + this.getSourceCodeLineNumber());
         }
         
         this.getStatement().getPreviousStatement().setCurrentValue(result);
@@ -251,7 +251,7 @@ public class Map extends AbstractNode implements Node {
                     k = i;
                 }
                 Node arrayValue = arrayValues.get(k);
-                //log.debug("    >> MAP OP i=["  + i + "], arrayValue :: "+ arrayValue); 
+                ////:OFF:log.debug("    >> MAP OP i=["  + i + "], arrayValue :: "+ arrayValue); 
         
                 if ((arrayValue instanceof OperonValue) == false) {
                     arrayValue = arrayValue.getEvaluatedValue();
@@ -415,6 +415,7 @@ public class Map extends AbstractNode implements Node {
     }
 
     public OperonValue handleObject(OperonValue currentValueCopy, Info info) throws OperonGenericException, IOException, ClassNotFoundException {
+        //System.out.println("Map :: handleObject");
         ObjectType jsonObj = (ObjectType) currentValueCopy;
         List<PairType> pairs = jsonObj.getPairs();
         
@@ -427,17 +428,26 @@ public class Map extends AbstractNode implements Node {
             int k = 0; // this is used as index to get the value. "i" is not used as it is used to calculate the "k" based on direction.
             //System.out.println("parallel was false");
             
-            //
-            // FIXME: this gets reset somewhere ---> is some problem with Arrays? Require test.
-            //
             Path prevPath = null;
             Path resetPath = new Path(this.getStatement());
             if (this.getStatement().getPreviousStatement() != null) {
                 Statement prevStmt = this.getStatement().getPreviousStatement();
-                prevPath = prevStmt.getCurrentPath();
-                resetPath = prevPath.copy();
-                resetPath.setObjLink(prevPath.getObjLink());
+                Path prevCurrentPath = (Path) prevStmt.getCurrentPath();
+                PathPart pp = new PosPathPart(k + 1);
+                Path newPath = new Path(this.getStatement());
+                newPath.setObjLink(prevCurrentPath.getObjLink());
+                newPath = (Path) prevCurrentPath.copy();
+                newPath.getPathParts().add(pp);
+                this.getStatement().setCurrentPath(newPath);
             }
+            else {
+                PathPart pp = new PosPathPart(k + 1);
+                Path newPath = new Path(this.getStatement());
+                newPath.getPathParts().add(pp);
+                newPath.setObjLink(currentValueCopy);
+                this.getStatement().setCurrentPath(newPath);
+            }
+            //System.out.println(">> start for");
             for (int i = 0; i < pairs.size(); i ++) {
                 //
                 // Reset prevPath
@@ -466,7 +476,7 @@ public class Map extends AbstractNode implements Node {
                     pairOperonValue = pairObj;
                 }
                 
-                //log.debug("    >> MAP OP k=["  + k + "], pairOperonValue :: "+ pairOperonValue); 
+                ////:OFF:log.debug("    >> MAP OP k=["  + k + "], pairOperonValue :: "+ pairOperonValue); 
                 //System.out.println("    >> MAP OP k=["  + k + "], pairOperonValue :: "+ pairOperonValue); 
                 
                 //System.out.println(">> Map, add attributes");
@@ -577,7 +587,7 @@ public class Map extends AbstractNode implements Node {
                         c.setValueToEvaluateAgainst((OperonValue) mapExprResult); 
                         OperonValue constraintResult = (OperonValue) c.evaluate(); 
                         if (constraintResult instanceof FalseType) {
-                            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "CONSTRAINT", "VIOLATION", "Field: " + pair.getKey().substring(1, pair.getKey().length() - 1));
+                            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "CONSTRAINT", "VIOLATION", "Field: " + pair.getKey().substring(1, pair.getKey().length() - 1) + ", line #" + this.getSourceCodeLineNumber());
                         } 
                         resultPair.setOperonValueConstraint(c); 
                     } 
@@ -628,7 +638,7 @@ public class Map extends AbstractNode implements Node {
                     try {
                         PairType pair = (PairType) pwi.value;
                         int i = pwi.index;
-                        //log.debug("    >> MAP OP i=["  + i + "], arrayValue :: "+ arrayValue); 
+                        ////:OFF:log.debug("    >> MAP OP i=["  + i + "], arrayValue :: "+ arrayValue); 
                         OperonValue pairOperonValue = (OperonValue) pair.getValue();
 
                         //pairOperonValue.getStatement().getRuntimeValues().put("_", jsonObj);
@@ -659,7 +669,7 @@ public class Map extends AbstractNode implements Node {
                             c.setValueToEvaluateAgainst((OperonValue) mapExprResult); 
                             OperonValue constraintResult = (OperonValue) c.evaluate(); 
                             if (constraintResult instanceof FalseType) { 
-                                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "CONSTRAINT", "VIOLATION", "Field: " + pair.getKey().substring(1, pair.getKey().length() - 1));
+                                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "CONSTRAINT", "VIOLATION", "Field: " + pair.getKey().substring(1, pair.getKey().length() - 1) + ", line #" + this.getSourceCodeLineNumber());
                             } 
                             resultPair.setOperonValueConstraint(c); 
                         } 
@@ -701,7 +711,7 @@ public class Map extends AbstractNode implements Node {
 
     public StringType handleString(OperonValue currentValueCopy, Info info) throws OperonGenericException {
         StringType jsonString = (StringType) currentValueCopy; 
-        //log.debug("    >> MAP OP lhsResult :: " + lhsResult); 
+        ////:OFF:log.debug("    >> MAP OP lhsResult :: " + lhsResult); 
         char [] chars = jsonString.getJavaStringValue().toCharArray(); 
          
         StringBuilder sb = new StringBuilder();
@@ -786,9 +796,9 @@ public class Map extends AbstractNode implements Node {
             }
         }
         else {
-            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "PARALLEL", "TYPE", "String cannot be mapped in parallel");
+            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "PARALLEL", "TYPE", "String cannot be mapped in parallel, line #" + this.getSourceCodeLineNumber());
         }
-        //log.debug("RESULT >> " + resultString);
+        ////:OFF:log.debug("RESULT >> " + resultString);
         StringType result = new StringType(this.getStatement()); 
         result.setFromJavaString(sb.toString()); 
         return result;
@@ -802,13 +812,13 @@ public class Map extends AbstractNode implements Node {
         Node mapExpression = this.getMapExpr();
         StreamValueWrapper svw = it.getStreamValueWrapper();
         if (svw == null) {
-            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "Map", "Stream", "Stream is not correctly wrapped.");
+            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "Map", "Stream", "Stream is not correctly wrapped, line #" + this.getSourceCodeLineNumber());
         }
         
         ArrayType resultArray = new ArrayType(this.getStatement());
         
         if (svw.supportsJson()) {
-            log.debug("Stream supportsJson");
+            //:OFF:log.debug("Stream supportsJson");
             OperonValue nextValue = null;
             int i = 0;
             do {
@@ -853,7 +863,7 @@ public class Map extends AbstractNode implements Node {
         
         else {
             System.out.println("Map: Stream does NOT support Json");
-            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "Map", "Stream", "Stream is not JSON-iterable.");
+            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "Map", "Stream", "Stream is not JSON-iterable, line #" + this.getSourceCodeLineNumber());
         }
         return resultArray;
     }

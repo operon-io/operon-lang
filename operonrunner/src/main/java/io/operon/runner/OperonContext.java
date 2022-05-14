@@ -60,7 +60,7 @@ import org.apache.logging.log4j.LogManager;
  * 
  */
 public class OperonContext extends BaseContext implements Context, java.io.Serializable {
-    private static Logger log = LogManager.getLogger(OperonContext.class);
+     // no logger 
 
     private FromStatement fromStatement;
     private SelectStatement selectStatement;
@@ -93,10 +93,11 @@ public class OperonContext extends BaseContext implements Context, java.io.Seria
     public static EmptyContext emptyContext = new EmptyContext();
     
     private static transient ExecutorService signalingExecutorService;
+    public boolean hasHeartbeat = false;
     
     public OperonContext() throws IOException {
         super();
-        log.debug("create OperonContext");
+        //:OFF:log.debug("create OperonContext");
         
         this.setExceptionStatement(new DefaultStatement(this));
         this.getExceptionStatement().setId("ErrorStatement");
@@ -121,7 +122,7 @@ public class OperonContext extends BaseContext implements Context, java.io.Seria
     }
 
     public void start(OperonContextManager.ContextStrategy contextStrategy) {
-        log.debug("OperonContext :: start()");
+        //:OFF:log.debug("OperonContext :: start()");
         this.shutdown = false;
         
         //
@@ -152,26 +153,30 @@ public class OperonContext extends BaseContext implements Context, java.io.Seria
                 NumberType heartBeatNumber = (NumberType) configs.getByKey("heartBeat").evaluate();
                 long heartBeatLong = (long) heartBeatNumber.getDoubleValue();
                 System.out.println("  - interval: " + heartBeatLong);
-                //
-                // TODO: start background Thread, which creates HeartBeatSignal
-                //       with the given interval.
-                //
-                signalingExecutorService = Executors.newFixedThreadPool(3);
                 this.registerHeartBeat(heartBeatLong);
+                this.hasHeartbeat = true;
             }
             
             isd.start(ocm);
         } catch (Exception e) {
-            log.debug("OperonContext :: start() Exception");
+            //:OFF:log.debug("OperonContext :: start() Exception");
             System.err.println("ERROR SIGNAL: " + e.getMessage());
             throw new RuntimeException("ERROR SIGNAL " + e.getMessage());
         }
     }
     
     public void registerHeartBeat(long duration) {
+        //System.out.println("  - register signal-service, duration=" + duration);
         SignalService sigServ = new SignalService(this, duration);
+        if (signalingExecutorService == null) {
+            //
+            // Start background Thread, which creates HeartBeatSignal
+            // with the given interval.
+            //
+            signalingExecutorService = Executors.newFixedThreadPool(3);
+        }
         signalingExecutorService.submit(sigServ);
-        System.out.println("  - signal service registered");
+        //System.out.println("  - signal service registered");
     }
 
     //
@@ -249,12 +254,14 @@ public class OperonContext extends BaseContext implements Context, java.io.Seria
     }
     
     public OperonValue evaluateSelectStatement() throws OperonGenericException {
-        log.debug("OperonContext :: ENTER SELECT.EVALUATE()");
+        //:OFF:log.debug("OperonContext :: ENTER SELECT.EVALUATE()");
         assert (selectStatement != null): "Context :: evaluateSelectStatement, selectStatement was null.";
         
         this.setIsReady(false, "SelectStmt");
         this.setException(null);
         long startTime = System.nanoTime();
+        
+        //System.out.println("Configs: " + this.getConfigs());
         
         OperonValue currentValue = this.getFromStatement().getRuntimeValues().get("$");
         assert(currentValue != null): "Context :: evaluateSelectStatement, initial-value was null.";
@@ -349,12 +356,12 @@ public class OperonContext extends BaseContext implements Context, java.io.Seria
             result = this.getSelectStatement().evaluate(); // possible constraint is checked in SelectStatement.
             //System.out.println("Evaluate selectStatement :: ready to output result");
         } catch (BreakSelect b) {
-            log.debug("Evaluate selectStatement :: BreakSelect");
+            //:OFF:log.debug("Evaluate selectStatement :: BreakSelect");
             //System.out.println("Evaluate selectStatement :: breaked :: " + b.getBreakType());
             this.synchronizeState();
             long stopTime = System.nanoTime();
             long elapsedTime = stopTime - startTime;
-            log.debug("Execution time: " + elapsedTime + " ns (" + elapsedTime / 1000000 + " ms.)");
+            //:OFF:log.debug("Execution time: " + elapsedTime + " ns (" + elapsedTime / 1000000 + " ms.)");
             if (b.getBreakType() == (short) 0) {
                 result = new EmptyType(this.getSelectStatement());
             }
@@ -362,7 +369,7 @@ public class OperonContext extends BaseContext implements Context, java.io.Seria
                 result = b.getOperonValueOnBreak();
             }
             this.setIsReady(true, "SelectStmt breakSelect");
-            log.debug("Evaluate selectStatement :: BreakSelect done");
+            //:OFF:log.debug("Evaluate selectStatement :: BreakSelect done");
             return result;
         } catch (BreakLoopException ble) {
             StringType err = new StringType(this.getSelectStatement());
@@ -378,26 +385,26 @@ public class OperonContext extends BaseContext implements Context, java.io.Seria
             //System.out.println("OperonContext :: Evaluate selectStatement :: an error occured :: " + e.getErrorValue());
             //System.out.println("OperonContext :: Evaluate selectStatement :: an error occured :: " + e.getMessage());
             //System.out.println("OperonContext :: Evaluate selectStatement :: an error occured :: " + e.getErrorJson());
-            log.debug("Evaluate selectStatement :: an error occured");
-            log.debug("  Evaluate selectStatement :: error :: " + e);
+            //:OFF:log.debug("Evaluate selectStatement :: an error occured");
+            //:OFF:log.debug("  Evaluate selectStatement :: error :: " + e);
             result = handleExceptionCatch(e);
             this.setIsReady(true, "SelectStmt :: exception");
         } catch (RuntimeException e) {
-            log.debug("Evaluate selectStatement :: RuntimeException");
+            //:OFF:log.debug("Evaluate selectStatement :: RuntimeException");
             System.err.println("RuntimeException :: " + e);
             StringType err = new StringType(this.getSelectStatement());
             err.setFromJavaString(e.getMessage().replaceAll("\"", "\\\\\""));
             OperonGenericException oge = new OperonGenericException(err);
             result = handleExceptionCatch(oge);
             this.setIsReady(true, "SelectStmt :: exception");
-            log.debug("Evaluate selectStatement :: RuntimeException handled");
+            //:OFF:log.debug("Evaluate selectStatement :: RuntimeException handled");
         }
         
         this.synchronizeState();
         
         long stopTime = System.nanoTime();
         long elapsedTime = stopTime - startTime;
-        log.debug("Execution time: " + elapsedTime + " ns (" + elapsedTime / 1000000 + " ms.)");
+        //:OFF:log.debug("Execution time: " + elapsedTime + " ns (" + elapsedTime / 1000000 + " ms.)");
         if (this.getConfigs().getPrintDuration()) {
             System.out.println("Execution time: " + elapsedTime + " ns (" + elapsedTime / 1000000 + " ms.)");
         }
@@ -412,7 +419,7 @@ public class OperonContext extends BaseContext implements Context, java.io.Seria
     // This is the global error-handler.
     //
     public OperonValue handleExceptionCatch(OperonGenericException e) {
-        log.debug("OperonContext :: handleExceptionCatch()");
+        //:OFF:log.debug("OperonContext :: handleExceptionCatch()");
         this.setException(e);
         if (e.getErrorValue() != null) {
             //System.out.println("handleExceptionCatch :: " + e.getErrorValue());
@@ -422,7 +429,7 @@ public class OperonContext extends BaseContext implements Context, java.io.Seria
         OperonValue errorHandlingResult = null;
         
         if (this.getExceptionHandler() != null) {
-            log.debug("OperonContext :: handleExceptionCatch() Global HandleError");
+            //:OFF:log.debug("OperonContext :: handleExceptionCatch() Global HandleError");
             //
             // set exception for ExceptionHandler, which can be used to extract context-information;
             //
@@ -434,7 +441,7 @@ public class OperonContext extends BaseContext implements Context, java.io.Seria
         else {
             errorHandlingResult = e.getErrorValue();
         }
-        log.debug("OperonContext :: handleExceptionCatch() done");
+        //:OFF:log.debug("OperonContext :: handleExceptionCatch() done");
         return errorHandlingResult;
     }
     
@@ -450,11 +457,11 @@ public class OperonContext extends BaseContext implements Context, java.io.Seria
     // TODO: create class for output (Producer)
     //
     public void outputResult(OperonValue result) throws OperonGenericException {
-        log.debug("=== RESULT ===");
+        //:OFF:log.debug("=== RESULT ===");
         //System.out.println("--- OUTPUT SELECT RESULT --- :: " + result);
         long startTime = System.nanoTime();
         
-        //log.debug(result);
+        ////:OFF:log.debug(result);
         
         if (this.getException() == null) {
             this.setOutputOperonValue(result);
@@ -576,19 +583,19 @@ public class OperonContext extends BaseContext implements Context, java.io.Seria
         
         long stopTime = System.nanoTime();
         long elapsedTime = stopTime - startTime;
-        log.debug("Result printing time: " + elapsedTime + " ns (" + elapsedTime / 1000000 + " ms.)");
+        //:OFF:log.debug("Result printing time: " + elapsedTime + " ns (" + elapsedTime / 1000000 + " ms.)");
     }
     
     public void outputError() {
-        log.debug("OperonContext :: outputError()");
+        //:OFF:log.debug("OperonContext :: outputError()");
         if (this.getException() != null) {
-            log.debug("OperonContext :: outputError() getExceptionHandler()");
+            //:OFF:log.debug("OperonContext :: outputError() getExceptionHandler()");
             System.err.println("Error JSON :: " + this.getException().getErrorJson());
             System.err.println("  - Exception :: " + this.getException());
             System.err.println("  - Value :: " + this.getErrorValue());
         }
         else {
-            log.debug("OperonContext :: outputError() else");
+            //:OFF:log.debug("OperonContext :: outputError() else");
         }
     }
     
@@ -605,24 +612,28 @@ public class OperonContext extends BaseContext implements Context, java.io.Seria
         return "---" + System.lineSeparator() + value.toYamlString(null);
     }
     
+    public static String serializeAsToml(OperonValue value) throws OperonGenericException {
+        return value.toTomlString(null);
+    }
+    
     private OperonValue handleError(OperonGenericException oge) {
-        log.debug("OperonContext :: handleError()");
+        //:OFF:log.debug("OperonContext :: handleError()");
         OperonValue result = null;
         try {
             if (this.getExceptionHandler() != null) {
-                log.debug("OperonContext :: handleError() getExceptionHandler()");
+                //:OFF:log.debug("OperonContext :: handleError() getExceptionHandler()");
                 this.getExceptionHandler().setException(oge);
                 result = this.getExceptionHandler().evaluate(oge);
                 this.setOutputOperonValue(result);
             }
             else {
-                log.debug("No error handler defined");
+                //:OFF:log.debug("No error handler defined");
             }
         } catch (OperonGenericException newOge) {
-            log.debug("OperonContext :: handleError() OperonGenericException");
+            //:OFF:log.debug("OperonContext :: handleError() OperonGenericException");
             this.setException(newOge);
         } catch (Exception e) {
-            log.debug("OperonContext :: handleError() Exception");
+            //:OFF:log.debug("OperonContext :: handleError() Exception");
             String msg = null;
             if (e.getMessage() != null) {
                 msg = e.getMessage();
@@ -636,7 +647,7 @@ public class OperonContext extends BaseContext implements Context, java.io.Seria
             this.printStackTrace();
         }
         //System.out.println("RETURNING RESULT: " + result);
-        log.debug("OperonContext :: handleError() done");
+        //:OFF:log.debug("OperonContext :: handleError() done");
         return result;
     }
 

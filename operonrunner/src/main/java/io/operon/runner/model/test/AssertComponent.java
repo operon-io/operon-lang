@@ -31,7 +31,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class AssertComponent {
-    private static Logger log = LogManager.getLogger(AssertComponent.class);
+     // no logger 
     
     private String componentNamespace; // I.e. in which module this is defined in
     private String componentName; // The first ID of form ID ':' ID

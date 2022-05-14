@@ -70,7 +70,7 @@ import org.apache.logging.log4j.LogManager;
 
 
 public class Keyboard {
-    private static Logger log = LogManager.getLogger(Keyboard.class);
+     // no logger 
 
     private Robot r;
     private Locale locale;

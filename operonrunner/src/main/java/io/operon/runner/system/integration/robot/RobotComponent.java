@@ -74,7 +74,7 @@ import org.apache.logging.log4j.LogManager;
 
 
 public class RobotComponent extends BaseComponent implements IntegrationComponent {
-    private static Logger log = LogManager.getLogger(RobotComponent.class);
+     // no logger 
 
     private Robot r;
 
@@ -229,7 +229,7 @@ public class RobotComponent extends BaseComponent implements IntegrationComponen
                     info.mousebutton = (int) mouseButton;
                     break;
                 default:
-                    log.debug("robot -producer: no mapping for configuration key: " + key);
+                    //:OFF:log.debug("robot -producer: no mapping for configuration key: " + key);
                     System.err.println("robot -producer: no mapping for configuration key: " + key);
                     ErrorUtil.createErrorValueAndThrow(currentValue.getStatement(), "ROBOT", "ERROR", "robot -producer: no mapping for configuration key: " + key);
             }

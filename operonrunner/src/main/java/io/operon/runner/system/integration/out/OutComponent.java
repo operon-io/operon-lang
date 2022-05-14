@@ -57,7 +57,7 @@ import org.apache.logging.log4j.LogManager;
 
 
 public class OutComponent extends BaseComponent implements IntegrationComponent {
-    private static Logger log = LogManager.getLogger(OutComponent.class);
+     // no logger 
 
     public OutComponent() {}
     
@@ -239,7 +239,7 @@ public class OutComponent extends BaseComponent implements IntegrationComponent 
                     }
                     break;
                 default:
-                    log.debug("out -producer: no mapping for configuration key: " + key);
+                    //:OFF:log.debug("out -producer: no mapping for configuration key: " + key);
                     System.err.println("out -producer: no mapping for configuration key: " + key);
                     ErrorUtil.createErrorValueAndThrow(currentValue.getStatement(), "OUT", "ERROR", "out -producer: no mapping for configuration key: " + key);
             }

@@ -138,15 +138,15 @@ public class QueryCommand implements MainCommand {
             
             if (streamLines == false) {
                 do {
-                   try {
+                    try {
                         dataInput = f.readLine();
-                     if (dataInput != null) {
-                         sb.append(dataInput + System.getProperty("line.separator"));
-                     }
-                   } catch (IOException e) {
-                       System.err.println("ERROR SIGNAL while reading inputstream");
-                       return 1;
-                   }
+                        if (dataInput != null) {
+                            sb.append(dataInput + System.getProperty("line.separator"));
+                        }
+                    } catch (IOException e) {
+                        System.err.println("ERROR SIGNAL while reading inputstream");
+                        return 1;
+                    }
                 } while (dataInput != null);
     
                 OperonValue initialValue = null;

@@ -18,6 +18,7 @@ package io.operon.runner.processor.binary;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Formatter;
 
 import io.operon.runner.node.Node;
 import io.operon.runner.node.type.*;
@@ -25,6 +26,9 @@ import io.operon.runner.processor.BaseBinaryNodeProcessor;
 import io.operon.runner.processor.BinaryNodeProcessor;
 import io.operon.runner.processor.binary.logical.Eq;
 import io.operon.runner.processor.function.core.path.PathReclude;
+import io.operon.runner.processor.function.core.path.PathValue;
+import io.operon.runner.processor.function.core.raw.RawEvaluate;
+import io.operon.runner.processor.function.core.string.StringToRaw;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
@@ -40,7 +44,8 @@ public class Modulus extends BaseBinaryNodeProcessor implements BinaryNodeProces
 
     public OperonValue process(Statement statement, Node lhs, Node rhs) throws OperonGenericException {
         this.preprocess(statement, lhs, rhs);
-        
+        //System.out.println("LHS: " + lhsResult.getClass().getName());
+        //System.out.println("RHS: " + rhsResult.getClass().getName());
         if ( customBindingCheck(lhs, rhs, binaryOperator) ) {
             return doCustomBinding(statement, lhs, rhs, binaryOperator);
         }
@@ -206,14 +211,323 @@ public class Modulus extends BaseBinaryNodeProcessor implements BinaryNodeProces
             return result;
         }
         
+        // 
+        // "Foo %s" % "Bar"
+        // #> "Foo Bar"
+        // 
+        else if (lhsResult instanceof StringType && rhsResult instanceof StringType) {
+            StringType lhsString = (StringType) lhsResult;
+            StringType rhsString = (StringType) rhsResult;
+            String lhsStringValue = lhsString.getJavaStringValue();
+            String rhsStringValue = rhsString.getJavaStringValue();
+            Formatter fmt = new Formatter(NumberType.defaultLocale);
+            lhsStringValue = fmt.format(lhsStringValue, rhsStringValue).toString();
+            StringType result = StringType.create(statement, lhsStringValue);
+            return result;
+        }
+        
+        // 
+        // `Foo %s` % "Bar"
+        // #> Foo Bar
+        // 
+        else if (lhsResult instanceof RawValue && rhsResult instanceof StringType) {
+            RawValue lhsRaw = (RawValue) lhsResult;
+            StringType rhsString = (StringType) rhsResult;
+            String lhsStringValue = lhsRaw.toRawString();
+            String rhsStringValue = rhsString.getJavaStringValue();
+            Formatter fmt = new Formatter(NumberType.defaultLocale);
+            lhsStringValue = fmt.format(lhsStringValue, rhsStringValue).toString();
+            RawValue result = RawValue.createFromString(statement, lhsStringValue);
+            return result;
+        }
+        
+        // 
+        // `Foo %s` % `Bar`
+        // #> Foo Bar
+        // 
+        else if (lhsResult instanceof RawValue && rhsResult instanceof RawValue) {
+            RawValue lhsRaw = (RawValue) lhsResult;
+            RawValue rhsRaw = (RawValue) rhsResult;
+            String lhsStringValue = lhsRaw.toRawString();
+            String rhsStringValue = rhsRaw.toRawString();
+            Formatter fmt = new Formatter(NumberType.defaultLocale);
+            lhsStringValue = fmt.format(lhsStringValue, rhsStringValue).toString();
+            RawValue result = RawValue.createFromString(statement, lhsStringValue);
+            return result;
+        }
+        
+        // 
+        // "Foo %s" % `Bar`
+        // #> "Foo Bar"
+        // 
+        else if (lhsResult instanceof StringType && rhsResult instanceof RawValue) {
+            StringType lhsString = (StringType) lhsResult;
+            RawValue rhsRaw = (RawValue) rhsResult;
+            String lhsStringValue = lhsString.getJavaStringValue();
+            String rhsStringValue = rhsRaw.toRawString();
+            Formatter fmt = new Formatter(NumberType.defaultLocale);
+            lhsStringValue = fmt.format(lhsStringValue, rhsStringValue).toString();
+            StringType result = StringType.create(statement, lhsStringValue);
+            return result;
+        }
+        
+        // 
+        // :"Foo %s %s" % ["Bin", "Bai"]
+        // #> "Foo Bin Bai"
+        //
+        // :"%s,age=%.0f" % ["Foo", 9]
+        // #> "Foo,age=9"
+        //
+        else if (lhsResult instanceof StringType && rhsResult instanceof ArrayType) {
+            StringType lhsString = (StringType) lhsResult;
+            ArrayType rhsArray = (ArrayType) rhsResult;
+            String lhsStringValue = lhsString.getJavaStringValue();
+            
+            List<Object> items = new ArrayList<Object>();
+            
+            for (int i = 0; i < rhsArray.getValues().size(); i ++) {
+                OperonValue value = rhsArray.getValues().get(i).evaluate();
+                
+                if (value instanceof StringType) {
+                    items.add(((StringType) value).getJavaStringValue());
+                }
+                else if (value instanceof RawValue) {
+                    items.add(((RawValue) value).toRawString());
+                }
+                else if (value instanceof NumberType) {
+                    items.add(((NumberType) value).getDoubleValue());
+                }
+            }
+            Formatter fmt = new Formatter(NumberType.defaultLocale);
+            Object [] fmtParams = items.toArray();
+            lhsStringValue = fmt.format(lhsStringValue, fmtParams).toString();
+            StringType result = StringType.create(statement, lhsStringValue);
+            return result;
+        }
+        
+        // 
+        // :`Foo %s %s` % ["Bin", `Bai`]
+        // #> Foo Bin Bai
+        //
+        // :`%s,age=%.0f` % ["Foo", 9]
+        // #> Foo,age=9
+        //
+        else if (lhsResult instanceof RawValue && rhsResult instanceof ArrayType) {
+            RawValue lhsRaw = (RawValue) lhsResult;
+            ArrayType rhsArray = (ArrayType) rhsResult;
+            String lhsStringValue = lhsRaw.toRawString();
+            
+            List<Object> items = new ArrayList<Object>();
+            
+            for (int i = 0; i < rhsArray.getValues().size(); i ++) {
+                OperonValue value = rhsArray.getValues().get(i).evaluate();
+                
+                if (value instanceof StringType) {
+                    items.add(((StringType) value).getJavaStringValue());
+                }
+                else if (value instanceof RawValue) {
+                    items.add(((RawValue) value).toRawString());
+                }
+                else if (value instanceof NumberType) {
+                    items.add(((NumberType) value).getDoubleValue());
+                }
+            }
+            Formatter fmt = new Formatter(NumberType.defaultLocale);
+            Object [] fmtParams = items.toArray();
+            lhsStringValue = fmt.format(lhsStringValue, fmtParams).toString();
+            RawValue result = RawValue.createFromString(statement, lhsStringValue);
+            return result;
+        }
+        
+        // 
+        // "PI=%0.2f" % 3.141592
+        // #> "PI=3.14"
+        // 
+        else if (lhsResult instanceof StringType && rhsResult instanceof NumberType) {
+            StringType lhsString = (StringType) lhsResult;
+            NumberType rhsNumber = (NumberType) rhsResult;
+            String lhsStringValue = lhsString.getJavaStringValue();
+            double rhsNumberValue = (double) rhsNumber.getDoubleValue();
+            Formatter fmt = new Formatter(NumberType.defaultLocale);
+            lhsStringValue = fmt.format(lhsStringValue, rhsNumberValue).toString();
+            StringType result = StringType.create(statement, lhsStringValue);
+            
+            return result;
+        }
+        
+        // 
+        // `PI=%0.2f` % 3.141592
+        // #> `PI=3.14`
+        // 
+        else if (lhsResult instanceof RawValue && rhsResult instanceof NumberType) {
+            RawValue lhsRaw = (RawValue) lhsResult;
+            NumberType rhsNumber = (NumberType) rhsResult;
+            String lhsStringValue = lhsRaw.toRawString();
+            double rhsNumberValue = (double) rhsNumber.getDoubleValue();
+            Formatter fmt = new Formatter(NumberType.defaultLocale);
+            lhsStringValue = fmt.format(lhsStringValue, rhsNumberValue).toString();
+            RawValue result = RawValue.createFromString(statement, lhsStringValue);
+            
+            return result;
+        }
+        
+        //
+        // Automatically extract the keys
+        // 
+        else if (lhsResult instanceof StringType && rhsResult instanceof ObjectType) {
+            String lhsStringValue = interpolateStringWithObj(
+                statement, ((StringType) lhsResult).getJavaStringValue(), (ObjectType) rhsResult, lhs, rhs, true
+            );
+            StringType result = StringType.create(statement, lhsStringValue);
+            return result;
+        }
+        
+        else if (lhsResult instanceof RawValue && rhsResult instanceof ObjectType) {
+            String lhsStringValue = interpolateStringWithObj(
+                statement, ((RawValue) lhsResult).toRawString(), (ObjectType) rhsResult, lhs, rhs, false
+            );
+            RawValue result = RawValue.createFromString(statement, lhsStringValue);
+            return result;
+        }
+        
         else {
-            log.error("INCOMPATIBLE TYPES: " + lhsResult.getClass() + ", " + rhsResult.getClass());
+            //:OFF:log.error("INCOMPATIBLE TYPES: " + lhsResult.getClass() + ", " + rhsResult.getClass());
             
             String lhsType = ErrorUtil.mapTypeFromJavaClass(lhsResult);
             String rhsType = ErrorUtil.mapTypeFromJavaClass(rhsResult);
-            return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "MODULUS", "Not defined: " + lhsType + " " + binaryOperator + " " + rhsType);
+            return ErrorUtil.createErrorValueAndThrow(statement,
+                "OPERATOR", 
+                "MODULUS", 
+                "Not defined: " + lhsType + " " + binaryOperator + " " + rhsType +
+                    ", at line #" + this.getSourceCodeLineNumber() +
+                    ". lhs value: " + lhs.toString() + ", rhs value: " + rhs.toString()
+            );
         }
         
     }
 
+    private String interpolateStringWithObj(Statement statement, String lhsStringValue,
+            ObjectType rhsObject, Node lhs, Node rhs, boolean unescapeExpr) throws OperonGenericException {
+        //StringType lhsString = (StringType) lhsResult;
+        //ObjectType rhsObject = (ObjectType) rhsResult;
+        //String lhsStringValue = lhsString.getJavaStringValue();
+        
+        List<Object> items = new ArrayList<Object>();
+        
+        // PARAM-STRING:
+        // "Foo %s:key1; %f:key2;"
+        
+        // First seek the key candidates
+        
+        boolean extractMode = false;
+        boolean fmtMode = false;
+        boolean exprMode = false;
+        
+        String extractedKey = "";
+        String extractedFmt = "";
+        String extractedExpr = "";
+        String channel = "";
+        
+        StringBuilder resultStr = new StringBuilder();
+        for (int i = 0; i < lhsStringValue.length(); i ++) {
+            if (lhsStringValue.charAt(i) == '%') {
+                fmtMode = true; // start to collect the formatting option
+            }
+            // Collect the formatting option, e.g. "%s" or "%.2f"
+            else if (fmtMode && lhsStringValue.charAt(i) == ':') {
+                fmtMode = false;
+                extractMode = true;
+                channel += lhsStringValue.charAt(i);
+                continue;
+            }
+            // Collect the optional expr, for which the value will be
+            // evaluated against
+            else if (extractMode && lhsStringValue.charAt(i) == ':') {
+                fmtMode = false;
+                extractMode = false;
+                exprMode = true;
+                channel += lhsStringValue.charAt(i);
+                continue;
+            }
+            else if ((extractMode || exprMode) && lhsStringValue.charAt(i) == ';') {
+                extractMode = false;
+                exprMode = false;
+                
+                //System.out.println("fmt=" + extractedFmt);
+                //System.out.println("expr=" + extractedExpr);
+                
+                //
+                // Convert extractedKey into PathValue and use that to access the value
+                // If does not start with "." or "[", then assume that accesses a field,
+                // and append with "."
+                //
+                if (extractedKey.startsWith(".") == false && extractedKey.startsWith("[") == false) {
+                    extractedKey = "." + extractedKey;
+                }
+                //System.out.println("KEY :: " + extractedKey);
+                OperonValue value = PathValue.get(rhsObject, extractedKey);
+                
+                if (extractedExpr.isEmpty() == false) {
+                    try {
+                        if (unescapeExpr) {
+                            extractedExpr = StringToRaw.unescapeString(extractedExpr);
+                        }
+                        value = RawEvaluate.evaluate(statement, extractedExpr, value);
+                    } catch (Exception e) {
+                        String lhsType = ErrorUtil.mapTypeFromJavaClass(lhsResult);
+                        String rhsType = ErrorUtil.mapTypeFromJavaClass(rhsResult);
+                        ErrorUtil.createErrorValueAndThrow(statement,
+                            "OPERATOR", 
+                            "MODULUS", 
+                            "String-templating" +
+                                ", at line #" + this.getSourceCodeLineNumber() +
+                                ". Input value: " + value.toString() +
+                                ". Unable to compile expression: " + extractedExpr
+                        );
+                    }
+                }
+                
+                // Next line left here as commented, until the related Bug has been resolved
+                // OperonValue value = rhsObject.getByKey(extractedKey).evaluate();
+
+                Formatter fmt = new Formatter(NumberType.defaultLocale);
+                
+                // TODO: check the kind of extractedFmt that matches the type?
+                if (value instanceof StringType) {
+                    resultStr.append(fmt.format(extractedFmt, ((StringType) value).getJavaStringValue()).toString());
+                }
+                else if (value instanceof NumberType) {
+                    resultStr.append(fmt.format(extractedFmt, ((NumberType) value).getDoubleValue()).toString());
+                }
+                extractedFmt = "";
+                extractedKey = "";
+                extractedExpr = "";
+                channel = "";
+                continue;
+            }
+            if (extractMode) {
+                extractedKey += lhsStringValue.charAt(i);
+                channel += lhsStringValue.charAt(i);
+            }
+            else if (fmtMode) {
+                extractedFmt += lhsStringValue.charAt(i);
+                channel += lhsStringValue.charAt(i);
+            }
+            else if (exprMode) {
+                extractedExpr += lhsStringValue.charAt(i);
+                channel += lhsStringValue.charAt(i);
+            }
+            else {
+                resultStr.append(lhsStringValue.charAt(i));
+            }
+        }
+
+        // If not terminated with ";"
+        if (channel.length() > 0) {
+            resultStr.append(channel);
+        }
+
+        lhsStringValue = resultStr.toString();
+        return lhsStringValue;
+    }
 }

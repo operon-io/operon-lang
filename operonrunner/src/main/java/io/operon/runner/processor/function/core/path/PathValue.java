@@ -97,7 +97,7 @@ public class PathValue extends BaseArity0 implements Node, Arity0 {
 
     // 
     // Fetch the value of the Path, given the root-value
-    // Return EmptyValue if path has no value.
+    // @returns empty if path has no value.
     // 
     public static OperonValue get(OperonValue root, Path path) throws OperonGenericException {
         //System.out.println("Traversing path: " + path);
@@ -123,9 +123,13 @@ public class PathValue extends BaseArity0 implements Node, Arity0 {
             if (i == 0 && root instanceof ObjectType) {
                 //System.out.println(">> 1");
                 if (pathParts.get(i) instanceof KeyPathPart) {
-                    //System.out.println(">> 2");
                     String key = ((KeyPathPart) pathParts.get(i)).getKey();
-                    pathCurrentValue = ((ObjectType) root).getByKey(key);
+                    try {
+                        pathCurrentValue = ((ObjectType) root).getByKey(key);
+                    } catch (OperonGenericException oge) {
+                        // Key not found: abort
+                        break;
+                    }
                     //System.out.println("pathCurrentValue(obj)="+pathCurrentValue);
                 }
             }
@@ -133,7 +137,12 @@ public class PathValue extends BaseArity0 implements Node, Arity0 {
                 //System.out.println("pathCurrentValue="+pathCurrentValue);
                 if (pathParts.get(i) instanceof PosPathPart) {
                     int pos = ((PosPathPart) pathParts.get(i)).getPos() - 1;
-                    pathCurrentValue = (OperonValue) ((ArrayType) root).getValues().get(pos);
+                    try {
+                        pathCurrentValue = (OperonValue) ((ArrayType) root).getValues().get(pos);
+                    } catch (Exception ex) {
+                        // Index not found: abort
+                        break;
+                    }
                     //System.out.println("pathCurrentValue(array)="+pathCurrentValue);
                 }
             }
@@ -144,14 +153,24 @@ public class PathValue extends BaseArity0 implements Node, Arity0 {
                 if (pathCurrentValue instanceof ObjectType) {
                     if (pathParts.get(i) instanceof KeyPathPart) {
                         String key = ((KeyPathPart) pathParts.get(i)).getKey();
-                        pathCurrentValue = ((ObjectType) pathCurrentValue).getByKey(key);
+                        try {
+                            pathCurrentValue = ((ObjectType) pathCurrentValue).getByKey(key);
+                        } catch (OperonGenericException oge) {
+                            // Key not found: abort
+                            break;
+                        }
                         //System.out.println("after initial case: pathCurrentValue(obj)="+pathCurrentValue);
                     }
                 }
                 else if (pathCurrentValue instanceof ArrayType) {
                     if (pathParts.get(i) instanceof PosPathPart) {
                         int pos = ((PosPathPart) pathParts.get(i)).getPos() - 1;
-                        pathCurrentValue = (OperonValue) ((ArrayType) pathCurrentValue).getValues().get(pos);
+                        try {
+                            pathCurrentValue = (OperonValue) ((ArrayType) pathCurrentValue).getValues().get(pos);
+                        } catch (Exception ex) {
+                            // Index not found: abort
+                            break;
+                        }
                         //System.out.println("after initial case: pathCurrentValue(array)="+pathCurrentValue);
                     }
                 }

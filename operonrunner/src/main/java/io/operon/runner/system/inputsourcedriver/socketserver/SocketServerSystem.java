@@ -55,7 +55,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class SocketServerSystem implements InputSourceDriver {
-    private static Logger log = LogManager.getLogger(SocketServerSystem.class);
+     // no logger 
 
     private ObjectType jsonConfiguration; // optional: json-configuration for the component
     private boolean isRunning;
@@ -97,7 +97,7 @@ public class SocketServerSystem implements InputSourceDriver {
             server = new ServerSocket(info.port, info.backlogSize, address);
             handleFrame(ocm, info);
         } catch (OperonGenericException e) {
-            log.error("Exception :: " + e.toString());
+            //:OFF:log.error("Exception :: " + e.toString());
             ctx.setException(e);
         } catch (Exception ex) {
             OperonGenericException oge = new OperonGenericException(ex.getMessage());
@@ -340,7 +340,7 @@ public class SocketServerSystem implements InputSourceDriver {
     
     public void stop() {
         this.isRunning = false;
-        log.info("Stopped");
+        //:OFF:log.info("Stopped");
     }
     
     public void setJsonConfiguration(ObjectType jsonConfig) { this.jsonConfiguration = jsonConfig; }

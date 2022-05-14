@@ -34,7 +34,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class DefaultStatement extends BaseStatement implements Statement {
-    private static Logger log = LogManager.getLogger(DefaultStatement.class);
+     // no logger 
     
     public DefaultStatement(Context ctx) {
         super(ctx);
@@ -43,7 +43,7 @@ public class DefaultStatement extends BaseStatement implements Statement {
     
     public OperonValue evaluate() throws OperonGenericException {
         //System.out.println("DefaultStatement evaluate, stmt id=" + this.getId());
-        log.debug("Default-statement :: evaluate()");
+        //:OFF:log.debug("Default-statement :: evaluate()");
         OperonValue result = this.getNode().evaluate();
         this.synchronizeState();
         this.setEvaluatedValue(result);
@@ -53,7 +53,7 @@ public class DefaultStatement extends BaseStatement implements Statement {
             OperonValueConstraint c = this.getOperonValueConstraint();
             OperonValueConstraint.evaluateConstraintAgainstOperonValue(this.getEvaluatedValue(), c);
         }
-        log.debug("Default statement return :: " + this.getEvaluatedValue());
+        //:OFF:log.debug("Default statement return :: " + this.getEvaluatedValue());
         return this.getEvaluatedValue();
     }
 

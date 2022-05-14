@@ -49,7 +49,7 @@ import org.apache.logging.log4j.LogManager;
  * 
  */ 
 public class Loop extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(Loop.class); 
+     // no logger  
 
     private String valueRef;
     private Node loopExpr;
@@ -62,7 +62,7 @@ public class Loop extends AbstractNode implements Node {
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("Loop :: evaluate()");
+        //:OFF:log.debug("Loop :: evaluate()");
         assert (this.getLoopExpr() != null) : "Loop.evaluate() : loopExpr was null";
         
         OperonValue currentValue = this.getStatement().getPreviousStatement().getCurrentValue();
@@ -381,7 +381,7 @@ public class Loop extends AbstractNode implements Node {
         OperonValue result = currentValue;
         
         if (svw.supportsJson()) {
-            log.debug("Stream supportsJson");
+            //:OFF:log.debug("Stream supportsJson");
             OperonValue nextValue = null;
             do {
                 nextValue = svw.readJson();

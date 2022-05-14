@@ -262,6 +262,9 @@ public class PathMatches extends AbstractNode implements Node {
         //System.out.println("  - pathMatchPartsIndex=" + pathMatchPartsIndex);
         //System.out.println("  - pathMatchParts size=" + pathMatchParts.size());
         //System.out.println("  - pathMatchPart=" + pathMatchPart);
+        //System.out.println("  - previousWildcardAny=" + previousWildcardAny);
+        //System.out.println("  - currentWildcardAnyIndex=" + currentWildcardAnyIndex);
+        //System.out.println("  - sourcePathPart=" + sourcePathParts.get(sourceIndex));
         
         //
         // There was more path matching parts remaining (excluding '?*'), but all the source path parts were consumed:
@@ -307,6 +310,17 @@ public class PathMatches extends AbstractNode implements Node {
         //
         else if (previousWildcardAny && currentClearMatch == false) {
             //System.out.println("3. Exit with false");
+            return falseResult;
+        }
+        
+        //
+        // : ~.books[1].book ~= ?+.book.name
+        //     I.e. the last pathMatchPart is a "clear"-match,
+        //     but it wasn't matched because source-path was fully consumed.
+        //
+        else if (pathMatchPartsIndex < pathMatchParts.size() - 1 && 
+                    pathMatchParts.get(pathMatchPartsIndex + 1) instanceof AnyNoneOrMorePathMatchPart == false
+                        && pathMatchParts.get(pathMatchPartsIndex + 1) instanceof AnySingleOrMorePathMatchPart == false) {
             return falseResult;
         }
 

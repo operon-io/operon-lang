@@ -68,11 +68,18 @@ public class Multiplicate extends BaseBinaryNodeProcessor implements BinaryNodeP
         // [1,2,3] * [4,5,6] = [[1,4], [2,5], [3,6]]
         
         else {
-            log.error("INCOMPATIBLE TYPES: " + lhsResult.getClass() + ", " + rhsResult.getClass());
+            //:OFF:log.error("INCOMPATIBLE TYPES: " + lhsResult.getClass() + ", " + rhsResult.getClass());
             
             String lhsType = ErrorUtil.mapTypeFromJavaClass(lhsResult);
             String rhsType = ErrorUtil.mapTypeFromJavaClass(rhsResult);
-            return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "MULTIPLICATE", "Not defined: " + lhsType + " " + binaryOperator + " " + rhsType);
+            return ErrorUtil.createErrorValueAndThrow(statement,
+                "OPERATOR", 
+                "MULTIPLICATE", 
+                "Not defined: " + lhsType + " " + binaryOperator + " " + rhsType +
+                    ", at line #" + this.getSourceCodeLineNumber() +
+                    ". lhs value: " + lhs.toString() + ", rhs value: " + rhs.toString()
+            
+            );
         }
         
     }

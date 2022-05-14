@@ -44,7 +44,7 @@ import org.apache.logging.log4j.LogManager;
 
 
 public class CallComponent extends BaseComponent implements IntegrationComponent {
-    private static Logger log = LogManager.getLogger(CallComponent.class);
+     // no logger 
 
     public CallComponent() {}
     
@@ -111,7 +111,7 @@ public class CallComponent extends BaseComponent implements IntegrationComponent
                     info.params = pair.getEvaluatedValue();
                     break;
                 default:
-                    log.debug("call -producer: no mapping for configuration key: " + key);
+                    //:OFF:log.debug("call -producer: no mapping for configuration key: " + key);
                     System.err.println("call -producer: no mapping for configuration key: " + key);
                     ErrorUtil.createErrorValueAndThrow(currentValue.getStatement(), "CALL", "ERROR", "call -producer: no mapping for configuration key: " + key);
             }

@@ -50,7 +50,7 @@ import org.apache.logging.log4j.LogManager;
 // This ISD is used for internal testing.
 //
 public class SequenceSystem extends BaseSystem implements InputSourceDriver {
-    private static Logger log = LogManager.getLogger(SequenceSystem.class);
+     // no logger 
 
     private OperonValue initialValue;
     private ObjectType jsonConfiguration; // optional: json-configuration for the component. Not available for SequenceSystem.
@@ -124,7 +124,7 @@ public class SequenceSystem extends BaseSystem implements InputSourceDriver {
                                     }*/
                                 //}
                             } catch (OperonGenericException e) {
-                                log.error("Exception :: " + e.toString());
+                                //:OFF:log.error("Exception :: " + e.toString());
                                 //ctx.setException(e);
                             } catch (IOException ioe) {
                                 System.err.println("IOException");
@@ -139,7 +139,7 @@ public class SequenceSystem extends BaseSystem implements InputSourceDriver {
             }
             this.isRunning = false;
         } /*catch (OperonGenericException e) {
-            log.error("Exception :: " + e.toString());
+            //:OFF:log.error("Exception :: " + e.toString());
             ctx.setException(e);
         } */catch (Exception ex) {
             OperonGenericException oge = new OperonGenericException(ex.getMessage());
@@ -168,7 +168,7 @@ public class SequenceSystem extends BaseSystem implements InputSourceDriver {
     
     public void stop() {
         this.isRunning = false;
-        log.info("Stopped");
+        //:OFF:log.info("Stopped");
     }
     
     public void setJsonConfiguration(ObjectType jsonConfig) { this.jsonConfiguration = jsonConfig; }

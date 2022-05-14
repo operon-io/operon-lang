@@ -43,7 +43,7 @@ import org.apache.logging.log4j.LogManager;
  *
  */
 public class Wait extends BaseArity1 implements Node, Arity1 {
-    private static Logger log = LogManager.getLogger(Wait.class);
+     // no logger 
     
     public Wait(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);

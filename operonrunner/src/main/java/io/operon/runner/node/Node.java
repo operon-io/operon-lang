@@ -35,6 +35,10 @@ public interface Node {
     public String toString();
     public String toFormattedString(OutputFormatter pp);
     public String toYamlString(YamlFormatter yf);
+    public String toTomlString(OutputFormatter pp);
+
+	public int getSourceCodeLineNumber();
+	public void setSourceCodeLineNumber(int ln);
 
     public void setEvaluatedValue(OperonValue value);
     

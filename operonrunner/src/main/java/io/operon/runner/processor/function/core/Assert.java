@@ -46,7 +46,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class Assert extends BaseArity1 implements Node, Arity1 {
-    private static Logger log = LogManager.getLogger(Assert.class);
+     // no logger 
 
     private AssertComponent assertComponent;
     
@@ -56,7 +56,7 @@ public class Assert extends BaseArity1 implements Node, Arity1 {
     }
 
     public OperonValue evaluate() throws OperonGenericException {        
-        log.debug("EVALUATE ASSERT");
+        //:OFF:log.debug("EVALUATE ASSERT");
         //System.out.println("Assert :: evaluate");
         try {
             OperonValue currentValue = this.getStatement().getCurrentValue();

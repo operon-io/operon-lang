@@ -77,7 +77,7 @@ import org.apache.logging.log4j.LogManager;
 
 
 public class CertificateComponent extends BaseComponent implements IntegrationComponent {
-    private static Logger log = LogManager.getLogger(CertificateComponent.class);
+     // no logger 
 
     public CertificateComponent() {}
     
@@ -249,7 +249,7 @@ public class CertificateComponent extends BaseComponent implements IntegrationCo
                     info.signature = signatureBytes;
                     break;
                 default:
-                    log.debug("certificate -producer: no mapping for configuration key: " + key);
+                    //:OFF:log.debug("certificate -producer: no mapping for configuration key: " + key);
                     System.err.println("certificate -producer: no mapping for configuration key: " + key);
                     ErrorUtil.createErrorValueAndThrow(currentValue.getStatement(), "CERTIFICATE", "ERROR", "certificate -producer: no mapping for configuration key: " + key);
             }

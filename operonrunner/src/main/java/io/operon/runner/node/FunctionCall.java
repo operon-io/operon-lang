@@ -44,7 +44,7 @@ import org.apache.logging.log4j.LogManager;
 // => functionName()
 //
 public class FunctionCall extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(FunctionCall.class);
+     // no logger 
     private String functionFQName;
 
     private FunctionStatement functionStatement; // function execution context
@@ -58,7 +58,7 @@ public class FunctionCall extends AbstractNode implements Node {
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER FunctionCall.evaluate() :: " + this.getFunctionFQName());
+        //:OFF:log.debug("ENTER FunctionCall.evaluate() :: " + this.getFunctionFQName());
         
         FunctionStatement fnStatement = FunctionRef.resolveUserFunction(this.getStatement(),
             this.getFunctionFQName()/*, this.getStatement().isPrototype()*/);
@@ -78,11 +78,11 @@ public class FunctionCall extends AbstractNode implements Node {
             String copyArg = new String(paramsOriginal.get(i).getParam());
             paramsCopy.add(copyArg);
         }
-        log.debug("  function statement paramsCopy: " + paramsCopy);
+        //:OFF:log.debug("  function statement paramsCopy: " + paramsCopy);
 
         OperonValue currentValue = this.getStatement().getCurrentValue();
         OperonValue currentValueCopy = null; // TODO: remove this variable
-        log.debug("  currentValue resolved: " + currentValue);
+        //:OFF:log.debug("  currentValue resolved: " + currentValue);
         //System.out.println("FunctionCall cv=" + currentValue);
 
         // FunctionRef.invoke() also sets the currentValue for FunctionStatement,
@@ -91,14 +91,14 @@ public class FunctionCall extends AbstractNode implements Node {
         if (currentValue == null) { // ADDED THIS
             if (this.getFunctionStatement().getCurrentValue() == null) {
                 // http-server isd: cookies. evaluate jsonValue, caused NullPointerException here
-                log.debug("FunctionCall :: resolve currentValueCopy from previousStatement (currentValue was null");
+                //:OFF:log.debug("FunctionCall :: resolve currentValueCopy from previousStatement (currentValue was null");
                 currentValueCopy = this.getStatement().getPreviousStatement().getCurrentValue();
                 //System.out.println("SET cv for functionStatement: " + currentValueCopy);
             }
             else {
-                log.debug("FunctionCall :: resolve currentValueCopy from functionStatement's currentValue");
+                //:OFF:log.debug("FunctionCall :: resolve currentValueCopy from functionStatement's currentValue");
                 currentValueCopy = this.getFunctionStatement().getCurrentValue(); // this has value FunctionTests#functionValueRefTest
-                log.debug("  resolved cv=" + currentValueCopy);
+                //:OFF:log.debug("  resolved cv=" + currentValueCopy);
                 //currentValueCopy = this.getStatement().getCurrentValue();
                 //this.getStatement().setCurrentValue(currentValueCopy);
             }
@@ -111,8 +111,8 @@ public class FunctionCall extends AbstractNode implements Node {
         
         // Check that paramsCopy and given arguments size matches:
         if (arguments.size() != paramsCopy.size()) {
-            log.debug("ERR: paramsCopy :: " + paramsCopy);
-            log.debug("ERR: params :: " + arguments);
+            //:OFF:log.debug("ERR: paramsCopy :: " + paramsCopy);
+            //:OFF:log.debug("ERR: params :: " + arguments);
             ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION_CALL", "ARGUMENTS", "incorrect amount of arguments. Required: " + arguments.size() + ", but was " + paramsCopy.size());
         }
         
@@ -128,18 +128,18 @@ public class FunctionCall extends AbstractNode implements Node {
             Node param = this.getArguments().get(i);
 
             if (param instanceof UnaryNode) {
-                log.debug("FunctionCall :: UnaryNode");
+                //:OFF:log.debug("FunctionCall :: UnaryNode");
                 param = param.evaluate();
             }
             
             if (param instanceof FunctionNamedArgument) {
-                log.debug("FunctionCall :: named argument :: counter :: " + i);
+                //:OFF:log.debug("FunctionCall :: named argument :: counter :: " + i);
                 //System.out.println("FunctionCall :: named argument :: counter :: " + i);
                 FunctionNamedArgument fna = (FunctionNamedArgument) param;
                 String argName = fna.getArgumentName();
-                log.debug("  >> argName :: " + argName);
+                //:OFF:log.debug("  >> argName :: " + argName);
                 Node argValue = fna.getArgumentValue();
-                //log.debug("  REMOVE THIS >> FunctionCall :: before evaluating argValue :: " + argValue);
+                ////:OFF:log.debug("  REMOVE THIS >> FunctionCall :: before evaluating argValue :: " + argValue);
                 
                 // If boxed as FunctionNamedArgument, then unbox it:
                 // This kind of boxing might happen, when passing functionRef through multiple Let-statements.
@@ -148,7 +148,7 @@ public class FunctionCall extends AbstractNode implements Node {
                 // TODO: does the next "else if" also require this check?
                 
                 argValue = this.unboxArgumentToOperonValue(argValue);
-                log.debug("NAMED ARG :: PUT :: " + argName);
+                //:OFF:log.debug("NAMED ARG :: PUT :: " + argName);
                 
                 this.getFunctionStatement().getRuntimeValues()
                     .put(argName, (OperonValue) argValue);
@@ -183,17 +183,17 @@ public class FunctionCall extends AbstractNode implements Node {
 
             else if (param instanceof FunctionRefNamedArgument) {
                 // NOTE: this is same as above. Check if own method could be created.
-                log.debug("FunctionCall :: function ref named argument :: counter :: " + i);
+                //:OFF:log.debug("FunctionCall :: function ref named argument :: counter :: " + i);
                 //System.out.println("FunctionCall :: named ref argument :: counter :: " + i);
                 FunctionRefNamedArgument frna = (FunctionRefNamedArgument) param;
                 String argName = frna.getArgumentName();
-                log.debug("  >> argName :: " + argName);
+                //:OFF:log.debug("  >> argName :: " + argName);
                 //System.out.println("  >> argName :: " + argName);
                 Node argValue = frna.getExprNode();
                 
                 argValue = this.unboxArgumentToOperonValue(argValue);
                 
-                log.debug("NAMED ARG :: PUT :: " + argName);
+                //:OFF:log.debug("NAMED ARG :: PUT :: " + argName);
                 
                 this.getFunctionStatement().getRuntimeValues()
                     .put(argName, (OperonValue) argValue);
@@ -235,7 +235,7 @@ public class FunctionCall extends AbstractNode implements Node {
                 Node param = this.getArguments().get(i);
     
                 if (param instanceof UnaryNode) {
-                    log.debug("FunctionCall :: UnaryNode");
+                    //:OFF:log.debug("FunctionCall :: UnaryNode");
                     param = param.evaluate();
                 }
                 
@@ -248,18 +248,18 @@ public class FunctionCall extends AbstractNode implements Node {
                 }
                 
                 else if (param instanceof FunctionRegularArgument) {
-                    log.debug("FunctionCall :: regular argument :: counter :: " + i);
+                    //:OFF:log.debug("FunctionCall :: regular argument :: counter :: " + i);
                     Node argValue = ((FunctionRegularArgument) param).getArgument();
                     if (argValue == null) {
                         ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION_CALL", "ARGUMENTS", "Argument was null.");
                     }
                     if (argValue instanceof OperonValue == false) {
-                        log.debug("  FunctionCall :: unboxing arg");
+                        //:OFF:log.debug("  FunctionCall :: unboxing arg");
                         argValue = argValue.evaluate();
                     }
                     
                     String functionStatementArgument = paramsCopy.get(0);
-                    log.debug("  FunctionCall :: setting arg :: " + functionStatementArgument);
+                    //:OFF:log.debug("  FunctionCall :: setting arg :: " + functionStatementArgument);
                     
                     
                     //
@@ -277,7 +277,7 @@ public class FunctionCall extends AbstractNode implements Node {
                     //System.out.println(">>> regular argf: matchValueToArgumentConstraintAndEvaluate: " + testIndex);
                     this.matchValueToArgumentConstraintAndEvaluate(paramsOriginal, testIndex, (OperonValue) argValue);
                     
-                    log.debug("REGULAR ARG :: PUT :: " + functionStatementArgument);
+                    //:OFF:log.debug("REGULAR ARG :: PUT :: " + functionStatementArgument);
                     this.getFunctionStatement().getRuntimeValues()
                         .put(functionStatementArgument, (OperonValue) argValue);
                     
@@ -288,7 +288,7 @@ public class FunctionCall extends AbstractNode implements Node {
                     //
                     // TODO: should this be matched with Constraint as well?
                     //
-                    log.debug("FunctionCall :: untyped argument");
+                    //:OFF:log.debug("FunctionCall :: untyped argument");
                     String functionStatementArgument = paramsCopy.get(0);
                     this.getFunctionStatement().getRuntimeValues()
                         .put(functionStatementArgument, (OperonValue) param);
@@ -299,7 +299,7 @@ public class FunctionCall extends AbstractNode implements Node {
             }
         }
         
-        log.debug("FunctionCall :: ARGS SET: " + this.getFunctionStatement().getRuntimeValues().keySet().toString());
+        //:OFF:log.debug("FunctionCall :: ARGS SET: " + this.getFunctionStatement().getRuntimeValues().keySet().toString());
 
         OperonValue result = this.getFunctionStatement().evaluate();
         this.setEvaluatedValue(result);
@@ -336,14 +336,14 @@ public class FunctionCall extends AbstractNode implements Node {
 
     private OperonValue unboxArgumentToOperonValue(Node argValue) throws OperonGenericException {
         if (argValue instanceof FunctionNamedArgument) {
-            log.debug("  >> FunctionCall :: unbox FunctionNamedArgument");
+            //:OFF:log.debug("  >> FunctionCall :: unbox FunctionNamedArgument");
             argValue = ((FunctionNamedArgument) argValue).getArgumentValue();
         }
         
         if (!(argValue instanceof OperonValue)) {
-            log.debug("  >> FunctionCall :: evaluate argValue");
+            //:OFF:log.debug("  >> FunctionCall :: evaluate argValue");
             argValue = argValue.evaluate();
-            log.debug("  >> FunctionCall :: done evaluating argValue");
+            //:OFF:log.debug("  >> FunctionCall :: done evaluating argValue");
             return this.unboxArgumentToOperonValue(argValue);
         }
         

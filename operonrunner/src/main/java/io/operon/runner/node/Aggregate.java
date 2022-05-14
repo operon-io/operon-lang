@@ -30,6 +30,8 @@ import io.operon.runner.util.JsonUtil;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.aggregate.AggregateState;
 
+import io.operon.runner.Context;
+import io.operon.runner.BaseContext;
 import io.operon.runner.OperonContext;
 import io.operon.runner.system.InputSourceDriver;
 
@@ -56,7 +58,7 @@ import org.apache.logging.log4j.LogManager;
 // The most basic aggregation-strategy is to just add json-values into an array.
 //
 public class Aggregate extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(Aggregate.class);
+     // no logger 
 
     private ObjectType configs;
 
@@ -97,14 +99,15 @@ public class Aggregate extends AbstractNode implements Node {
     //       reduced to single-value.
     private Node aggregateFunction;
     
-    public Boolean hasTimeout; // Compiler sets this information bit.
+    private boolean hasTimeout = false;
     public Long timeoutMillis;
     private Node timeoutContinuation; // After timeout this node will be evaluated. Should be next node from AST after aggregate.
+    private long defaultHeartbeatDuration = 1000L;
     
     private static Map<String, AggregateState> aggregateStates;
 
-    public Aggregate(Statement stmnt, String id) {
-        super(stmnt);
+    public Aggregate(Statement stmt, String id) {
+        super(stmt);
         synchronized (this) {
             //System.out.println("new Aggregate");
             this.setId(id);
@@ -124,12 +127,37 @@ public class Aggregate extends AbstractNode implements Node {
     }
 
     public /*synchronized*/ OperonValue evaluate() throws BreakSelect, OperonGenericException {
-        log.debug("ENTER Aggregate.evaluate(). Stmt: " + this.getStatement().getId());
+        //:OFF:log.debug("ENTER Aggregate.evaluate(). Stmt: " + this.getStatement().getId());
         //System.out.println("Aggregate id: " + this.getId() + " :: ENTER Aggregate.evaluate()");
         OperonValue currentValue = this.getStatement().getCurrentValue();
         
         //System.out.println("cv=" + currentValue); // it seems that cv gets in correctly, i.e. it is not changed before
         //OperonValue currentValueCopy = currentValue.copy();
+
+
+        if (this.getHasTimeout()) {
+            //System.out.println("Has timeout");
+            Context ctx = BaseContext.getRootContextByStatement(this.getStatement());
+            if (ctx instanceof OperonContext) {
+                //System.out.println("ctx is OperonContext");
+                OperonContext operonCtx = (OperonContext) ctx;
+                //
+                // Set the missing heartbeat with default-value
+                //
+                if (operonCtx.hasHeartbeat == false) {
+                    //System.out.println("Setting the default-heartbeat");
+                    operonCtx.registerHeartBeat(defaultHeartbeatDuration);
+                    //System.out.println("Setting the default-heartbeat: OK");
+                }
+            }
+            else {
+                //System.out.println("Not OperonContext");
+            }
+        }
+        else {
+            //System.out.println("No timeout");
+        }
+
 
         // Calculate the correlationId -value
         if (this.getCorrelationIdExpr() != null) {
@@ -137,8 +165,8 @@ public class Aggregate extends AbstractNode implements Node {
         }
 
         //System.out.println("AGGREGATE :: CV :: " + currentValueCopy + ", stmt id :: " + this.getStatement().getId());
-        //log.debug("Aggregate :: configs :: " + this.getConfigs()); // don't log, would try to evaluate the firePredicate
-        log.debug("Retrieve array for key :: " + this.getCorrelationId());
+        ////:OFF:log.debug("Aggregate :: configs :: " + this.getConfigs()); // don't log, would try to evaluate the firePredicate
+        //:OFF:log.debug("Retrieve array for key :: " + this.getCorrelationId());
         
         //
         // Initialize aggregationResult, if not initialized:
@@ -150,7 +178,7 @@ public class Aggregate extends AbstractNode implements Node {
         //
         if (agg == null && this.getAggregateFunction() == null) {
             ArrayType initialArray = new ArrayType(this.getStatement());
-            log.debug("Adding initial array for key :: " + this.getCorrelationId());
+            //:OFF:log.debug("Adding initial array for key :: " + this.getCorrelationId());
             getAggregateStates().get(this.getId()).getResult().put(this.getCorrelationId(), initialArray);
             agg = getAggregateStates().get(this.getId()).getResult().get(this.getCorrelationId());
         }
@@ -161,7 +189,7 @@ public class Aggregate extends AbstractNode implements Node {
         //
         else if (agg == null) {
             if (this.getAggregateFunction() != null) {
-                log.debug("Aggregate with lfnr");
+                //:OFF:log.debug("Aggregate with lfnr");
                 OperonValue aggFnRefTypeTest = (OperonValue) this.getAggregateFunction().evaluate();
             
                 if (aggFnRefTypeTest instanceof LambdaFunctionRef) {
@@ -173,16 +201,16 @@ public class Aggregate extends AbstractNode implements Node {
                     init.setDoubleValue(0.0);
                     OperonValue initialValue = init;// new OperonValue(this.getStatement());
                     
-                    log.debug("INITIAL :: " + initialValue);
+                    //:OFF:log.debug("INITIAL :: " + initialValue);
                     
-                    log.debug("Adding initial value for key :: " + this.getCorrelationId());
+                    //:OFF:log.debug("Adding initial value for key :: " + this.getCorrelationId());
                     getAggregateStates().get(this.getId()).getResult().put(this.getCorrelationId(), initialValue);
                     agg = getAggregateStates().get(this.getId()).getResult().get(this.getCorrelationId());
-                    log.debug("Initial value set");
+                    //:OFF:log.debug("Initial value set");
                 }
                 
                 else {
-                    log.debug("Aggregate :: cannot set initial value");
+                    //:OFF:log.debug("Aggregate :: cannot set initial value");
                     ErrorUtil.createErrorValueAndThrow(this.getStatement(), "AGGREGATE", "INITIAL_VALUE", "Cannot set initial value");
                 }
             }
@@ -195,10 +223,10 @@ public class Aggregate extends AbstractNode implements Node {
         boolean isTimeout = this.getHasTimeout();
 
         AggregateState aggState = getAggregateStates().get(this.getId());
-        log.debug(">> 1");
+        //:OFF:log.debug(">> 1");
         
         if (aggState == null) {
-            log.debug(this.getId().substring(0, 3) + " :: aggState null");
+            //:OFF:log.debug(this.getId().substring(0, 3) + " :: aggState null");
             //System.exit(1);
             ErrorUtil.createErrorValueAndThrow(this.getStatement(), "AGGREGATE", "STATE", "State was not set");
         }
@@ -213,7 +241,7 @@ public class Aggregate extends AbstractNode implements Node {
         
         if (this.getFirePredicate() != null) {
             synchronized (this) {
-                log.debug("Evaluating firePredicate");
+                //:OFF:log.debug("Evaluating firePredicate");
                 
                 // FIXME: current-value should be set first, otherwise it could be set somewere else!
                 //System.out.println("FIRE-PRED: CV=" + currentValue);
@@ -271,8 +299,8 @@ public class Aggregate extends AbstractNode implements Node {
                 }
                 
                 if (predicateResult instanceof TrueType) {
-                    log.debug("firePredicate was true. Return aggregationResult");
-                    log.debug(">> Pred res true -> getAggregationResult");
+                    //:OFF:log.debug("firePredicate was true. Return aggregationResult");
+                    //:OFF:log.debug(">> Pred res true -> getAggregationResult");
                     //System.out.println(">> FirePredicate was true");
                     synchronized (this) {
                         OperonValue result = this.getAggregationResult(type, currentValue.copy());
@@ -327,7 +355,7 @@ public class Aggregate extends AbstractNode implements Node {
             // FirePredicate false or timeout running, therefore do-aggregate:
             // TODO: should we tell the type here as well (as in the above blocks)?
             //System.out.println("Aggregate :: doAggregate");
-            log.debug(">> do aggregate");
+            //:OFF:log.debug(">> do aggregate");
             return this.doAggregate((OperonValue) currentValue.copy());
         }
 
@@ -364,7 +392,7 @@ public class Aggregate extends AbstractNode implements Node {
             correlationIdResult = (OperonValue) correlationIdResult.evaluate();
         }
         String corrId = ((StringType) correlationIdResult).getJavaStringValue();
-        //log.debug("Aggregate :: calculated correlationId :: " + corrId);
+        ////:OFF:log.debug("Aggregate :: calculated correlationId :: " + corrId);
         this.setCorrelationId(corrId);
         this.getStatement().setCurrentValue(currentValueCopy); // ensure that we didn't change the currentValue
     }
@@ -373,7 +401,7 @@ public class Aggregate extends AbstractNode implements Node {
         //System.out.println(">>>>> Aggregate :: " + currentValueCopy);
         // aggregate with aggregateFunction, if such is defined (not null)
         if (this.getAggregateFunction() != null) {
-            log.debug("Aggregate with fn");
+            //:OFF:log.debug("Aggregate with fn");
             OperonValue aggFnRefTypeTest = (OperonValue) this.getAggregateFunction().evaluate();
             
             if (aggFnRefTypeTest instanceof FunctionRef) {
@@ -400,7 +428,7 @@ public class Aggregate extends AbstractNode implements Node {
             }
             
             else if (aggFnRefTypeTest instanceof LambdaFunctionRef) {
-                log.debug("Aggregate with LambdaFunctionRef");
+                //:OFF:log.debug("Aggregate with LambdaFunctionRef");
                 
                 // DEBUG: try commenting, there's copy error later on, this could cause it
                 //System.out.println("Aggregate with LambdaFunctionRef :: value to aggregate :: " + currentValueCopy);
@@ -410,7 +438,7 @@ public class Aggregate extends AbstractNode implements Node {
                     ErrorUtil.createErrorValueAndThrow(this.getStatement(), "AGGREGATE", "ERROR", "Expected two params.");
                 }
                 
-                log.debug("Aggregate with LambdaFunctionRef :: clear params");
+                //:OFF:log.debug("Aggregate with LambdaFunctionRef :: clear params");
                 aggFnRef.getParams().clear();
                 OperonValue currentResult = this.getAggregationResult((short) 2, currentValueCopy);
                 
@@ -419,42 +447,42 @@ public class Aggregate extends AbstractNode implements Node {
                 //  i.e. we'd had params: $initial, $old, $new
                 // $initial would require set value from user, i.e. it would not be placeholder!
                 if (currentResult == null) {
-                    log.debug("Aggregate with LambdaFunctionRef :: currentResult was null, set with cvc");
+                    //:OFF:log.debug("Aggregate with LambdaFunctionRef :: currentResult was null, set with cvc");
                     currentResult = currentValueCopy.copy();
-                    log.debug("Aggregate with LambdaFunctionRef :: currentResult :: " + currentResult);
+                    //:OFF:log.debug("Aggregate with LambdaFunctionRef :: currentResult :: " + currentResult);
                 }
                 
                 // GOTCHA! The problem is that the initial-value is set with OperonValue, but it is not null
                 //         either! It should be set to null...
                 else {
-                    log.debug("Aggregate with LambdaFunctionRef :: currentResult was NOT null");
-                    log.debug("Aggregate with LambdaFunctionRef :: currentResult :: " + currentResult);
+                    //:OFF:log.debug("Aggregate with LambdaFunctionRef :: currentResult was NOT null");
+                    //:OFF:log.debug("Aggregate with LambdaFunctionRef :: currentResult :: " + currentResult);
                 }
                 
-                log.debug("Aggregate with LambdaFunctionRef :: set params");
-                log.debug("Aggregate with LambdaFunctionRef :: currentResult :: " + currentResult);
+                //:OFF:log.debug("Aggregate with LambdaFunctionRef :: set params");
+                //:OFF:log.debug("Aggregate with LambdaFunctionRef :: currentResult :: " + currentResult);
                 
                 // old
                 aggFnRef.getParams().put("$old", currentResult.copy()); // should we copy here? FIXME: causes error.
                 
-                log.debug("Aggregate with LambdaFunctionRef :: old :: " + aggFnRef.getParams().get("$old"));
+                //:OFF:log.debug("Aggregate with LambdaFunctionRef :: old :: " + aggFnRef.getParams().get("$old"));
                 
                 // new
                 aggFnRef.getParams().put("$new", currentValueCopy.copy());
                 
-                log.debug("Aggregate with LambdaFunctionRef :: new :: " + aggFnRef.getParams().get("$new"));
+                //:OFF:log.debug("Aggregate with LambdaFunctionRef :: new :: " + aggFnRef.getParams().get("$new"));
                 
                 aggFnRef.setCurrentValueForFunction(currentValueCopy.copy());
                 OperonValue aggFnResult = (OperonValue) aggFnRef.invoke();
                 
-                log.debug("Aggregate with LambdaFunctionRef :: got result :: " + aggFnResult);
+                //:OFF:log.debug("Aggregate with LambdaFunctionRef :: got result :: " + aggFnResult);
                 
                 Node aggRes = getAggregateStates().get(this.getId()).getResult().put(this.getCorrelationId(), aggFnResult);
             }
         }
         
         else {
-            log.debug("Aggregate fn was null");
+            //:OFF:log.debug("Aggregate fn was null");
             // The default aggregation strategy. Adds items into ArrayType.
             synchronized (this) {
             //System.out.println("correlationId :: " + this.getCorrelationId() + ", aggregateId :: " + this.getId());
@@ -486,9 +514,9 @@ public class Aggregate extends AbstractNode implements Node {
             
         }
         
-        log.debug("exit evaluateSelectStatement");
+        //:OFF:log.debug("exit evaluateSelectStatement");
         //System.out.println("Throw BreakSelect");
-        log.debug("Throw BreakSelect");
+        //:OFF:log.debug("Throw BreakSelect");
         throw new BreakSelect();
     }
 
@@ -497,7 +525,7 @@ public class Aggregate extends AbstractNode implements Node {
     //  1 = interval
     //  2 = firepredicateExpr or firepredicateFunctionRef
     private synchronized OperonValue getAggregationResult(short type, OperonValue currentValueCopy) throws OperonGenericException {
-        log.debug("getAggregationResult, type = " + type);
+        //:OFF:log.debug("getAggregationResult, type = " + type);
         //System.out.println(">>> getAggregationResult :: add cv :: " + currentValueCopy);
         // If triggered by timeout (0) or interval (1), then retrieve _all_ keys.
         // Otherwise (2) retrieve only the current correlationId.
@@ -557,7 +585,7 @@ public class Aggregate extends AbstractNode implements Node {
             
             // Retrieve only by current correlationId
             else {
-                log.debug("get RES :: TYPE 2");
+                //:OFF:log.debug("get RES :: TYPE 2");
                 aggregationResult = aggResult.get(this.getCorrelationId());
         
                 ArrayType aggregationResultArr = (ArrayType) aggregationResult;

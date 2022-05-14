@@ -44,7 +44,7 @@ import org.apache.logging.log4j.LogManager;
 // Tests predicate-expression (given as functionRef) for each value in an array
 // 
 public class ArraySearch extends BaseArity1 implements Node, Arity1, SupportsAttributes {
-    private static Logger log = LogManager.getLogger(ArraySearch.class);
+     // no logger 
     
     public ArraySearch(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
@@ -72,7 +72,7 @@ public class ArraySearch extends BaseArity1 implements Node, Arity1, SupportsAtt
         
         try {
             for (int i = 0; i < arrayToTest.getValues().size(); i ++) {
-                log.debug("loop, i == " + i);
+                //:OFF:log.debug("loop, i == " + i);
                 OperonValue valueToTest = ArrayGet.baseGet(this.getStatement(), arrayToTest, i + 1);
                 
                 this.setCurrentPathWithPos(this.getStatement(), i + 1, arrayToTest);

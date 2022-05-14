@@ -31,7 +31,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager; 
  
 public class ObjDynamicAccess extends AbstractNode implements Node { 
-    private static Logger log = LogManager.getLogger(ObjDynamicAccess.class); 
+     // no logger  
 
     private Node keyExpr;
     private Node configs;
@@ -42,7 +42,7 @@ public class ObjDynamicAccess extends AbstractNode implements Node {
     } 
  
     public OperonValue evaluate() throws OperonGenericException { 
-        log.debug("ENTER ObjDynamicAccess.evaluate(). Stmt: " + this.getStatement().getId()); 
+        //:OFF:log.debug("ENTER ObjDynamicAccess.evaluate(). Stmt: " + this.getStatement().getId()); 
         
         // get currentValue from the statement 
         OperonValue value = this.getStatement().getCurrentValue(); 
@@ -52,17 +52,17 @@ public class ObjDynamicAccess extends AbstractNode implements Node {
         
         if (evaluatedValue instanceof ObjectType) { 
             //System.out.println("ObjDynamicAccess :: obj");
-            log.debug("EXIT ObjDynamicAccess.evaluate() obj"); 
+            //:OFF:log.debug("EXIT ObjDynamicAccess.evaluate() obj"); 
             return evaluateObj( (ObjectType) evaluatedValue, info); 
         } 
 
         else if (evaluatedValue instanceof ArrayType) {
             //System.out.println("ObjDynamicAccess :: array");
-            log.debug("EXIT ObjDynamicAccess.evaluate() array");
+            //:OFF:log.debug("EXIT ObjDynamicAccess.evaluate() array");
             return evaluateArray( (ArrayType) evaluatedValue, info);
         }
-        log.debug("ObjDynamicAccess: cannot access object. Wrong type: " + evaluatedValue); 
-        return ErrorUtil.createErrorValueAndThrow(this.getStatement(), "OBJECT_DYNAMIC_ACCESS", "TYPE", "Cannot access object. Wrong type");
+        //:OFF:log.debug("ObjDynamicAccess: cannot access object. Wrong type: " + evaluatedValue); 
+        return ErrorUtil.createErrorValueAndThrow(this.getStatement(), "OBJECT_DYNAMIC_ACCESS", "TYPE", "Cannot access object. Wrong type. Line #" + this.getSourceCodeLineNumber());
     } 
      
     // 
@@ -80,7 +80,7 @@ public class ObjDynamicAccess extends AbstractNode implements Node {
             for (int i = 0; i < obj.getPairs().size(); i ++) {
                 //System.out.println("ObjDynamicAccess :: " + i);
                 PairType pair = obj.getPairs().get(i);
-                log.debug("    Obj key :: " + pair.getKey());
+                //:OFF:log.debug("    Obj key :: " + pair.getKey());
                 
                 //
                 // Set the Pair's key as the currentValue for keyExpr:
@@ -103,7 +103,7 @@ public class ObjDynamicAccess extends AbstractNode implements Node {
                     }
                     else if (info.onEmptyType != null) {
                         if (info.onEmptyType == OnEmptyType.THROW) {
-                            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "OBJECT_DYNAMIC_ACCESS", "TYPE", "Field not found");
+                            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "OBJECT_DYNAMIC_ACCESS", "TYPE", "Field not found. Line #" + this.getSourceCodeLineNumber());
                         }
                         else if (info.onEmptyType == OnEmptyType.OBJECT) {
                             result = new ObjectType(this.getStatement()); // return empty object value
@@ -130,7 +130,7 @@ public class ObjDynamicAccess extends AbstractNode implements Node {
                 }
                 else if (info.onEmptyType != null) {
                     if (info.onEmptyType == OnEmptyType.THROW) {
-                        ErrorUtil.createErrorValueAndThrow(this.getStatement(), "OBJECT_DYNAMIC_ACCESS", "TYPE", "Field not found");
+                        ErrorUtil.createErrorValueAndThrow(this.getStatement(), "OBJECT_DYNAMIC_ACCESS", "TYPE", "Field not found. Line #" + this.getSourceCodeLineNumber());
                     }
                     else if (info.onEmptyType == OnEmptyType.OBJECT) {
                         result = new ObjectType(this.getStatement()); // return empty object value
@@ -157,7 +157,7 @@ public class ObjDynamicAccess extends AbstractNode implements Node {
             //
             for (int i = 0; i < obj.getPairs().size(); i ++) {
                 PairType pair = obj.getPairs().get(i);
-                log.debug("    Obj key :: " + pair.getKey());
+                //:OFF:log.debug("    Obj key :: " + pair.getKey());
                 
                 //
                 // Set the Pair's key as the currentValue for keyExpr:
@@ -181,7 +181,7 @@ public class ObjDynamicAccess extends AbstractNode implements Node {
                     }
                     else if (info.onEmptyType != null) {
                         if (info.onEmptyType == OnEmptyType.THROW) {
-                            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "OBJECT_DYNAMIC_ACCESS", "TYPE", "Field not found");
+                            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "OBJECT_DYNAMIC_ACCESS", "TYPE", "Field not found. Line #" + this.getSourceCodeLineNumber());
                         }
                         else if (info.onEmptyType == OnEmptyType.OBJECT) {
                             newResult = new ObjectType(this.getStatement()); // return empty object value
@@ -218,13 +218,13 @@ public class ObjDynamicAccess extends AbstractNode implements Node {
     // lhs is array, i.e. accessing array 
     // 
     private ArrayType evaluateArray(ArrayType array, Info info) throws OperonGenericException { 
-        log.debug("Accessing array of objects"); 
+        //:OFF:log.debug("Accessing array of objects"); 
         ArrayType resultArray = new ArrayType(this.getStatement()); 
         List<Node> arrayValues = array.getValues(); 
          
         for (int i = 0; i < arrayValues.size(); i ++) { 
             Node arrayNode = arrayValues.get(i); 
-            //log.debug("    >> Looping: " + i); 
+            ////:OFF:log.debug("    >> Looping: " + i); 
             if (arrayNode.evaluate() instanceof ObjectType) { 
                 Node obj = evaluateObj((ObjectType) arrayNode.evaluate(), info); 
                 resultArray.addValue(obj); 
@@ -276,7 +276,7 @@ public class ObjDynamicAccess extends AbstractNode implements Node {
         }
         
         else {
-            return ErrorUtil.createErrorValueAndThrow(this.getStatement(), "OBJECT_DYNAMIC_ACCESS", "TYPE", "Unsupported type: " + dynamicKeyExprResult.getClass().getName());
+            return ErrorUtil.createErrorValueAndThrow(this.getStatement(), "OBJECT_DYNAMIC_ACCESS", "TYPE", "Unsupported type: " + dynamicKeyExprResult.getClass().getName() + ", line #" + this.getSourceCodeLineNumber());
         }
         return result;
     }

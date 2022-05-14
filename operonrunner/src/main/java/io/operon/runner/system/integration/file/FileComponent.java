@@ -61,14 +61,14 @@ import org.apache.logging.log4j.LogManager;
 //
 public class FileComponent extends BaseComponent implements IntegrationComponent {
 
-    private static Logger log = LogManager.getLogger(FileComponent.class);
+     // no logger 
 
     public FileComponent() {
-        log.debug("file :: constructor");
+        //:OFF:log.debug("file :: constructor");
     }
     
     public OperonValue produce(OperonValue currentValue) throws OperonComponentException {
-        log.debug("file :: produce");
+        //:OFF:log.debug("file :: produce");
         try {
             Info info = resolve(currentValue);
             OperonValue result = this.handleTask(currentValue, info);
@@ -109,6 +109,40 @@ public class FileComponent extends BaseComponent implements IntegrationComponent
                 else {
                     valueToWrite = currentValue.toString();
                 }
+                
+                if (info.addLineBreak) {
+                    valueToWrite += System.lineSeparator();
+                }
+                byte[] strToBytes = valueToWrite.getBytes();
+                try {
+                    Files.write(path, strToBytes, info.openOptions);
+                } catch (NoSuchFileException nsfe) {
+                    ErrorUtil.createErrorValueAndThrow(currentValue.getStatement(), "COMPONENT", "FILE", "Could not open file. Please add CREATE, CREATE_NEW or TRUNCATE_EXISTING -option.");
+                } catch (Exception e) {
+                    System.out.println("ERROR: " + e.getMessage() + ", " + e.getClass().getName());
+                }
+            }
+            
+            else if (info.writeAs == WriteAsType.YAML) {
+                String valueToWrite = null;
+                valueToWrite = OperonContext.serializeAsYaml(currentValue);
+                
+                if (info.addLineBreak) {
+                    valueToWrite += System.lineSeparator();
+                }
+                byte[] strToBytes = valueToWrite.getBytes();
+                try {
+                    Files.write(path, strToBytes, info.openOptions);
+                } catch (NoSuchFileException nsfe) {
+                    ErrorUtil.createErrorValueAndThrow(currentValue.getStatement(), "COMPONENT", "FILE", "Could not open file. Please add CREATE, CREATE_NEW or TRUNCATE_EXISTING -option.");
+                } catch (Exception e) {
+                    System.out.println("ERROR: " + e.getMessage() + ", " + e.getClass().getName());
+                }
+            }
+            
+            else if (info.writeAs == WriteAsType.TOML) {
+                String valueToWrite = null;
+                valueToWrite = OperonContext.serializeAsToml(currentValue);
                 
                 if (info.addLineBreak) {
                     valueToWrite += System.lineSeparator();
@@ -424,7 +458,7 @@ public class FileComponent extends BaseComponent implements IntegrationComponent
                     info.method = MethodType.valueOf(method.toUpperCase());
                     break;
                 default:
-                    log.debug("file -producer: no mapping for configuration key: " + key);
+                    //:OFF:log.debug("file -producer: no mapping for configuration key: " + key);
                     System.err.println("file -producer: no mapping for configuration key: " + key);
                     ErrorUtil.createErrorValueAndThrow(currentValue.getStatement(), "FILE", "ERROR", "file -producer: no mapping for configuration key: " + key);
             }
@@ -476,7 +510,7 @@ public class FileComponent extends BaseComponent implements IntegrationComponent
     }
 
     private enum WriteAsType {
-        JSON, RAW;
+        JSON, RAW, YAML, TOML;
     }
 
     private enum MethodType {

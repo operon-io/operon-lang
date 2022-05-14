@@ -52,7 +52,7 @@ import org.apache.logging.log4j.LogManager;
  *
  */
 public class MappableTo extends BaseArity1 implements Node, Arity1 {
-    private static Logger log = LogManager.getLogger(MappableTo.class);
+     // no logger 
     
     public MappableTo(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
@@ -63,7 +63,7 @@ public class MappableTo extends BaseArity1 implements Node, Arity1 {
         //
         // Note: param (mappableTo) should be a OperonValue, or ValueRef, or Function.
         //
-        log.debug("MappableTo :: evaluate()");
+        //:OFF:log.debug("MappableTo :: evaluate()");
         OperonValue currentValue = (OperonValue) this.getStatement().getCurrentValue();
         currentValue = (OperonValue) currentValue.evaluate(); // unbox
         
@@ -72,7 +72,7 @@ public class MappableTo extends BaseArity1 implements Node, Arity1 {
         
         if (mappableTo instanceof OperonValue == false) {
             OperonValue mapTo = mappableTo.evaluate();
-            log.debug("MAP TO 1 :: " + mapTo.getClass().getName());
+            //:OFF:log.debug("MAP TO 1 :: " + mapTo.getClass().getName());
             result = this.evaluateIsMappableTo(currentValue, mapTo);
         }
         else {
@@ -89,16 +89,16 @@ public class MappableTo extends BaseArity1 implements Node, Arity1 {
         
         if (currentValue instanceof StringType
                 && mappableTo instanceof StringType) {
-            log.debug("MappableTo :: evaluate() :: StringType");
+            //:OFF:log.debug("MappableTo :: evaluate() :: StringType");
             result = resultTrue;
             StringType mapTo = (StringType) mappableTo;
             if (mapTo.getOperonValueConstraint() != null) {
-                log.debug(" MapTo :: StringType :: CONSTRAINT EXISTS. Evaluate against :: " + currentValue);
+                //:OFF:log.debug(" MapTo :: StringType :: CONSTRAINT EXISTS. Evaluate against :: " + currentValue);
                 mapTo.getOperonValueConstraint().setValueToEvaluateAgainst(currentValue.copy());
                 OperonValue constraintResult = (OperonValue) mapTo.getOperonValueConstraint().evaluate();
                 
                 if (constraintResult instanceof FalseType) {
-                    log.debug("MappableTo :: constraint violation in StringType");
+                    //:OFF:log.debug("MappableTo :: constraint violation in StringType");
                     result = resultFalse;
                 }
             }
@@ -106,37 +106,37 @@ public class MappableTo extends BaseArity1 implements Node, Arity1 {
         
         else if (currentValue instanceof NumberType
                 && mappableTo instanceof NumberType) {
-            log.debug("MappableTo :: evaluate() :: NumberType");
+            //:OFF:log.debug("MappableTo :: evaluate() :: NumberType");
             result = resultTrue;
         }
         
         else if (currentValue instanceof TrueType
                 && mappableTo instanceof TrueType) {
-            log.debug("MappableTo :: evaluate() :: TrueType");
+            //:OFF:log.debug("MappableTo :: evaluate() :: TrueType");
             result = resultTrue;
         }
         
         else if (currentValue instanceof FalseType
                 && mappableTo instanceof FalseType) {
-            log.debug("MappableTo :: evaluate() :: FalseType");
+            //:OFF:log.debug("MappableTo :: evaluate() :: FalseType");
             result = resultTrue;
         }
         
         else if (currentValue instanceof TrueType
                 && mappableTo instanceof FalseType) {
-            log.debug("MappableTo :: evaluate() :: TrueType");
+            //:OFF:log.debug("MappableTo :: evaluate() :: TrueType");
             result = resultTrue;
         }
         
         else if (currentValue instanceof FalseType
                 && mappableTo instanceof TrueType) {
-            log.debug("MappableTo :: evaluate() :: FalseType");
+            //:OFF:log.debug("MappableTo :: evaluate() :: FalseType");
             result = resultTrue;
         }
         
         else if (currentValue instanceof ArrayType
                 && mappableTo instanceof ArrayType) {
-            log.debug("MappableTo :: evaluate() :: ArrayType");
+            //:OFF:log.debug("MappableTo :: evaluate() :: ArrayType");
             //
             // TODO: loop through the array and evaluate each element? NOTE: this might be unnecessary!
             //
@@ -145,26 +145,26 @@ public class MappableTo extends BaseArity1 implements Node, Arity1 {
         
         else if (currentValue instanceof ObjectType
             && mappableTo instanceof ObjectType) {
-            log.debug("MappableTo :: evaluate() :: ObjectType");
+            //:OFF:log.debug("MappableTo :: evaluate() :: ObjectType");
             ObjectType curObj = (ObjectType) currentValue;
             result = resultTrue;
             
             int i = 0;
             for (PairType mappablePair : ((ObjectType) mappableTo).getPairs()) {
                 i += 1;
-                log.debug(" >> MAPPABLE_TO OBJ KEY :: " + mappablePair.getKey());
+                //:OFF:log.debug(" >> MAPPABLE_TO OBJ KEY :: " + mappablePair.getKey());
                 OperonValueConstraint constraint = mappablePair.getOperonValueConstraint();
                 boolean hasConstraint = false;
                 
                 if (constraint != null) {
-                    log.debug(" >> " + mappablePair.getKey() + " CONSTRAINT FOUND !!!");
+                    //:OFF:log.debug(" >> " + mappablePair.getKey() + " CONSTRAINT FOUND !!!");
                     hasConstraint = true;
                 }
                     
                 // Apply constraint-check (when constraint exists):
                 boolean found = false;
                 for (PairType pair : curObj.getPairs()) {
-                    log.debug(" >> CUR OBJ KEY :: " + pair.getKey());
+                    //:OFF:log.debug(" >> CUR OBJ KEY :: " + pair.getKey());
                     if (pair.getKey().equals(mappablePair.getKey())) {
                         found = true;
                         if (hasConstraint) {
@@ -173,31 +173,31 @@ public class MappableTo extends BaseArity1 implements Node, Arity1 {
                             OperonValue constraintResult = constraint.evaluate();
                             
                             if (constraintResult instanceof FalseType) {
-                                log.debug("MappableTo :: constraint violation :: " + pair.getKey());
+                                //:OFF:log.debug("MappableTo :: constraint violation :: " + pair.getKey());
                                 result = resultFalse;
                                 return result;
                             }
                         }
                         
                         // If mappablePair is ObjectType, then evaluate the sub-fields
-                        log.debug(">>>>>> Evaluate sub-field :: " + mappablePair.getValue().getClass().getName() + " :: " + pair.getValue());
+                        //:OFF:log.debug(">>>>>> Evaluate sub-field :: " + mappablePair.getValue().getClass().getName() + " :: " + pair.getValue());
                         if (mappablePair.getValue().evaluate() instanceof ObjectType) {
                             OperonValue pairValue = pair.getValue().copy();
                             if (pairValue instanceof ObjectType) {
                                 ObjectType p1 = (ObjectType) pairValue;
                                 ObjectType p2 = (ObjectType) mappablePair.getValue().evaluate();
                                 if (this.evaluateIsMappableTo(p1, p2) instanceof FalseType) {
-                                    log.debug("MappableTo :: constraint violation in sub-field :: " + pairValue + " / " + mappablePair.getValue());
+                                    //:OFF:log.debug("MappableTo :: constraint violation in sub-field :: " + pairValue + " / " + mappablePair.getValue());
                                     result = resultFalse;
                                 }
                             }
                             else {
-                                log.debug(" >>> pairValue was not ObjectType :: " + pairValue.getClass().getName());
+                                //:OFF:log.debug(" >>> pairValue was not ObjectType :: " + pairValue.getClass().getName());
                                 // The constraint-check was ok, so this must be ok as well.
                                 result = resultTrue;
                             }
                             
-                            log.debug(">>>>>> Evaluation of sub-field done :: " + mappablePair.getValue().getClass().getName());
+                            //:OFF:log.debug(">>>>>> Evaluation of sub-field done :: " + mappablePair.getValue().getClass().getName());
                         }
                         break;
                     }
@@ -214,7 +214,7 @@ public class MappableTo extends BaseArity1 implements Node, Arity1 {
                     OperonValue constraintResult = constraint.evaluate();
                     
                     if (constraintResult instanceof FalseType) {
-                        log.debug("MappableTo :: constraint violation :: " + mappablePair.getKey());
+                        //:OFF:log.debug("MappableTo :: constraint violation :: " + mappablePair.getKey());
                         result = resultFalse;
                         return result;
                     }
@@ -224,49 +224,49 @@ public class MappableTo extends BaseArity1 implements Node, Arity1 {
         
         else if (currentValue instanceof NullType
                 && mappableTo instanceof NullType) {
-            log.debug("MappableTo :: evaluate() :: NullType");
+            //:OFF:log.debug("MappableTo :: evaluate() :: NullType");
             result = resultTrue;
         }
         
         else if (currentValue instanceof EmptyType
                 && mappableTo instanceof EmptyType) {
-            log.debug("MappableTo :: evaluate() :: EmptyType");
+            //:OFF:log.debug("MappableTo :: evaluate() :: EmptyType");
             result = resultTrue;
         }
         
         else if (currentValue instanceof LambdaFunctionRef
                 && mappableTo instanceof LambdaFunctionRef) {
-            log.debug("MappableTo :: evaluate() :: LambdaFunctionRef");
+            //:OFF:log.debug("MappableTo :: evaluate() :: LambdaFunctionRef");
             result = resultTrue;
         }
         
         else if (currentValue instanceof FunctionRef
                 && mappableTo instanceof FunctionRef) {
-            log.debug("MappableTo :: evaluate() :: FunctionRef");
+            //:OFF:log.debug("MappableTo :: evaluate() :: FunctionRef");
             result = resultTrue;
         }
         
         else if (currentValue instanceof Path
                 && mappableTo instanceof Path) {
-            log.debug("MappableTo :: evaluate() :: Path");
+            //:OFF:log.debug("MappableTo :: evaluate() :: Path");
             result = resultTrue;
         }
         
         else if (currentValue instanceof RawValue
                 && mappableTo instanceof RawValue) {
-            log.debug("MappableTo :: evaluate() :: RawValue");
+            //:OFF:log.debug("MappableTo :: evaluate() :: RawValue");
             result = resultTrue;
         }
         
         else if (currentValue instanceof StreamValue
                 && mappableTo instanceof StreamValue) {
-            log.debug("MappableTo :: evaluate() :: RawValue");
+            //:OFF:log.debug("MappableTo :: evaluate() :: RawValue");
             result = resultTrue;
         }
         
         else {
-            log.debug("MappableTo :: evaluate() :: ELSE >>>>>>>>>>>>>>>>>>> RETURN FALSE");
-            log.debug("    >> Current Value :: " + currentValue.getClass().getName() + ", mappableTo :: " + mappableTo.getClass().getName());
+            //:OFF:log.debug("MappableTo :: evaluate() :: ELSE >>>>>>>>>>>>>>>>>>> RETURN FALSE");
+            //:OFF:log.debug("    >> Current Value :: " + currentValue.getClass().getName() + ", mappableTo :: " + mappableTo.getClass().getName());
             result = resultFalse;
         }
         

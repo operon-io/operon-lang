@@ -28,7 +28,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class MultiNode extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(MultiNode.class);
+     // no logger 
     private List<Node> nodes;
     
     public MultiNode(Statement stmnt) {
@@ -39,9 +39,9 @@ public class MultiNode extends AbstractNode implements Node {
     public OperonValue evaluate() throws OperonGenericException {
         // loop through nodes, and evaluate each
         OperonValue result = null;
-        log.debug("ENTER MULTINODE EVALUATE");
+        //:OFF:log.debug("ENTER MULTINODE EVALUATE");
         // Evaluate in reverse order
-        //log.debug("MultiNode :: Runtimevalues :: " + this.getStatement().getRuntimeValues());
+        ////:OFF:log.debug("MultiNode :: Runtimevalues :: " + this.getStatement().getRuntimeValues());
         for (int i = this.nodes.size() - 1; i >= 0; i --) {
             Node node = this.nodes.get(i);
             Context ctx = this.getStatement().getOperonContext();
@@ -69,7 +69,7 @@ public class MultiNode extends AbstractNode implements Node {
         //System.out.println("MultiNode setEvaluatedValue :: " + result);
         this.setEvaluatedValue(result);
         //System.out.println("Multinode :: result :: " + this.getStatement().getId() + " :: " + result);
-        log.debug("EXIT MULTINODE EVALUATE");
+        //:OFF:log.debug("EXIT MULTINODE EVALUATE");
         return result;
     }
     

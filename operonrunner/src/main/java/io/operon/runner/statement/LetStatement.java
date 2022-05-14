@@ -38,7 +38,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class LetStatement extends BaseStatement implements Statement {
-    private static Logger log = LogManager.getLogger(LetStatement.class);
+     // no logger 
     
     private Node configs;
     
@@ -73,7 +73,7 @@ public class LetStatement extends BaseStatement implements Statement {
     }
     
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("Let-statement :: evaluate()");
+        //:OFF:log.debug("Let-statement :: evaluate()");
         //System.out.println("Let-statement :: evaluate()");
         
         //
@@ -137,7 +137,7 @@ public class LetStatement extends BaseStatement implements Statement {
                 result = eh.evaluate(e);
             }
             else {
-                log.debug("LetStatement :: exceptionHandler missing, throw to upper-level");
+                //:OFF:log.debug("LetStatement :: exceptionHandler missing, throw to upper-level");
                 //
                 // Throw the exception to upper-level, since no ExceptionHandler was found:
                 //
@@ -155,12 +155,12 @@ public class LetStatement extends BaseStatement implements Statement {
             OperonValueConstraint.evaluateConstraintAgainstOperonValue(this.getEvaluatedValue(), jvc);
         }
         
-        log.debug("LET STATEMENT RETURN :: " + this.getEvaluatedValue());
+        //:OFF:log.debug("LET STATEMENT RETURN :: " + this.getEvaluatedValue());
         return this.getEvaluatedValue();
     }
     
     public void resolveConfigs() throws OperonGenericException {
-        log.debug("Let, resolveConfigs");
+        //:OFF:log.debug("Let, resolveConfigs");
         ObjectType conf = this.getConfigs();
         if (conf == null) {
             return;
@@ -172,6 +172,24 @@ public class LetStatement extends BaseStatement implements Statement {
                     String resetTypeStr = ((StringType) pair.getEvaluatedValue()).getJavaStringValue();
                     resetTypeStr.substring(1, resetTypeStr.length() - 1);
                     this.setResetType(LetStatement.ResetType.valueOf(resetTypeStr.toUpperCase()));
+                    break;
+                case "\"eager\"":
+                    Node evaluateEagerValue = pair.getValue().evaluate();
+                    if (evaluateEagerValue instanceof FalseType) {
+                        this.setEvaluateType(LetStatement.EvaluateType.LAZY);
+                    }
+                    else {
+                        this.setEvaluateType(LetStatement.EvaluateType.EAGER);
+                    }
+                    break;
+                case "\"lazy\"":
+                    Node evaluateLazyValue = pair.getValue().evaluate();
+                    if (evaluateLazyValue instanceof FalseType) {
+                        this.setEvaluateType(LetStatement.EvaluateType.EAGER);
+                    }
+                    else {
+                        this.setEvaluateType(LetStatement.EvaluateType.LAZY);
+                    }
                     break;
                 // 
                 // Lazy | Eager
@@ -255,11 +273,11 @@ public class LetStatement extends BaseStatement implements Statement {
     }
     
     public void reset() {
-        log.debug("LetStatement :: reset() called");
+        //:OFF:log.debug("LetStatement :: reset() called");
         //System.out.println("LetStatement :: reset() called");
         if (this.getResetType() != ResetType.NEVER) {
-            log.debug("LetStatement :: resetting");
-            log.debug("LetStatement :: rt-values :: " + this.getRuntimeValues());
+            //:OFF:log.debug("LetStatement :: resetting");
+            //:OFF:log.debug("LetStatement :: rt-values :: " + this.getRuntimeValues());
             this.getRuntimeValues().clear();
             this.setEvaluatedValue(null);
             //System.out.println("LetStatement :: reset done...");

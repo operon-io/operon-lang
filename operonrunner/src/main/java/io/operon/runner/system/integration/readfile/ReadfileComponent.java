@@ -58,7 +58,7 @@ import org.apache.logging.log4j.LogManager;
 // This component is a "producer".
 //
 public class ReadfileComponent extends BaseComponent implements IntegrationComponent, java.io.Serializable {
-    private static Logger log = LogManager.getLogger(ReadfileComponent.class);
+     // no logger 
 
     private ObjectType jsonConfiguration; // optional: json-configuration for the component
     private boolean isRunning;
@@ -68,7 +68,7 @@ public class ReadfileComponent extends BaseComponent implements IntegrationCompo
     public ReadfileComponent() {}
 
     public OperonValue produce(OperonValue currentValue) throws OperonComponentException {
-        log.debug("readfile :: produce");
+        //:OFF:log.debug("readfile :: produce");
         try {
             Info info = resolve(currentValue);
             OperonValue result = this.handleTask(currentValue, info);
@@ -383,7 +383,7 @@ public class ReadfileComponent extends BaseComponent implements IntegrationCompo
                     info.maxFileAmount = (long) maxFileAmount;
                     break;
                 default:
-                    log.debug("readfile -producer: no mapping for configuration key: " + key);
+                    //:OFF:log.debug("readfile -producer: no mapping for configuration key: " + key);
                     System.err.println("readfile -producer: no mapping for configuration key: " + key);
                     ErrorUtil.createErrorValueAndThrow(currentValue.getStatement(), "READFILE", "ERROR", "readfile -producer: no mapping for configuration key: " + key);
             }

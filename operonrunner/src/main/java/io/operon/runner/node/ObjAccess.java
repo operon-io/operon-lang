@@ -35,7 +35,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager; 
  
 public class ObjAccess extends AbstractNode implements Node, SupportsAttributes { 
-    private static Logger log = LogManager.getLogger(ObjAccess.class); 
+     // no logger  
     private String objAccessKey;
 
     public ObjAccess(Statement stmnt) { 
@@ -47,9 +47,9 @@ public class ObjAccess extends AbstractNode implements Node, SupportsAttributes 
     } 
  
     public OperonValue evaluate() throws OperonGenericException { 
-        log.debug("ENTER ObjAccess.evaluate(). Stmt: " + this.getStatement().getId());
+        //:OFF:log.debug("ENTER ObjAccess.evaluate(). Stmt: " + this.getStatement().getId());
         //System.out.println("ENTER ObjAccess.evaluate(). Stmt: " + this.getStatement().getId());
-
+        
         // get currentValue from the statement 
         OperonValue currentValue = this.getStatement().getCurrentValue();
         //OperonValue evaluatedValue = currentValue; 
@@ -59,41 +59,58 @@ public class ObjAccess extends AbstractNode implements Node, SupportsAttributes 
         } 
  
         if (currentValue instanceof ObjectType) { 
-            log.debug("EXIT ObjAccess.evaluate() obj");
+            //:OFF:log.debug("EXIT ObjAccess.evaluate() obj");
             OperonValue res = evaluateObj((ObjectType) currentValue);
             return res; 
         } 
          
         else if (currentValue instanceof ArrayType) { 
-            log.debug("EXIT ObjAccess.evaluate() array"); 
+            //:OFF:log.debug("EXIT ObjAccess.evaluate() array"); 
             return evaluateArray( (ArrayType) currentValue ); 
         } 
-        log.debug("ObjAccess: cannot access object. Wrong type: " + currentValue); 
+        //:OFF:log.debug("ObjAccess: cannot access object. Wrong type: " + currentValue); 
         
-        return ErrorUtil.createErrorValueAndThrow(this.getStatement(), "OBJACCESS", "TYPE", "Cannot access object. Wrong type. Key: " + this.getObjAccessKey());
+        return ErrorUtil.createErrorValueAndThrow(this.getStatement(), "OBJACCESS", "TYPE", "Cannot access object. Wrong type. Key: " + this.getObjAccessKey() + ", line #" + this.getSourceCodeLineNumber());
     } 
      
     private OperonValue evaluateObj(ObjectType obj) throws OperonGenericException { 
         OperonValue result = null;
-
-        log.debug("Accessing: " + this.getObjAccessKey());
+        
+        //:OFF:log.debug("Accessing: " + this.getObjAccessKey());
         //System.out.println("Accessing: " + this.getObjAccessKey());
         
-        // Access by object's key. Loop through the pairs and check which pair matches.
-        String parentKey = null;
-        int resultPairPosition = 0;
-        int pairPosition = 1;
-        for (PairType pair : obj.getPairs()) { 
-            log.debug("KEY :: " + pair.getKey()); 
-            if (pair.getKey().equals("\"" + this.getObjAccessKey() + "\"")) { 
-                result = pair.getEvaluatedValue(); 
-                resultPairPosition = pairPosition;
-                parentKey = pair.getKey();
-                break; 
+        
+        if (obj.getIndexedPairs() != null) {
+            PairType p = obj.getIndexedPairs().get("\"" + this.getObjAccessKey() + "\"");
+            if (p != null) {
+                result = p.getEvaluatedValue();
+                // No position available
+                //parentKey = p.getKey();
+                // TODO: check if parentKey assign can be removed!
             }
-            pairPosition += 1;
-        } 
-
+        }
+        
+        
+        if (result == null) {
+            // Access by object's key. Loop through the pairs and check which pair matches.
+            String parentKey = null;
+            int resultPairPosition = 0;
+            int pairPosition = 1;
+            for (PairType pair : obj.getPairs()) { 
+                //:OFF:log.debug("KEY :: " + pair.getKey()); 
+                if (pair.getKey().equals("\"" + this.getObjAccessKey() + "\"")) { 
+                    result = pair.getEvaluatedValue(); 
+                    resultPairPosition = pairPosition;
+                    parentKey = pair.getKey();
+                    break; 
+                }
+                pairPosition += 1;
+            } 
+        }
+        else {
+            //System.out.println("Cache hit");
+        }
+        
         // If not found, return Empty 
         if (result == null) { 
             result = new EmptyType(this.getStatement()); 
@@ -127,7 +144,7 @@ public class ObjAccess extends AbstractNode implements Node, SupportsAttributes 
     }
      
     private ArrayType evaluateArray(ArrayType array) throws OperonGenericException {         
-        log.debug("Accessing array of objects: " + this.getObjAccessKey()); 
+        //:OFF:log.debug("Accessing array of objects: " + this.getObjAccessKey()); 
          
         ArrayType resultArray = new ArrayType(this.getStatement()); 
          
@@ -136,7 +153,7 @@ public class ObjAccess extends AbstractNode implements Node, SupportsAttributes 
         
         for (int i = 0; i < arrayValues.size(); i ++) { 
             Node arrayNode = arrayValues.get(i); 
-            //log.debug("    >> Looping: " + i); 
+            ////:OFF:log.debug("    >> Looping: " + i); 
             if (arrayNode.evaluate() instanceof ObjectType) {
                 Node obj = evaluateObj((ObjectType) arrayNode.evaluate());
                 if (obj instanceof ObjectType && ((ObjectType) obj).getPairs().size() == 0) {

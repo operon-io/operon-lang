@@ -53,4 +53,9 @@ public class FalseType extends OperonValue implements Node, AtomicOperonValue {
         return "false";
     }
 
+    @Override
+    public String toTomlString(OutputFormatter ofmt) {
+        return "false";
+    }
+
 }

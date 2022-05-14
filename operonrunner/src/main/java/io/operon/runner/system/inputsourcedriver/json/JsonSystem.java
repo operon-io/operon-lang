@@ -36,7 +36,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class JsonSystem extends BaseSystem implements InputSourceDriver {
-    private static Logger log = LogManager.getLogger(JsonSystem.class);
+     // no logger 
     
     private OperonValue initialValue;
     private ObjectType jsonConfiguration;
@@ -81,10 +81,10 @@ public class JsonSystem extends BaseSystem implements InputSourceDriver {
             this.isRunning = false;
         } catch (OperonGenericException e) {
             //System.out.println("OGE Exception :: " + e.toString());
-            log.error("Exception :: " + e.toString());
+            //:OFF:log.error("Exception :: " + e.toString());
             StackTraceElement [] st = e.getStackTrace();
             for (int i = 0; i < st.length; i ++) {
-                log.error("  StackTrace :: " + st[i]);
+                //:OFF:log.error("  StackTrace :: " + st[i]);
             }
             ctx.setException(e);
             if (e.getErrorValue() != null) {

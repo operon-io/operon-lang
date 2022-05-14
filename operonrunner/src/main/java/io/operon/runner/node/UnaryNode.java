@@ -27,7 +27,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class UnaryNode extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(UnaryNode.class);
+     // no logger 
     
     private Node node;
     private UnaryNodeProcessor proc;
@@ -44,7 +44,7 @@ public class UnaryNode extends AbstractNode implements Node {
             this.setEvaluatedValue(result);
             // update the currentValue from the statement
             this.getStatement().setCurrentValue(result);
-            log.debug("Unary node evaluated with processor :: " + result);
+            //:OFF:log.debug("Unary node evaluated with processor :: " + result);
             return result;
         }
         
@@ -55,7 +55,7 @@ public class UnaryNode extends AbstractNode implements Node {
             this.setEvaluatedValue(result);
             // update the currentValue from the statement
             this.getStatement().setCurrentValue(result);
-            log.debug("Unary node evaluated without processor :: class: " + result.getClass().getName());
+            //:OFF:log.debug("Unary node evaluated without processor :: class: " + result.getClass().getName());
             return result;
         }
     }

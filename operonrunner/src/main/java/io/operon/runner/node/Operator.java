@@ -38,7 +38,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class Operator extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(Operator.class);
+     // no logger 
 
     // This should be set dynamically (during runtime).
     private OperonValue valueToApplyAgainst;
@@ -69,7 +69,7 @@ public class Operator extends AbstractNode implements Node {
     // I think that this must register to OperonContext's Bindings or BindManager,
     // which will cascade the Bindings dynamically, when requested.
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER Operator.evaluate()");
+        //:OFF:log.debug("ENTER Operator.evaluate()");
         return null;
     }
 

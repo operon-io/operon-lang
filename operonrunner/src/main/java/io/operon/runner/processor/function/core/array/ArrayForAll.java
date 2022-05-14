@@ -43,7 +43,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 // Tests predicate-expression (given as functionRef) for each value in an array
 // 
 public class ArrayForAll extends BaseArity1 implements Node, Arity1, SupportsAttributes {
-    private static Logger log = LogManager.getLogger(ArrayForAll.class);
+     // no logger 
     
     public ArrayForAll(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
@@ -68,7 +68,7 @@ public class ArrayForAll extends BaseArity1 implements Node, Arity1, SupportsAtt
         
         try {
             for (int i = 0; i < arrayToTest.getValues().size(); i ++) {
-                log.debug("loop, i == " + i);
+                //:OFF:log.debug("loop, i == " + i);
                 //
                 // Set new PosPathPart:
                 //

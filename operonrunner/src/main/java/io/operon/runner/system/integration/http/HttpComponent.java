@@ -96,16 +96,16 @@ import org.apache.logging.log4j.LogManager;
 //
 public class HttpComponent extends BaseComponent implements IntegrationComponent {
 
-    private static Logger log = LogManager.getLogger(HttpComponent.class);
+     // no logger 
     private static final String COOKIES_HEADER = "Set-Cookie";
     private static java.net.CookieManager msCookieManager = new java.net.CookieManager();
 
     public HttpComponent() {
-        log.debug("http :: constructor");
+        //:OFF:log.debug("http :: constructor");
     }
     
     public OperonValue produce(OperonValue currentValue) throws OperonComponentException {
-        log.debug("http :: produce");
+        //:OFF:log.debug("http :: produce");
         try {
             Info info = resolve(currentValue);
             OperonValue result = this.handleTask(currentValue, info);
@@ -664,7 +664,7 @@ public class HttpComponent extends BaseComponent implements IntegrationComponent
                     }
                     break;
                 default:
-                    log.debug("file -producer: no mapping for configuration key: " + key);
+                    //:OFF:log.debug("file -producer: no mapping for configuration key: " + key);
                     System.err.println("file -producer: no mapping for configuration key: " + key);
                     ErrorUtil.createErrorValueAndThrow(currentValue.getStatement(), "HTTP", "ERROR", "http -producer: no mapping for configuration key: " + key);
             }

@@ -45,7 +45,7 @@ import org.apache.logging.log4j.LogManager;
 // LambdaFunctionRef is used to reference function e.g. in the assignments.
 //
 public class LambdaFunctionRef extends OperonValue implements Node {
-    private static Logger log = LogManager.getLogger(FunctionRef.class);
+     // no logger 
 
     private Node lambdaExpr;
     private Map<String, Node> params;
@@ -61,13 +61,13 @@ public class LambdaFunctionRef extends OperonValue implements Node {
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER LambdaFunctionRef.evaluate(), stmt = " + this.getStatement().getPreviousStatement().getId());
+        //:OFF:log.debug("ENTER LambdaFunctionRef.evaluate(), stmt = " + this.getStatement().getPreviousStatement().getId());
         this.setUnboxed(false);
         return this;
     }
     
     public OperonValue invoke() throws OperonGenericException {
-        log.debug("ENTER LambdaFunctionRef.invoke()");
+        //:OFF:log.debug("ENTER LambdaFunctionRef.invoke()");
         //System.out.println("  LambdaFunctionRef invoke cv=" + this.getCurrentValueForFunction() + ", stmt cv=" + this.getStatement().getCurrentValue() + ", stmt id=" + this.getStatement().getClass().getName());
         
         LambdaFunctionCall lfnCall = new LambdaFunctionCall(this.getStatement());
@@ -89,7 +89,7 @@ public class LambdaFunctionRef extends OperonValue implements Node {
             // The CV get this far correctly
             //System.out.println("LambdaFunctionRef.setParamsAndInvokeLambdaFunctionRef: cv=" + currentValueCopy);
             LambdaFunctionRef lfr = LambdaFunctionRef.setParams(ref, currentValueCopy, fArgs);
-            log.debug("  invoking function");
+            //:OFF:log.debug("  invoking function");
             lfr.setCurrentValueForFunction(currentValueCopy);
             OperonValue result = lfr.invoke();
             // Check that the result does not violate constraint:
@@ -118,8 +118,8 @@ public class LambdaFunctionRef extends OperonValue implements Node {
         List<String> usedFunctionArgumentNames = new ArrayList<String>();
         
         if (fArgs != null) {
-            log.debug("  setting the function arguments. Amount :: " + fArgs.getArguments().size());
-            log.debug("  lfr params-size :: " + lfr.getParams().size());
+            //:OFF:log.debug("  setting the function arguments. Amount :: " + fArgs.getArguments().size());
+            //:OFF:log.debug("  lfr params-size :: " + lfr.getParams().size());
             // Set the function arguments before invoking it
             int argPlaceholderCounter = 0;
             
@@ -129,10 +129,10 @@ public class LambdaFunctionRef extends OperonValue implements Node {
             boolean linkScope = true;
             
             for (Map.Entry<String, Node> param : params.entrySet()) {
-                log.debug("  PARAM name :: " + param.getKey());
+                //:OFF:log.debug("  PARAM name :: " + param.getKey());
                 
                 if (param.getValue() instanceof FunctionRefNamedArgument) {
-                    log.debug("  FunctionRefNamedArgument found from param");
+                    //:OFF:log.debug("  FunctionRefNamedArgument found from param");
                     FunctionRefNamedArgument arg = (FunctionRefNamedArgument) param.getValue();
                     
                     //
@@ -154,25 +154,25 @@ public class LambdaFunctionRef extends OperonValue implements Node {
                     // Bind param with value:
                     lfr.getParams().put(arg.getArgumentName(), arg.getExprNode());
                     usedFunctionArgumentNames.add(arg.getArgumentName());
-                    log.debug("  Named argument found :: " + arg.getArgumentName());
+                    //:OFF:log.debug("  Named argument found :: " + arg.getArgumentName());
                     paramsSetCounter += 1;
                 }
                 
                 else if (param.getValue() instanceof FunctionRefArgumentPlaceholder) {
-                    log.debug("  FunctionRefArgumentPlaceholder found from param");
+                    //:OFF:log.debug("  FunctionRefArgumentPlaceholder found from param");
                     //
                     // Resolve correct position
                     //
-                    log.debug("  fArgs.getArguments().size() :: " + fArgs.getArguments().size());
+                    //:OFF:log.debug("  fArgs.getArguments().size() :: " + fArgs.getArguments().size());
                     for (int i = 0; i < fArgs.getArguments().size(); i ++) {
                         Node fArg = fArgs.getArguments().get(i);
                         
                         if (fArg instanceof FunctionNamedArgument) {
-                            log.debug("  fArg matches FunctionNamedArgument");
+                            //:OFF:log.debug("  fArg matches FunctionNamedArgument");
                             String argName = ((FunctionNamedArgument) fArg).getArgumentName();
-                            log.debug("  argName :: " + argName + ", param name :: " + param.getKey());
+                            //:OFF:log.debug("  argName :: " + argName + ", param name :: " + param.getKey());
                             if (argName.equals(param.getKey())) {
-                                log.debug("   FunctionNamedArgument found for :: " + argName);
+                                //:OFF:log.debug("   FunctionNamedArgument found for :: " + argName);
                                 Node argValue = ((FunctionNamedArgument) fArg).getArgumentValue();
                                 
                                 //
@@ -199,12 +199,12 @@ public class LambdaFunctionRef extends OperonValue implements Node {
                             }
                         }
                         else if (fArg instanceof FunctionRefNamedArgument) {
-                            log.debug("  fArg matches FunctionRefNamedArgument");
+                            //:OFF:log.debug("  fArg matches FunctionRefNamedArgument");
                             String argName = ((FunctionRefNamedArgument) fArg).getArgumentName();
-                            log.debug("  argName :: " + argName + ", param name :: " + param.getKey());
+                            //:OFF:log.debug("  argName :: " + argName + ", param name :: " + param.getKey());
                             
                             if (argName.equals(param.getKey())) {
-                                log.debug("   FunctionRefNamedArgument found for :: " + argName);
+                                //:OFF:log.debug("   FunctionRefNamedArgument found for :: " + argName);
                                 Node argValue = ((FunctionRefNamedArgument) fArg).getExprNode();
                                 
                                 //
@@ -234,19 +234,19 @@ public class LambdaFunctionRef extends OperonValue implements Node {
                 }
             }
             
-            log.debug("   AMOUNT of params set :: " + paramsSetCounter);
+            //:OFF:log.debug("   AMOUNT of params set :: " + paramsSetCounter);
             
             //
             // Loop again, and this time resolve the function-placeholders!
             // 
             List<Integer> usedRegularArgIndexes = new ArrayList<Integer>();
-            log.debug("  Loop to determine the argument-placeholders.");
+            //:OFF:log.debug("  Loop to determine the argument-placeholders.");
             
             for (Map.Entry<String, Node> param : params.entrySet()) {
-                log.debug("  PARAM name :: " + param.getKey());
+                //:OFF:log.debug("  PARAM name :: " + param.getKey());
                 
                 if (param.getValue() instanceof FunctionRefArgumentPlaceholder) {
-                    log.debug("  FunctionRefArgumentPlaceholder found from param");
+                    //:OFF:log.debug("  FunctionRefArgumentPlaceholder found from param");
                     // Check if arg-name has already been used.
                     // (If it was not used, then proceed).
                     boolean found = false;
@@ -256,13 +256,13 @@ public class LambdaFunctionRef extends OperonValue implements Node {
                             break;
                         }
                     }
-                    log.debug("  Found :: " + found);
+                    //:OFF:log.debug("  Found :: " + found);
                     
                     //
                     // Not used in the previous loop, so use it now, and then add to used.
                     //
                     if (found == false) {
-                        log.debug(param.getKey() + " was not used, using it now...");
+                        //:OFF:log.debug(param.getKey() + " was not used, using it now...");
                         usedFunctionArgumentNames.add(param.getKey());
                         
                         //
@@ -278,7 +278,7 @@ public class LambdaFunctionRef extends OperonValue implements Node {
                                 }
                                 else {
                                     usedRegularArgIndexes.add(i);
-                                    log.debug("   FunctionRegularArgument found");
+                                    //:OFF:log.debug("   FunctionRegularArgument found");
                                     Node argValue = ((FunctionRegularArgument) fArg).getArgument();
                                     
                                     //
@@ -305,7 +305,7 @@ public class LambdaFunctionRef extends OperonValue implements Node {
                         }
                     }
                     else {
-                        log.debug("  Nothing done for arg-placeholder (not regular argument)");
+                        //:OFF:log.debug("  Nothing done for arg-placeholder (not regular argument)");
                     }
                 }
             }

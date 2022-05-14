@@ -1,0 +1,6 @@
+[
+    {"name": "java.lang.String"},
+    {"name": "java.util.ArrayList"},
+    {"name": "double[]"},
+    {"name": "double[][]"}
+]

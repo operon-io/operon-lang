@@ -62,7 +62,7 @@ import org.apache.logging.log4j.LogManager;
 
 
 public class DigestComponent extends BaseComponent implements IntegrationComponent {
-    private static Logger log = LogManager.getLogger(DigestComponent.class);
+     // no logger 
 
     public DigestComponent() {}
     
@@ -214,7 +214,7 @@ public class DigestComponent extends BaseComponent implements IntegrationCompone
                     info.secretKey = secretKeyStr;
                     break;
                 default:
-                    log.debug("digest -producer: no mapping for configuration key: " + key);
+                    //:OFF:log.debug("digest -producer: no mapping for configuration key: " + key);
                     System.err.println("digest -producer: no mapping for configuration key: " + key);
                     ErrorUtil.createErrorValueAndThrow(currentValue.getStatement(), "DIGEST", "ERROR", "digest -producer: no mapping for configuration key: " + key);
             }
@@ -224,15 +224,23 @@ public class DigestComponent extends BaseComponent implements IntegrationCompone
         return info;
     }
 
-    private class Info {
-        private Algorithm algorithm = Algorithm.SHA256;
-        private WriteAs writeAs = WriteAs.HEX;
-        private String secretKey = "";
-        private String binaryEncoding = "utf-8"; // null = none, print as raw. UTF-8
+    class Info {
+        Algorithm algorithm = Algorithm.SHA256;
+        WriteAs writeAs = WriteAs.HEX;
+        String secretKey = "";
+        String binaryEncoding = "utf-8"; // null = none, print as raw. UTF-8
+    }
+
+    WriteAs getWriteAs(String writeAs) {
+        return WriteAs.valueOf(writeAs.toUpperCase());
     }
 
     enum WriteAs {
         BASE64, BASE64NOPADDING, BASE64URLSAFE, BASE64URLSAFENOPADDING, RAW, HEX;
+    }
+
+    Algorithm getAlgorithm(String alg) {
+        return Algorithm.valueOf(alg.toUpperCase());
     }
     
     enum Algorithm {

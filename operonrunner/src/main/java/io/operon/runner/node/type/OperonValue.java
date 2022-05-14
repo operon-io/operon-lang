@@ -38,7 +38,7 @@ import org.apache.logging.log4j.LogManager;
 // assignable.
 //
 public class OperonValue extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(OperonValue.class);
+     // no logger 
     
     private Node value; // boxed value
     
@@ -68,10 +68,10 @@ public class OperonValue extends AbstractNode implements Node {
 
     // Evaluates the boxed value
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("OperonValue :: evaluate, bindings size :: " + value.getBindings().size());
+        //:OFF:log.debug("OperonValue :: evaluate, bindings size :: " + value.getBindings().size());
 
         OperonValue result = value.evaluate();
-        log.debug("  OperonValue :: " + result.getClass().getName());
+        //:OFF:log.debug("  OperonValue :: " + result.getClass().getName());
         // update the currentValue from the statement
         //assert(this.getStatement() != null): "OperonValue.evaluate() :: getStatement was null";
         // # Removed this for #objWithCvSubstringTest
@@ -116,7 +116,7 @@ public class OperonValue extends AbstractNode implements Node {
     // Creates a deep-copy of the Jsonvalue, with array-copying flag.
     //
     public OperonValue copy(boolean deepCopyArrays) throws OperonGenericException {
-        //log.debug("OperonValue :: copy()");
+        ////:OFF:log.debug("OperonValue :: copy()");
         if (deepCopyArrays) {
             OperonValue result = JsonUtil.copyOperonValueWithArray(this);
             return result;
@@ -132,7 +132,7 @@ public class OperonValue extends AbstractNode implements Node {
     // Creates a deep-copy of the Jsonvalue, excluding the Arrays.
     //
     public OperonValue copy() throws OperonGenericException {
-        //log.debug("OperonValue :: copy()");
+        ////:OFF:log.debug("OperonValue :: copy()");
         OperonValue result = JsonUtil.copyOperonValue(this);
         return result;
     }
@@ -163,6 +163,13 @@ public class OperonValue extends AbstractNode implements Node {
     public String toYamlString(YamlFormatter yf) {
         if (yf == null) {yf = new YamlFormatter();}
         String result = this.getValue().toYamlString(yf);
+        return result;
+    }
+
+    @Override
+    public String toTomlString(OutputFormatter ofmt) {
+        if (ofmt == null) {ofmt = new OutputFormatter();}
+        String result = this.getValue().toTomlString(ofmt);
         return result;
     }
 

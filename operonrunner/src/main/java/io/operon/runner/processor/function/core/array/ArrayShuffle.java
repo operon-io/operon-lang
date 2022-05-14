@@ -40,7 +40,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class ArrayShuffle extends BaseArity0 implements Node, Arity0 {
-    private static Logger log = LogManager.getLogger(ArrayShuffle.class);
+     // no logger 
     
     public ArrayShuffle(Statement statement) {
         super(statement);

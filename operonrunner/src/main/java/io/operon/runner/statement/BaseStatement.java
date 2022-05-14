@@ -33,7 +33,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public abstract class BaseStatement {
-    private static Logger log = LogManager.getLogger(BaseStatement.class);
+     // no logger 
     private String id;
     private Map<String, OperonValue> runtimeValues;
     private Statement previousStatement;

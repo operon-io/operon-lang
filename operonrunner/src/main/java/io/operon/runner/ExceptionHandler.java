@@ -36,7 +36,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class ExceptionHandler {
-    private static Logger log = LogManager.getLogger(ExceptionHandler.class);
+     // no logger 
     
     private Node exceptionHandlerExpr;
     private OperonGenericException exception;
@@ -60,7 +60,7 @@ public class ExceptionHandler {
     }
 
     public OperonValue evaluate(OperonGenericException e) throws OperonGenericException {
-        log.debug("ExceptionHandler :: evaluate()");
+        //:OFF:log.debug("ExceptionHandler :: evaluate()");
         Node errHandlerExpr = this.getExceptionHandlerExpr();
         errHandlerExpr.getStatement().getOperonContext().addStackTraceElement(errHandlerExpr);
         //System.out.println("Error: " + e.getErrorJson());
@@ -92,7 +92,7 @@ public class ExceptionHandler {
         // NOTE: this may throw again new error:
         //
         OperonValue result = (OperonValue) exceptionStatement.evaluate();
-        log.debug("ExceptionHandler :: evaluate() done");
+        //:OFF:log.debug("ExceptionHandler :: evaluate() done");
         return result;
     }
     
@@ -100,7 +100,7 @@ public class ExceptionHandler {
     // This sets also the valueBeforeError
     //
     public static ErrorValue createErrorValue(Statement stmt, OperonGenericException oge) {
-        log.debug("ExceptionHandler :: createErrorValue()");
+        //:OFF:log.debug("ExceptionHandler :: createErrorValue()");
         //System.out.println("ExceptionHandler :: createErrorValue :: 0");
         ErrorValue errorValue = new ErrorValue(stmt);
         errorValue.setCode("ERROR");
@@ -125,7 +125,7 @@ public class ExceptionHandler {
         }
         //System.out.println("ExceptionHandler :: createErrorValue :: 2");
         errorValue.setErrorJson(exceptionObj);
-        log.debug("ExceptionHandler :: createErrorValue() done");
+        //:OFF:log.debug("ExceptionHandler :: createErrorValue() done");
         return errorValue;
     }
 }

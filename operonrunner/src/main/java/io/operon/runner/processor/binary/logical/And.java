@@ -63,11 +63,18 @@ public class And extends BaseBinaryNodeProcessor implements BinaryNodeProcessor 
                 return resultFalse;
             }
             else {
-                log.error("INCOMPATIBLE TYPES: " + lhsResult.getClass() + ", " + rhsResult.getClass());
+                //:OFF:log.error("INCOMPATIBLE TYPES: " + lhsResult.getClass() + ", " + rhsResult.getClass());
                 
                 String lhsType = ErrorUtil.mapTypeFromJavaClass(lhsResult);
                 String rhsType = ErrorUtil.mapTypeFromJavaClass(rhsResult);
-                return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "AND", "Not defined: " + lhsType + " " + binaryOperator + " " + rhsType);
+                return ErrorUtil.createErrorValueAndThrow(statement,
+                    "OPERATOR", 
+                    "AND", 
+                    "Not defined: " + lhsType + " " + binaryOperator + " " + rhsType +
+                        ", at line #" + this.getSourceCodeLineNumber() +
+                        ". lhs value: " + lhs.toString() + ", rhs value: " + rhs.toString()
+                
+                );
             }
         }
         
@@ -78,30 +85,37 @@ public class And extends BaseBinaryNodeProcessor implements BinaryNodeProcessor 
         }
 
         else {
-            log.error("INCOMPATIBLE TYPES: " + lhsResult.getClass() + ", " + rhsResult.getClass());
+            //:OFF:log.error("INCOMPATIBLE TYPES: " + lhsResult.getClass() + ", " + rhsResult.getClass());
             
             String lhsType = ErrorUtil.mapTypeFromJavaClass(lhsResult);
             String rhsType = ErrorUtil.mapTypeFromJavaClass(rhsResult);
-            return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "AND", "Not defined: " + lhsType + " " + binaryOperator + " " + rhsType);
+            return ErrorUtil.createErrorValueAndThrow(statement,
+                "OPERATOR", 
+                "AND", 
+                "Not defined: " + lhsType + " " + binaryOperator + " " + rhsType +
+                    ", at line #" + this.getSourceCodeLineNumber() +
+                    ". lhs value: " + lhs.toString() + ", rhs value: " + rhs.toString()
+            
+            );
         }
         
     }
 
     public void preprocessLhs(Statement statement, Node lhs) throws OperonGenericException {
-        log.debug("BaseBinaryNodeProcessor :: preprocess");
+        //:OFF:log.debug("BaseBinaryNodeProcessor :: preprocess");
         OperonValue initialValue = statement.getCurrentValue();
         // @ might be null when executing only select statement (from unit-tests)
         if (initialValue != null) {
-            log.debug("  BaseBinaryNodeProcessor :: initialValue was null");
+            //:OFF:log.debug("  BaseBinaryNodeProcessor :: initialValue was null");
             initialValue = initialValue.copy();
         }
         
         lhsResult = lhs.evaluate();
-        log.debug("  BaseBinaryNodeProcessor :: lhsresult bindings size :: " + lhsResult.getBindings().size());
+        //:OFF:log.debug("  BaseBinaryNodeProcessor :: lhsresult bindings size :: " + lhsResult.getBindings().size());
 
         if (lhsResult instanceof OperonValue) {
-            log.debug("  BaseBinaryNodeProcessor :: lhsresult is OperonValue --> unboxing");
-            log.debug("  BaseBinaryNodeProcessor :: lhsresult bindings size before unboxing :: " + lhsResult.getBindings().size());
+            //:OFF:log.debug("  BaseBinaryNodeProcessor :: lhsresult is OperonValue --> unboxing");
+            //:OFF:log.debug("  BaseBinaryNodeProcessor :: lhsresult bindings size before unboxing :: " + lhsResult.getBindings().size());
             Map<String, Operator> bindings = lhsResult.getBindings(); // HACK: for passing the bindings after evaluating (unboxing) OperonValue
             
             // Related to OperatorTests#35, might remove if not needed!
@@ -112,7 +126,7 @@ public class And extends BaseBinaryNodeProcessor implements BinaryNodeProcessor 
             
             // Test#35
             lhsResult.setDoBindings(lhsDoBindings);
-            log.debug("  BaseBinaryNodeProcessor :: lhsresult bindings size after unboxing :: " + lhsResult.getBindings().size());
+            //:OFF:log.debug("  BaseBinaryNodeProcessor :: lhsresult bindings size after unboxing :: " + lhsResult.getBindings().size());
         }
         // Fork the initial value for rhs:
         statement.setCurrentValue(initialValue);

@@ -46,7 +46,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class Mock extends BaseArity1 implements Node, Arity1 {
-    private static Logger log = LogManager.getLogger(Mock.class);
+     // no logger 
 
     // Not used at the moment
     private MockComponent mockComponent;
@@ -57,7 +57,7 @@ public class Mock extends BaseArity1 implements Node, Arity1 {
     }
 
     public OperonValue evaluate() throws OperonGenericException {        
-        log.debug("EVALUATE Mock");
+        //:OFF:log.debug("EVALUATE Mock");
         //System.out.println("Mock :: evaluate");
         try {
             OperonValue currentValue = this.getStatement().getCurrentValue();

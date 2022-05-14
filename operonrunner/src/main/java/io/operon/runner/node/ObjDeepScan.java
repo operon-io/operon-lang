@@ -33,7 +33,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class ObjDeepScan extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(ObjDeepScan.class);
+     // no logger 
     private String objDeepScanKey;
     
     public ObjDeepScan(Statement stmnt) {
@@ -45,46 +45,46 @@ public class ObjDeepScan extends AbstractNode implements Node {
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER ObjDeepScan.evaluate(). Stmt: " + this.getStatement().getId());
+        //:OFF:log.debug("ENTER ObjDeepScan.evaluate(). Stmt: " + this.getStatement().getId());
         //System.out.println("ObjDeepScan :: evaluate");
         // get currentValue from the statement
         OperonValue currentValue = this.getStatement().getCurrentValue();
         //System.out.println("ObjDeepScan :: evaluate :: cv :: " + currentValue);
-        log.debug("  >> ObjDeepScan :: 1 :: " + currentValue.getClass().getName());
+        //:OFF:log.debug("  >> ObjDeepScan :: 1 :: " + currentValue.getClass().getName());
         
-        //log.debug("    >> @: " + value.toString()); // Do not log here, causes re-evaluation
+        ////:OFF:log.debug("    >> @: " + value.toString()); // Do not log here, causes re-evaluation
 
         return evaluateSelector(currentValue);
     }
     
     private OperonValue evaluateSelector(OperonValue value) throws OperonGenericException {
-        log.debug("  >> ObjDeepScan :: evaluate selector");
+        //:OFF:log.debug("  >> ObjDeepScan :: evaluate selector");
 
         if (value instanceof ObjectType == false && value instanceof ArrayType == false) {
             value = value.evaluate();
         }
 
         if (value instanceof ObjectType) {
-            log.debug("EXIT ObjDeepScan.evaluate() obj");
+            //:OFF:log.debug("EXIT ObjDeepScan.evaluate() obj");
             return evaluateObj( (ObjectType) value );
         }
         
         else if (value instanceof ArrayType) {
-            log.debug("EXIT ObjDeepScan.evaluate() array");
+            //:OFF:log.debug("EXIT ObjDeepScan.evaluate() array");
             return evaluateArray( (ArrayType) value );
         }
         
-        log.debug("ObjDeepScan: cannot scan object. Wrong type: " + value.getClass().getName());
-        return ErrorUtil.createErrorValueAndThrow(this.getStatement(), "OBJECT_DEEP_SCAN", "TYPE", "Cannot scan object. Wrong type.");
+        //:OFF:log.debug("ObjDeepScan: cannot scan object. Wrong type: " + value.getClass().getName());
+        return ErrorUtil.createErrorValueAndThrow(this.getStatement(), "OBJECT_DEEP_SCAN", "TYPE", "Cannot scan object. Wrong type. Line #" + this.getSourceCodeLineNumber());
     }
     
     private ArrayType evaluateObj(ObjectType obj) throws OperonGenericException {
         ArrayType result = new ArrayType(this.getStatement());
         
-        log.debug("    Scan key: " + this.getObjDeepScanKey());
+        //:OFF:log.debug("    Scan key: " + this.getObjDeepScanKey());
         
         for (PairType pair : obj.getPairs()) {
-            log.debug("    Obj key :: " + pair.getKey());
+            //:OFF:log.debug("    Obj key :: " + pair.getKey());
             if (pair.getKey().equals("\"" + this.getObjDeepScanKey() + "\"")) {
                 result.addValue(pair.getEvaluatedValue());
             }
@@ -126,14 +126,14 @@ public class ObjDeepScan extends AbstractNode implements Node {
     }
     
     private ArrayType evaluateArray(ArrayType array) throws OperonGenericException {
-        log.debug("Accessing array of objects: " + this.getObjDeepScanKey());
+        //:OFF:log.debug("Accessing array of objects: " + this.getObjDeepScanKey());
         
         ArrayType resultArray = new ArrayType(this.getStatement());
         List<Node> arrayValues = array.getValues();
         
         for (int i = 0; i < arrayValues.size(); i ++) {
             Node arrayNode = arrayValues.get(i);
-            log.debug("    >> Looping: " + i);
+            //:OFF:log.debug("    >> Looping: " + i);
             if (arrayNode.evaluate() instanceof ObjectType) {
                 ArrayType arrayNodeResult = (ArrayType) evaluateObj((ObjectType) arrayNode.evaluate());
                 if (arrayNodeResult.getValues().size() > 0) {

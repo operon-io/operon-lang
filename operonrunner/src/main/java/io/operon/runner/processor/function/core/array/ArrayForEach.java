@@ -44,7 +44,7 @@ import org.apache.logging.log4j.LogManager;
 // 
 // 
 public class ArrayForEach extends BaseArity1 implements Node, Arity1, SupportsAttributes {
-    private static Logger log = LogManager.getLogger(ArrayForEach.class);
+     // no logger 
     
     public ArrayForEach(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
@@ -52,7 +52,7 @@ public class ArrayForEach extends BaseArity1 implements Node, Arity1, SupportsAt
     }
 
     public ArrayType evaluate() throws OperonGenericException {
-        log.debug("ForEach :: evaluate()");
+        //:OFF:log.debug("ForEach :: evaluate()");
         
         OperonValue currentValue = this.getStatement().getCurrentValue();
         ArrayType arrayToLoop = (ArrayType) currentValue.evaluate();
@@ -86,7 +86,7 @@ public class ArrayForEach extends BaseArity1 implements Node, Arity1, SupportsAt
 
             if (evaluatedNode instanceof FunctionRef) {
                 for (int i = 0; i < arrayToLoop.getValues().size(); i ++) {
-                    log.debug("loop, i == " + i);
+                    //:OFF:log.debug("loop, i == " + i);
                     this.setCurrentPathWithPos(this.getStatement(), i + 1, objLink);
                     
                     valueToTransform = ArrayGet.baseGet(this.getStatement(), arrayToLoop, i + 1);
@@ -100,7 +100,7 @@ public class ArrayForEach extends BaseArity1 implements Node, Arity1, SupportsAt
             }
             else if (evaluatedNode instanceof LambdaFunctionRef) {
                 for (int i = 0; i < arrayToLoop.getValues().size(); i ++) {
-                    log.debug("loop, i == " + i);
+                    //:OFF:log.debug("loop, i == " + i);
                     this.setCurrentPathWithPos(this.getStatement(), i + 1, objLink);
                     
                     valueToTransform = ArrayGet.baseGet(this.getStatement(), arrayToLoop, i + 1);

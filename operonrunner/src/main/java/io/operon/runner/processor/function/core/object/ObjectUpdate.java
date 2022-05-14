@@ -32,6 +32,9 @@ import io.operon.runner.util.JsonUtil;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
 
+//
+// NOTE: this throws an error if the target was not found
+//
 public class ObjectUpdate extends BaseArity2 implements Node, Arity2 {
     
     public ObjectUpdate(Statement statement, List<Node> params) throws OperonGenericException {

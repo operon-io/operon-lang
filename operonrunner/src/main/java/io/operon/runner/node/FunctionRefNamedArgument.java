@@ -38,7 +38,7 @@ import org.apache.logging.log4j.LogManager;
 // A single named argument. Form: '$a: (expr | FunctionRefArgumentPlaceholder)'.
 //
 public class FunctionRefNamedArgument extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(FunctionRefNamedArgument.class);
+     // no logger 
 
     private String argName;
     private Node exprNode;

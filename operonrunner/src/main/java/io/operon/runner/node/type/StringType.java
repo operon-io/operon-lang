@@ -127,4 +127,8 @@ public class StringType extends OperonValue implements Node, AtomicOperonValue, 
         }
     }
 
+    @Override
+    public String toTomlString(OutputFormatter ofmt) {
+        return this.getStringValue();
+    }
 }

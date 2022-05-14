@@ -19,7 +19,7 @@ package io.operon.runner.node;
 import io.operon.runner.processor.BinaryNodeProcessor;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.Context;
-import io.operon.runner.node.type.OperonValue;
+import io.operon.runner.node.type.*;
 import io.operon.runner.model.exception.OperonGenericException;
 
 public class BinaryNode extends AbstractNode implements Node {

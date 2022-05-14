@@ -71,7 +71,7 @@ import org.apache.logging.log4j.LogManager;
 
 
 public class PublishComponent extends BaseComponent implements IntegrationComponent {
-    private static Logger log = LogManager.getLogger(PublishComponent.class);
+     // no logger 
 
     private JedisPool jedisPool = null;
 
@@ -184,7 +184,7 @@ public class PublishComponent extends BaseComponent implements IntegrationCompon
                     }
                     break;
                 default:
-                    log.debug("publish -producer: no mapping for configuration key: " + key);
+                    //:OFF:log.debug("publish -producer: no mapping for configuration key: " + key);
                     System.err.println("publish -producer: no mapping for configuration key: " + key);
                     ErrorUtil.createErrorValueAndThrow(currentValue.getStatement(), "PUBLISH", "ERROR", "publish -producer: no mapping for configuration key: " + key);
             }

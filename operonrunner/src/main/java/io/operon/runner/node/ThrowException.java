@@ -35,7 +35,7 @@ import org.apache.logging.log4j.LogManager;
 //   Select Error ("oops")
 // 
 public class ThrowException extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(ThrowException.class);
+     // no logger 
     
     private Node exceptionValue;
     
@@ -44,7 +44,7 @@ public class ThrowException extends AbstractNode implements Node {
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER ThrowException.evaluate(). Stmt: " + this.getStatement().getId());
+        //:OFF:log.debug("ENTER ThrowException.evaluate(). Stmt: " + this.getStatement().getId());
         OperonValue currentValue = this.getStatement().getCurrentValue();
         //System.out.println("ThrowException :: evaluate() :: CV :: " + this.getStatement().getCurrentValue());
         
@@ -71,7 +71,7 @@ public class ThrowException extends AbstractNode implements Node {
         this.getStatement().getOperonContext().setErrorValue(errorValue);
         this.getStatement().getOperonContext().setException(oge);
         
-        log.debug("ThrowException :: throw OperonGenericException");
+        //:OFF:log.debug("ThrowException :: throw OperonGenericException");
         throw oge;
     }
     

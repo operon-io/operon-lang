@@ -74,8 +74,8 @@ import io.operon.runner.model.exception.OperonGenericException;
 import io.operon.runner.model.exception.OperonComponentException;
 
 
-public class IntegrationCall extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(IntegrationCall.class);
+public class IOCall extends AbstractNode implements Node {
+     // no logger 
 
     private String componentName; // assigned from parsed static query
     private String componentId; // assigned from parsed static query
@@ -91,7 +91,7 @@ public class IntegrationCall extends AbstractNode implements Node {
     
     private Boolean disabledComponent = null;
     
-    public IntegrationCall(Statement statement) {
+    public IOCall(Statement statement) {
         super(statement);
     }
 
@@ -103,15 +103,15 @@ public class IntegrationCall extends AbstractNode implements Node {
     //
     public OperonValue evaluate() throws OperonGenericException {
         OperonValue currentValue = this.getStatement().getCurrentValue();
-        log.debug("IntegrationCall :: Sending cv to component");
-        log.debug("IntegrationCall :: cv :: " + currentValue);
-        log.debug("IntegrationCall :: componentName :: " + this.getComponentName());
-        log.debug("IntegrationCall :: componentId :: " + this.getComponentId());
-        log.debug("Sending " + currentValue.toString() + " to >> " + this.getComponentName() + ":" + this.getComponentId());
+        //:OFF:log.debug("IOCall :: Sending cv to component");
+        //:OFF:log.debug("IOCall :: cv :: " + currentValue);
+        //:OFF:log.debug("IOCall :: componentName :: " + this.getComponentName());
+        //:OFF:log.debug("IOCall :: componentId :: " + this.getComponentId());
+        //:OFF:log.debug("Sending " + currentValue.toString() + " to >> " + this.getComponentName() + ":" + this.getComponentId());
         
         OperonValue result = null;
         
-        //System.out.println("IntegrationCall evaluate()");
+        //System.out.println("IOCall evaluate()");
         
         if (this.disabledComponent == null) {
             Context rootContext = BaseContext.getRootContextByStatement(this.getStatement());
@@ -146,7 +146,7 @@ public class IntegrationCall extends AbstractNode implements Node {
             try {
                 outComponent.produce(currentValue);
             } catch (OperonComponentException oce) {
-                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "OUT", oce.getMessage());
+                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "OUT", oce.getMessage() + ". Line #" + this.getSourceCodeLineNumber());
             }
             result = currentValue; // bypass out-component's output
         }
@@ -159,12 +159,12 @@ public class IntegrationCall extends AbstractNode implements Node {
             try {
                 result = fileComponent.produce(currentValue);
             } catch (OperonComponentException oce) {
-                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "FILE", oce.getMessage());
+                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "FILE", oce.getMessage() + ". Line #" + this.getSourceCodeLineNumber());
             }
         }
         
         else if (this.getComponentName().equals("http")) {
-            log.debug("IntegrationCall :: http");
+            //:OFF:log.debug("IOCall :: http");
             IntegrationComponent httpComponent = new HttpComponent();
             httpComponent.setComponentName(this.getComponentName());
             httpComponent.setComponentId(this.getComponentId());
@@ -172,7 +172,7 @@ public class IntegrationCall extends AbstractNode implements Node {
             try {
                 result = httpComponent.produce(currentValue);
             } catch (OperonComponentException oce) {
-                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "HTTP", oce.getMessage());
+                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "HTTP", oce.getMessage() + ". Line #" + this.getSourceCodeLineNumber());
             }
         }
         
@@ -184,7 +184,7 @@ public class IntegrationCall extends AbstractNode implements Node {
             try {
                 result = readfileComponent.produce(currentValue);
             } catch (OperonComponentException oce) {
-                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "READFILE", oce.getMessage());
+                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "READFILE", oce.getMessage() + ". Line #" + this.getSourceCodeLineNumber());
             }
         }
 
@@ -196,7 +196,7 @@ public class IntegrationCall extends AbstractNode implements Node {
             try {
                 result = zipComponent.produce(currentValue);
             } catch (OperonComponentException oce) {
-                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "ZIP", oce.getMessage());
+                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "ZIP", oce.getMessage() + ". Line #" + this.getSourceCodeLineNumber());
             }
         }
 
@@ -208,7 +208,7 @@ public class IntegrationCall extends AbstractNode implements Node {
             try {
                 result = execComponent.produce(currentValue);
             } catch (OperonComponentException oce) {
-                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "EXEC", oce.getMessage());
+                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "EXEC", oce.getMessage() + ". Line #" + this.getSourceCodeLineNumber());
             }
         }
 
@@ -220,7 +220,7 @@ public class IntegrationCall extends AbstractNode implements Node {
             try {
                 result = cipherComponent.produce(currentValue);
             } catch (OperonComponentException oce) {
-                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "CIPHER", oce.getMessage());
+                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "CIPHER", oce.getMessage() + ". Line #" + this.getSourceCodeLineNumber());
             }
         }
 
@@ -232,7 +232,7 @@ public class IntegrationCall extends AbstractNode implements Node {
             try {
                 result = digestComponent.produce(currentValue);
             } catch (OperonComponentException oce) {
-                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "DIGEST", oce.getMessage());
+                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "DIGEST", oce.getMessage() + ". Line #" + this.getSourceCodeLineNumber());
             }
         }
         
@@ -244,7 +244,7 @@ public class IntegrationCall extends AbstractNode implements Node {
             try {
                 result = publishComponent.produce(currentValue);
             } catch (OperonComponentException oce) {
-                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "PUBLISH", oce.getMessage());
+                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "PUBLISH", oce.getMessage() + ". Line #" + this.getSourceCodeLineNumber());
             }
         }
         
@@ -256,7 +256,7 @@ public class IntegrationCall extends AbstractNode implements Node {
             try {
                 result = queueComponent.produce(currentValue);
             } catch (OperonComponentException oce) {
-                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "QUEUE", oce.getMessage());
+                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "QUEUE", oce.getMessage() + ". Line #" + this.getSourceCodeLineNumber());
             }
         }
 
@@ -268,7 +268,7 @@ public class IntegrationCall extends AbstractNode implements Node {
             try {
                 result = callComponent.produce(currentValue);
             } catch (OperonComponentException oce) {
-                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "CALL", oce.getMessage());
+                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "CALL", oce.getMessage() + ". Line #" + this.getSourceCodeLineNumber());
             }
         }
         
@@ -280,7 +280,7 @@ public class IntegrationCall extends AbstractNode implements Node {
             try {
                 result = certificateComponent.produce(currentValue);
             } catch (OperonComponentException oce) {
-                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "CERTIFICATE", oce.getMessage());
+                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "CERTIFICATE", oce.getMessage() + ". Line #" + this.getSourceCodeLineNumber());
             }
         }
 
@@ -292,9 +292,9 @@ public class IntegrationCall extends AbstractNode implements Node {
             try {
                 result = socketComponent.produce(currentValue);
             } catch (OperonComponentException oce) {
-                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "OPERON", oce.getErrorMessage());
+                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "OPERON", oce.getErrorMessage() + ". Line #" + this.getSourceCodeLineNumber());
             } catch (Exception e) {
-                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "OPERON", e.getMessage());
+                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "OPERON", e.getMessage() + ". Line #" + this.getSourceCodeLineNumber());
             }
         }
 
@@ -306,14 +306,14 @@ public class IntegrationCall extends AbstractNode implements Node {
             try {
                 result = robotComponent.produce(currentValue);
             } catch (OperonComponentException oce) {
-                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "ROBOT", oce.getErrorMessage());
+                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "ROBOT", oce.getErrorMessage() + ". Line #" + this.getSourceCodeLineNumber());
             } catch (Exception e) {
-                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "ROBOT", e.getMessage());
+                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", "ROBOT", e.getMessage() + ". Line #" + this.getSourceCodeLineNumber());
             }
         }
         
         else {
-            //System.out.println("IntegrationCall evaluate() --> ELSE :: " + this.getComponentName());
+            //System.out.println("IOCall evaluate() --> ELSE :: " + this.getComponentName());
             
             Info info = this.resolveConfigs();
             
@@ -350,7 +350,7 @@ public class IntegrationCall extends AbstractNode implements Node {
                     //newStmt.getRuntimeValues().put("configs", this.getJsonConfiguration()); // This does not resolve the value (ValueRef)
                     componentExprResult = RawEvaluate.evaluate(newStmt, exprStr, cvCopy);
                 } catch (Exception e) {
-                    ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", this.getComponentName(), e.getMessage());
+                    ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", this.getComponentName(), e.getMessage() + ". Line #" + this.getSourceCodeLineNumber());
                 }
                 
                 //
@@ -393,14 +393,14 @@ public class IntegrationCall extends AbstractNode implements Node {
                     result = (OperonValue) method.invoke(componentInstance, (Object) currentValue); // Convert Object to OperonValue
                     //System.out.println("Invoke DONE, return result :: " + result);
                 } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
-                    ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", this.getComponentName(), e.getMessage());
+                    ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", this.getComponentName(), e.getMessage() + ". Line #" + this.getSourceCodeLineNumber());
                 }
             }
         }
         // update the currentValue from the statement
         this.getStatement().setCurrentValue(result);
         
-        log.debug("IntegrationCall result :: " + result);
+        //:OFF:log.debug("IOCall result :: " + result);
         return result;
     }
 
@@ -448,7 +448,7 @@ public class IntegrationCall extends AbstractNode implements Node {
     }
 
     public Info resolveConfigs() throws OperonGenericException {
-        log.debug("Load component :: " + this.getComponentName() + ", definition file :: " + this.getComponentsDefinitionFilePath());
+        //:OFF:log.debug("Load component :: " + this.getComponentName() + ", definition file :: " + this.getComponentsDefinitionFilePath());
         
         Info info = new Info();
         
@@ -456,13 +456,13 @@ public class IntegrationCall extends AbstractNode implements Node {
         ObjectType integrationComponentObj = 
             ComponentSystemUtil.loadIntegrationComponentDefinition(this.getComponentName(), this.getComponentsDefinitionFilePath());
         
-        log.debug(">> Component definition object loaded");
+        //:OFF:log.debug(">> Component definition object loaded");
         
         if (integrationComponentObj == null) {
             ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", this.getComponentName(), "Could not load component definition object for component");
         }
         
-        log.debug(" >> Definition pairs size ::" + integrationComponentObj.getPairs().size());
+        //:OFF:log.debug(" >> Definition pairs size ::" + integrationComponentObj.getPairs().size());
         
         ObjectType altConfigObj = null;
         ObjectType altConfigObjTop = null;
@@ -470,7 +470,7 @@ public class IntegrationCall extends AbstractNode implements Node {
         
         for (PairType pair : integrationComponentObj.getPairs()) {
             String key = pair.getKey().toLowerCase();
-            log.debug("Key :: " + key);
+            //:OFF:log.debug("Key :: " + key);
             
             if (key.equals("\"componentexpr\"")) {
                 RawValue componentExpr = (RawValue) pair.getValue().evaluate();
@@ -483,7 +483,7 @@ public class IntegrationCall extends AbstractNode implements Node {
                 if (resolveUriValue instanceof StringType) {
                     componentLink = ((StringType) resolveUriValue).getJavaStringValue();
                     info.componentLink = componentLink;
-                    log.debug("Linking component :: " + componentLink);
+                    //:OFF:log.debug("Linking component :: " + componentLink);
                 }
             }
             

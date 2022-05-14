@@ -72,6 +72,9 @@ public class RawEvaluate extends BaseArity1 implements Node, Arity1 {
         }
     }
 
+    //
+    // TODO: flag for un-escaping characters
+    //
     public static OperonValue evaluate(Statement stmt, String expr, OperonValue currentValueForExpr) throws OperonGenericException, Exception {
         Node node = OperonRunner.compileExpr(stmt, expr);
         //System.out.println("RawEvaluate :: evaluate :: " + node.getStatement().getRuntimeValues());

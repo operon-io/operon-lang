@@ -84,7 +84,7 @@ import org.apache.logging.log4j.LogManager;
  * 
  */
 public class ModuleCompiler extends OperonModuleBaseListener {
-    private static Logger log = LogManager.getLogger(ModuleCompiler.class);
+     // no logger 
     private Context moduleContext;
     private String moduleFilePath;
     private Stack<Statement> statementStack;
@@ -147,7 +147,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     
     @Override
     public void enterOperonmodule(OperonModuleParser.OperonmoduleContext ctx) {
-        log.debug("ModuleCompiler :: starting to compile. ");
+        //:OFF:log.debug("ModuleCompiler :: starting to compile. ");
         //System.out.println("ModuleCompiler :: starting to compile.");
         startTime = System.nanoTime();
     }
@@ -155,7 +155,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
 
     @Override
     public void exitOperonmodule(OperonModuleParser.OperonmoduleContext ctx) {
-        log.debug("====== COMPILING DONE ======. Stack size: " + this.stack.size());
+        //:OFF:log.debug("====== COMPILING DONE ======. Stack size: " + this.stack.size());
         //System.out.println("ModuleCompiler :: compiling done.");
     }
 
@@ -171,7 +171,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
 
 	@Override
 	public void exitImport_stmt(OperonModuleParser.Import_stmtContext ctx) {
-	    log.debug("EXIT Import. Stack size: " + this.stack.size());
+	    //:OFF:log.debug("EXIT Import. Stack size: " + this.stack.size());
         OperonValue imports = (OperonValue) this.stack.pop();
         ObjectType importsObj = (ObjectType) imports;
         for (int i = 0; i < importsObj.getPairs().size(); i ++) {
@@ -187,13 +187,13 @@ public class ModuleCompiler extends OperonModuleBaseListener {
                 throw new RuntimeException("Compiler :: cannot read import-statement, invalid value");
             }
             
-            log.debug("Import source uri :: " + importSourceUri);
+            //:OFF:log.debug("Import source uri :: " + importSourceUri);
             String moduleAsString = null;
             String moduleFilePath = null;
             try {
                 if (importSourceUri.startsWith("file://")) {
                     moduleFilePath = importSourceUri.substring(7, importSourceUri.length());
-                    log.debug("LOAD MODULE FROM :: " + moduleFilePath);
+                    //:OFF:log.debug("LOAD MODULE FROM :: " + moduleFilePath);
                     moduleAsString =  new String(Files.readAllBytes(Paths.get(moduleFilePath)));
                 }
                 else {
@@ -203,11 +203,11 @@ public class ModuleCompiler extends OperonModuleBaseListener {
             } catch (IOException ioe) {
                 throw new RuntimeException("Compiler :: could not read module: " + importSourceUri + ". Error: " + ioe.getMessage());
             }
-            log.debug("=== Load module ===");
+            //:OFF:log.debug("=== Load module ===");
             Context module = null;
             String moduleFullNamespace = this.getModuleContext().getOwnNamespace() + ":" + importToNamespace;
             try {
-                log.debug("Try to compile module.");
+                //:OFF:log.debug("Try to compile module.");
                 if (this.getModuleContext() == null) {
                     throw new RuntimeException("ModuleContext was null");
                 }
@@ -215,7 +215,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
             } catch (IOException ioe) {
                 throw new RuntimeException("Compiler :: could not compile module :: test.opm");
             }
-            log.debug("=== Module loaded ===");
+            //:OFF:log.debug("=== Module loaded ===");
             if (this.getModuleContext().getModules().get(importToNamespace) != null) {
                 throw new RuntimeException("ModuleCompiler :: could not add module to namespace: " + importToNamespace + ", namespace already exists.");
             }
@@ -228,16 +228,17 @@ public class ModuleCompiler extends OperonModuleBaseListener {
 
     @Override
     public void exitFunction_stmt_param(OperonModuleParser.Function_stmt_paramContext ctx) {
-        log.debug("EXIT Function-stmt-param :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Function-stmt-param :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = getContextChildNodes(ctx);
 
         FunctionStatementParam fsParam = new FunctionStatementParam(this.getCurrentStatement());
 
         if (this.stack.size() > 0 && this.stack.peek() instanceof OperonValueConstraint) {
-            OperonValueConstraint jvc = (OperonValueConstraint) this.stack.pop();
+            OperonValueConstraint ovc = (OperonValueConstraint) this.stack.pop();
+            ovc.setSourceCodeLineNumber(ctx.start.getLine());
             String constraintAsString = subNodes.get(subNodes.size() - 1).getText();
-            jvc.setConstraintAsString(constraintAsString);
-            fsParam.setOperonValueConstraint(jvc);
+            ovc.setConstraintAsString(constraintAsString);
+            fsParam.setOperonValueConstraint(ovc);
         }
         String paramName = subNodes.get(0).getText();
         fsParam.setParam(paramName);
@@ -246,27 +247,27 @@ public class ModuleCompiler extends OperonModuleBaseListener {
 
     @Override
     public void enterFunction_stmt(OperonModuleParser.Function_stmtContext ctx) {
-        log.debug("ENTER Function-stmt :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("ENTER Function-stmt :: Stack size :: " + this.stack.size());
         Statement functionStatement = new FunctionStatement(this.getModuleContext());
         this.setPreviousStatementForStatement(functionStatement);
     }
 
     @Override
     public void exitFunction_stmt(OperonModuleParser.Function_stmtContext ctx) {
-        log.debug("EXIT Function-stmt :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Function-stmt :: Stack size :: " + this.stack.size());
         this.currentStatement.setNode(this.stack.pop()); // Function Expression
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         int subNodesSize = subNodes.size();
-        log.debug("  SubNodes :: " + subNodesSize);
+        //:OFF:log.debug("  SubNodes :: " + subNodesSize);
         
         FunctionStatement functionStatement = (FunctionStatement) this.getCurrentStatement();
         
         //
         // Add the OperonValueConstraint if such exists:
         //
-        OperonValueConstraint functionOutputJvc = null;
+        OperonValueConstraint functionOutputovc = null;
         if (this.stack.size() > 0 && this.stack.peek() instanceof OperonValueConstraint) {
-            functionOutputJvc = (OperonValueConstraint) this.stack.pop();
+            functionOutputovc = (OperonValueConstraint) this.stack.pop();
         }
 
         String functionNamespace = "";
@@ -281,8 +282,8 @@ public class ModuleCompiler extends OperonModuleBaseListener {
             }
             functionName = subNodes.get(3).getText();
             argumentsStartIndex = 4;
-            log.debug("FUNCTION :: namespace :: " + functionNamespace);
-            log.debug("FUNCTION :: name :: " + functionName);
+            //:OFF:log.debug("FUNCTION :: namespace :: " + functionNamespace);
+            //:OFF:log.debug("FUNCTION :: name :: " + functionName);
         }
         
         //
@@ -312,10 +313,10 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         //
         // TODO: the text-form should be collected in the ExitOperonValueConstraint !!!
         //
-        if (functionOutputJvc != null) {
+        if (functionOutputovc != null) {
             String constraintAsString = subNodes.get(argumentsEndParenthesesIndex + 1).getText();
-            functionOutputJvc.setConstraintAsString(constraintAsString);
-            functionStatement.setOperonValueConstraint(functionOutputJvc);
+            functionOutputovc.setConstraintAsString(constraintAsString);
+            functionStatement.setOperonValueConstraint(functionOutputovc);
         }
         
         while (this.stack.size() > 0 && this.stack.peek() instanceof FunctionStatementParam) {
@@ -326,7 +327,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         Collections.reverse(functionStatementParams);
         functionStatement.getParams().addAll(functionStatementParams);
 
-        log.debug("  " + functionName + " :: params set :: " + functionStatement.getParams().size());
+        //:OFF:log.debug("  " + functionName + " :: params set :: " + functionStatement.getParams().size());
 
         // Add functionStatement into OperonContext
         String fqName = functionNamespace + ":" + functionName + ":" + functionStatementParams.size();
@@ -343,7 +344,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
 
     @Override
     public void exitLet_stmt(OperonModuleParser.Let_stmtContext ctx) {
-        log.debug("EXIT Let :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Let :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = this.getContextChildNodes(ctx);
         
         Node letExpr = this.stack.pop();
@@ -358,19 +359,20 @@ public class ModuleCompiler extends OperonModuleBaseListener {
             // NOTE: module may assign value into "core" -namespace, because module has it's own namespace already.
             //
         }
-        log.debug("  >> constId :: " + constId);
+        //:OFF:log.debug("  >> constId :: " + constId);
         //
         // Add the OperonValueConstraint if such exists:
         //
-        log.debug("  >> subNodes.size() :: " + subNodes.size());
+        //:OFF:log.debug("  >> subNodes.size() :: " + subNodes.size());
 
         // Cannot just peek stack, because contraint could belong to other stmt
         if (subNodes.get(subNodes.size() - 4).getText().charAt(0) == '<') {
             if (this.stack.size() > 0 && this.stack.peek() instanceof OperonValueConstraint) {
-                OperonValueConstraint jvc = (OperonValueConstraint) this.stack.pop();
+                OperonValueConstraint ovc = (OperonValueConstraint) this.stack.pop();
+                ovc.setSourceCodeLineNumber(ctx.start.getLine());
                 String constraintAsString = subNodes.get(subNodes.size() - 4).getText();
-                jvc.setConstraintAsString(constraintAsString);
-                letStatement.setOperonValueConstraint(jvc);
+                ovc.setConstraintAsString(constraintAsString);
+                letStatement.setOperonValueConstraint(ovc);
             }
         }
         
@@ -447,7 +449,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     // From json:[10, 20, 30] Select $ [2] | [3] #> [3]
     @Override
     public void exitFlow_break(OperonModuleParser.Flow_breakContext ctx) {
-        log.debug("EXIT Flow_break :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Flow_break :: Stack size :: " + this.stack.size());
         Node expr = this.stack.pop();
         FlowBreak flowBreak = new FlowBreak(this.currentStatement);
         flowBreak.setExprNode(expr);
@@ -456,7 +458,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
 
     @Override
     public void enterChoice(OperonModuleParser.ChoiceContext ctx) {
-        log.debug("ENTER Choice :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("ENTER Choice :: Stack size :: " + this.stack.size());
         Statement choiceStatement = new DefaultStatement(this.getModuleContext());
         choiceStatement.setId("ChoiceStatement");
         this.setPreviousStatementForStatement(choiceStatement);
@@ -464,7 +466,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
 
     @Override
     public void exitChoice(OperonModuleParser.ChoiceContext ctx) {
-        log.debug("EXIT Choice :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Choice :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         int subNodesSize = subNodes.size();
         // count: io.operon.parser.OperonModuleParser$ExprContext, and apply stack pop() same amount
@@ -482,7 +484,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
             }
         }
         
-        log.debug("  Choice :: subNodes :: " + subNodesSize);
+        //:OFF:log.debug("  Choice :: subNodes :: " + subNodesSize);
         Choice choice = new Choice(this.currentStatement);
         
         if (hasOtherwise) {
@@ -513,7 +515,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
 
     @Override
     public void exitFilter_full_expr(OperonModuleParser.Filter_full_exprContext ctx) {
-        log.debug("EXIT Filter_full_expr :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Filter_full_expr :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         
         Filter filter = new Filter(this.currentStatement);
@@ -522,6 +524,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         //
         Node filterList = this.stack.pop();
         filter.setFilterListExpression(filterList);
+        filter.setSourceCodeLineNumber(ctx.start.getLine());
         
         if (this.stack.size() > 0 && subNodes.get(1).getText().charAt(0) == '{') {
             Node peeked = this.stack.peek();
@@ -538,7 +541,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
 
     @Override
     public void exitFilter_expr(OperonModuleParser.Filter_exprContext ctx) {
-        log.debug("EXIT Filter :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Filter :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         
         Filter filter = new Filter(this.currentStatement);
@@ -547,6 +550,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         //
         Node filterList = this.stack.pop();
         filter.setFilterListExpression(filterList);
+        filter.setSourceCodeLineNumber(ctx.start.getLine());
         
         if (this.stack.size() > 0 && subNodes.get(0).getText().charAt(0) == '{') {
             Node peeked = this.stack.peek();
@@ -561,9 +565,10 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     
     @Override
     public void exitFilter_list(OperonModuleParser.Filter_listContext ctx) {
-        log.debug("EXIT Filter_list :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Filter_list :: Stack size :: " + this.stack.size());
 
         FilterList filterList = new FilterList(currentStatement);
+        filterList.setSourceCodeLineNumber(ctx.start.getLine());
         List<FilterListExpr> filterExprList = new ArrayList<FilterListExpr>();
         
         while (this.stack.size() >= 1) {
@@ -587,24 +592,25 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     // 
     @Override
     public void exitFilter_list_expr(OperonModuleParser.Filter_list_exprContext ctx) {
-        log.debug("EXIT Filter_list_expr :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Filter_list_expr :: Stack size :: " + this.stack.size());
         FilterListExpr filterListExpr = new FilterListExpr(this.currentStatement);
+        filterListExpr.setSourceCodeLineNumber(ctx.start.getLine());
         filterListExpr.setFilterExpr(this.stack.pop());
         this.stack.push(filterListExpr);
     }
 
     @Override
     public void exitSplicing_expr(OperonModuleParser.Splicing_exprContext ctx) {
-        log.debug("EXIT Splicing_expr :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Splicing_expr :: Stack size :: " + this.stack.size());
 
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         int subNodesSize = subNodes.size();
-        log.debug("    SubTree nodes :: " + subNodesSize);
+        //:OFF:log.debug("    SubTree nodes :: " + subNodesSize);
         
         // :: expr
         if (subNodesSize == 2 && subNodes.get(0) instanceof TerminalNode) {
             try {
-                log.debug("    SpliceLeft");
+                //:OFF:log.debug("    SpliceLeft");
                 Node spliceUntilNode = this.stack.pop();
                 List<Node> params = new ArrayList<Node>();
                 params.add(spliceUntilNode);
@@ -618,7 +624,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         // expr ::
         else if (subNodesSize == 2 && subNodes.get(1) instanceof TerminalNode) {
             try {
-                log.debug("    SpliceRight");
+                //:OFF:log.debug("    SpliceRight");
                 Node spliceUntilNode = this.stack.pop();
                 List<Node> params = new ArrayList<Node>();
                 params.add(spliceUntilNode);
@@ -632,7 +638,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         // expr :: expr
         else if (subNodesSize == 3 && subNodes.get(1) instanceof TerminalNode) {
             try {
-                log.debug("    Splicing lhs - rhs");
+                //:OFF:log.debug("    Splicing lhs - rhs");
                 Node spliceCountNode = this.stack.pop();
                 Node spliceStartNode = this.stack.pop();
                 List<Node> params = new ArrayList<Node>();
@@ -646,22 +652,22 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         }
 
         else if (subNodesSize > 0) {
-            log.debug("    Splicing_expr :: unknown :: " + subNodes.get(0));
+            //:OFF:log.debug("    Splicing_expr :: unknown :: " + subNodes.get(0));
         }
     }
 
     @Override
     public void exitBind_value_expr(OperonModuleParser.Bind_value_exprContext ctx) {
-        log.debug("EXIT Bind_value_expr :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Bind_value_expr :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         int subNodesSize = subNodes.size();
-        log.debug(">> subNodes.size :: " + subNodes.size());
+        //:OFF:log.debug(">> subNodes.size :: " + subNodes.size());
         List<Operator> operators = new ArrayList<Operator>();
         
         // TODO: loop through Operators and pop-stack enough times!
         for (int i = subNodes.size() - 1; i > 2; i --) {
             if (subNodes.get(i) instanceof TerminalNode) {
-                log.debug(">> subNode: " + i + " :: " + subNodes.get(i).getText());
+                //:OFF:log.debug(">> subNode: " + i + " :: " + subNodes.get(i).getText());
             }
             
             else {
@@ -673,7 +679,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         
         ValueRef valueRef = (ValueRef) this.stack.pop();
         String valueRefStr = valueRef.getValueRef();
-        log.debug("  >> ValueRefStr :: " + valueRefStr);
+        //:OFF:log.debug("  >> ValueRefStr :: " + valueRefStr);
         
         Map<String, List<Operator>> bindValues = (Map<String, List<Operator>>) this.getModuleContext().getBindValues();
         
@@ -689,12 +695,12 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         
         bindValuesList.addAll(operators);
         bindValues.put(valueRefStr, bindValuesList);
-        log.debug("  >> Bind_value_expr :: added value binding");
+        //:OFF:log.debug("  >> Bind_value_expr :: added value binding");
     }
 
     @Override
     public void exitOperator_expr(OperonModuleParser.Operator_exprContext ctx) {
-        log.debug("EXIT Operator_expr :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Operator_expr :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         int subNodesSize = subNodes.size();
         
@@ -704,19 +710,19 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         boolean isCascade = false;
         if (subNodes.get(subNodes.size() - 2) instanceof TerminalNode && 
             subNodes.get(subNodes.size() - 2).getText().toLowerCase().equals("cascade")) {
-            log.debug("  >> Operator :: set cascade true :: " + subNodes.get(subNodes.size() - 2).getText());
+            //:OFF:log.debug("  >> Operator :: set cascade true :: " + subNodes.get(subNodes.size() - 2).getText());
             isCascade = true;
         }
         
         // Get the overloaded operator:
         for (int i = 0; i < subNodesSize; i ++) {
-            log.debug(subNodes.get(i).getClass().getName());
+            //:OFF:log.debug(subNodes.get(i).getClass().getName());
             if (subNodes.get(i) instanceof TerminalNode) {
-                log.debug("  >> Operator :: terminal-node found.");
+                //:OFF:log.debug("  >> Operator :: terminal-node found.");
             }
         }
         String operator = subNodes.get(2).getText();
-        log.debug(" >> OPERATOR :: " + operator);
+        //:OFF:log.debug(" >> OPERATOR :: " + operator);
         Operator op = new Operator(this.currentStatement); // TODO: might not to inherit Node, therefore giving statement not required.
         op.setOperator(operator);
         op.setFunctionRef(funcRef);
@@ -729,7 +735,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     // 
     @Override
     public void exitExpr(OperonModuleParser.ExprContext ctx) {
-        log.debug("EXIT Expr :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Expr :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = getContextChildNodes(ctx);
 
         String exprAsString = this.getExpressionAsString(subNodes);
@@ -737,16 +743,16 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         int subNodesSize = subNodes.size();
 
         if (subNodesSize == 1) {
-            log.debug("exitExpr UNARYNODE :: SubNodesSize == 1, Stack size == " + this.stack.size());
+            //:OFF:log.debug("exitExpr UNARYNODE :: SubNodesSize == 1, Stack size == " + this.stack.size());
             UnaryNode unode = new UnaryNode(this.currentStatement);
             unode.setExpr(exprAsString);
             unode.setNode(this.stack.pop());
             this.stack.push(unode);
-            log.debug("exitExpr UNARYNODE set SubNodesSize == 1");
+            //:OFF:log.debug("exitExpr UNARYNODE set SubNodesSize == 1");
         }
         
         else if (subNodesSize == 3 && subNodes.get(1) instanceof TerminalNode) {
-            log.debug("exitExpr ENTER BINARYNODE");
+            //:OFF:log.debug("exitExpr ENTER BINARYNODE");
             
             Node rhs = this.stack.pop();
             Node lhs = this.stack.pop();
@@ -758,72 +764,86 @@ public class ModuleCompiler extends OperonModuleBaseListener {
             
             if (token != null) {
                 op = new Plus();
-                log.debug("  Plus()");
+                op.setSourceCodeLineNumber(ctx.start.getLine());
+                //:OFF:log.debug("  Plus()");
             }
             
             else if ( (token = ctx.getToken(OperonModuleParser.MINUS, 0)) != null) {
                 op = new Minus();
-                log.debug("  Minus()");
+                op.setSourceCodeLineNumber(ctx.start.getLine());
+                //:OFF:log.debug("  Minus()");
             }
             
             else if ( (token = ctx.getToken(OperonModuleParser.MULT, 0)) != null) {
                 op = new Multiplicate();
-                log.debug("  Multiplicate()");
+                op.setSourceCodeLineNumber(ctx.start.getLine());
+                //:OFF:log.debug("  Multiplicate()");
             }
             
             else if ( (token = ctx.getToken(OperonModuleParser.DIV, 0)) != null) {
                 op = new Division();
-                log.debug("  Division()");
+                op.setSourceCodeLineNumber(ctx.start.getLine());
+                //:OFF:log.debug("  Division()");
             }
             
             else if ( (token = ctx.getToken(OperonModuleParser.MOD, 0)) != null) {
                 op = new Modulus();
-                log.debug("  Modulus()");
+                op.setSourceCodeLineNumber(ctx.start.getLine());
+                //:OFF:log.debug("  Modulus()");
             }
             
             else if ( (token = ctx.getToken(OperonModuleParser.POW, 0)) != null) {
                 op = new Power();
-                log.debug("  Power()");
+                op.setSourceCodeLineNumber(ctx.start.getLine());
+                //:OFF:log.debug("  Power()");
             }
             
             else if ( (token = ctx.getToken(OperonModuleParser.EQ, 0)) != null) {
                 op = new Eq();
-                log.debug("  Eq()");
+                op.setSourceCodeLineNumber(ctx.start.getLine());
+                //:OFF:log.debug("  Eq()");
             }
             
             else if ( (token = ctx.getToken(OperonModuleParser.IEQ, 0)) != null) {
                 op = new InEq();
-                log.debug("  InEq()");
+                op.setSourceCodeLineNumber(ctx.start.getLine());
+                //:OFF:log.debug("  InEq()");
             }
 
             else if ( (token = ctx.getToken(OperonModuleParser.GT, 0)) != null) {
                 op = new Gt();
-                log.debug("  Gt()");
+                op.setSourceCodeLineNumber(ctx.start.getLine());
+                //:OFF:log.debug("  Gt()");
             }
 
             else if ( (token = ctx.getToken(OperonModuleParser.GTE, 0)) != null) {
                 op = new Gte();
-                log.debug("  Gte()");
+                op.setSourceCodeLineNumber(ctx.start.getLine());
+                //:OFF:log.debug("  Gte()");
             }
 
             else if ( (token = ctx.getToken(OperonModuleParser.LT, 0)) != null) {
                 op = new Lt();
-                log.debug("  Lt()");
+                op.setSourceCodeLineNumber(ctx.start.getLine());
+                //:OFF:log.debug("  Lt()");
             }
 
             else if ( (token = ctx.getToken(OperonModuleParser.LTE, 0)) != null) {
                 op = new Lte();
-                log.debug("  Lte()");
+                op.setSourceCodeLineNumber(ctx.start.getLine());
+                //:OFF:log.debug("  Lte()");
             }
 
             else if ( (token = ctx.getToken(OperonModuleParser.AND, 0)) != null) {
                 op = new And();
-                log.debug("  And()");
+                op.setSourceCodeLineNumber(ctx.start.getLine());
+                //:OFF:log.debug("  And()");
             }
 
             else if ( (token = ctx.getToken(OperonModuleParser.OR, 0)) != null) {
                 op = new Or();
-                log.debug("  Or()");
+                op.setSourceCodeLineNumber(ctx.start.getLine());
+                //:OFF:log.debug("  Or()");
             }
             
             BinaryNode bnode = new BinaryNode(this.currentStatement);
@@ -834,12 +854,12 @@ public class ModuleCompiler extends OperonModuleBaseListener {
             
             this.stack.push(bnode);
             
-            log.debug("exitExpr EXIT BINARYNODE");
+            //:OFF:log.debug("exitExpr EXIT BINARYNODE");
         }
         
         else if (subNodesSize == 2 
                 && subNodes.get(0) instanceof TerminalNode) {
-            log.debug("ENTER UnaryNode (- or Not)");
+            //:OFF:log.debug("ENTER UnaryNode (- or Not)");
 
             UnaryNode unode = new UnaryNode(this.currentStatement);
             unode.setExpr(exprAsString);
@@ -852,88 +872,88 @@ public class ModuleCompiler extends OperonModuleBaseListener {
             
             if (token != null) {
                 op = new Not();
-                log.debug("  Not()");
+                //:OFF:log.debug("  Not()");
             }
             
             else if ( (token = ctx.getToken(OperonModuleParser.MINUS, 0)) != null || (token = ctx.getToken(OperonModuleParser.NEGATE, 0)) != null) {
                 op = new Negate();
-                log.debug("  Negate()");
+                //:OFF:log.debug("  Negate()");
             }
 
             unode.setUnaryNodeProcessor(op);
             this.stack.push(unode);
-            log.debug("EXIT SubNodesSize == 1");
+            //:OFF:log.debug("EXIT SubNodesSize == 1");
         }
         
         else if (subNodesSize == 3 
                 && subNodes.get(0) instanceof TerminalNode
                 && subNodes.get(2) instanceof TerminalNode) {
-            log.debug("ENTER UnaryNode (Parentheses)");
+            //:OFF:log.debug("ENTER UnaryNode (Parentheses)");
 
             UnaryNode unode = new UnaryNode(this.currentStatement);
             unode.setExpr(exprAsString);
             unode.setNode(this.stack.pop());
             this.stack.push(unode);
-            log.debug("EXIT SubNodesSize == 1");
+            //:OFF:log.debug("EXIT SubNodesSize == 1");
         }
         
         else if (subNodesSize == 2) {
             // Known cases are instances of (expr expr) --> map_expr, e.g. "[1,2,3] Map @ + 1 End" --> JsonContext, and Map_exprContext and (Not expr)
             // Should be handled as multinode
-            log.debug("ENTER MultiNode, subNodesSize = 2");
+            //:OFF:log.debug("ENTER MultiNode, subNodesSize = 2");
             for (int i = 0; i < subNodesSize; i ++) {
-                log.debug("    SubNode " + i + " :: " + subNodes.get(i).getClass().getName());
+                //:OFF:log.debug("    SubNode " + i + " :: " + subNodes.get(i).getClass().getName());
             }
             MultiNode mnode = new MultiNode(this.currentStatement);
             mnode.setExpr(exprAsString);
-            log.debug("  MultiNode :: Child count :: " + subNodesSize);
-            log.debug("  MultiNode :: Stack size :: " + this.stack.size());
+            //:OFF:log.debug("  MultiNode :: Child count :: " + subNodesSize);
+            //:OFF:log.debug("  MultiNode :: Stack size :: " + this.stack.size());
             
             if (subNodesSize > 1) {
                 for (int i = 0; i < subNodesSize; i ++) {
                     Node node = this.stack.pop();
-                    log.debug("   MN :: Loop :: " + node.getClass().getName());
+                    //:OFF:log.debug("   MN :: Loop :: " + node.getClass().getName());
                     mnode.addNode(node);
                 }
-                log.debug("  MultiNode :: Stack size :: " + this.stack.size());
+                //:OFF:log.debug("  MultiNode :: Stack size :: " + this.stack.size());
             }
             this.stack.push(mnode);
-            log.debug("EXIT MultiNode");
+            //:OFF:log.debug("EXIT MultiNode");
         }
         
         else {
-            log.debug("ENTER MultiNode");
+            //:OFF:log.debug("ENTER MultiNode");
             for (int i = 0; i < subNodesSize; i ++) {
-                log.debug("    SubNode " + i + " :: " + subNodes.get(i).getClass().getName());
+                //:OFF:log.debug("    SubNode " + i + " :: " + subNodes.get(i).getClass().getName());
             }
             
             MultiNode mnode = new MultiNode(this.currentStatement);
             mnode.setExpr(exprAsString);
-            log.debug("  MultiNode :: Child count :: " + subNodesSize);
-            log.debug("  MultiNode :: Stack size :: " + this.stack.size());
+            //:OFF:log.debug("  MultiNode :: Child count :: " + subNodesSize);
+            //:OFF:log.debug("  MultiNode :: Stack size :: " + this.stack.size());
             
             if (subNodesSize > 1) {
                 for (int i = 0; i < subNodesSize; i ++) {
                     Node node = this.stack.pop();
-                    log.debug("   MN :: Loop :: " + node.getClass().getName());
+                    //:OFF:log.debug("   MN :: Loop :: " + node.getClass().getName());
                     mnode.addNode(node);
                 }
-                log.debug("  MultiNode :: Stack size :: " + this.stack.size());
+                //:OFF:log.debug("  MultiNode :: Stack size :: " + this.stack.size());
             }
             this.stack.push(mnode);
             
-            log.debug("EXIT MultiNode");
+            //:OFF:log.debug("EXIT MultiNode");
         }
     }
 
     @Override
     public void exitParentheses_expr(OperonModuleParser.Parentheses_exprContext ctx) {
-        log.debug("EXIT parentheses_expr");
+        //:OFF:log.debug("EXIT parentheses_expr");
     }
     
     @Override
     public void exitAssign_expr(OperonModuleParser.Assign_exprContext ctx) {
-        log.debug("EXIT Assign_expr :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Assign_expr :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         Assign assignNode = new Assign(this.currentStatement);
         String symbol = null;
@@ -965,21 +985,21 @@ public class ModuleCompiler extends OperonModuleBaseListener {
 
     @Override
     public void exitBreak_loop(OperonModuleParser.Break_loopContext ctx) {
-        log.debug("EXIT Break :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Break :: Stack size :: " + this.stack.size());
         BreakLoop breakLoop = new BreakLoop(this.currentStatement);
         this.stack.push(breakLoop);
     }
 
     @Override
     public void exitContinue_loop(OperonModuleParser.Continue_loopContext ctx) {
-        log.debug("EXIT Continue :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Continue :: Stack size :: " + this.stack.size());
         ContinueLoop continueLoop = new ContinueLoop(this.currentStatement);
         this.stack.push(continueLoop);
     }
 
     @Override
     public void enterLoop_expr(OperonModuleParser.Loop_exprContext ctx) {
-        log.debug("ENTER Loop_expr :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("ENTER Loop_expr :: Stack size :: " + this.stack.size());
         Statement loopStatement = new DefaultStatement(this.getModuleContext());
         loopStatement.setId("LoopStatement");
         this.setPreviousStatementForStatement(loopStatement);
@@ -987,7 +1007,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     
     @Override
     public void exitLoop_expr(OperonModuleParser.Loop_exprContext ctx) {
-        log.debug("EXIT Loop_expr :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Loop_expr :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         io.operon.runner.node.Loop loopNode = new io.operon.runner.node.Loop(this.currentStatement);
         String symbol = null;
@@ -1019,7 +1039,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
 
     @Override
     public void enterDo_while_expr(OperonModuleParser.Do_while_exprContext ctx) {
-        log.debug("ENTER Do_while_expr :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("ENTER Do_while_expr :: Stack size :: " + this.stack.size());
         Statement doWhileStatement = new DefaultStatement(this.getModuleContext());
         doWhileStatement.setId("DoWhileStatement");
         this.setPreviousStatementForStatement(doWhileStatement);
@@ -1027,7 +1047,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     
     @Override
     public void exitDo_while_expr(OperonModuleParser.Do_while_exprContext ctx) {
-        log.debug("EXIT Do_while_expr :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Do_while_expr :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         io.operon.runner.node.DoWhile doWhileNode = new io.operon.runner.node.DoWhile(this.currentStatement);
 
@@ -1050,7 +1070,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
 
     @Override
     public void enterWhile_expr(OperonModuleParser.While_exprContext ctx) {
-        log.debug("ENTER While_expr :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("ENTER While_expr :: Stack size :: " + this.stack.size());
         Statement whileStatement = new DefaultStatement(this.getModuleContext());
         whileStatement.setId("WhileStatement");
         this.setPreviousStatementForStatement(whileStatement);
@@ -1058,7 +1078,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     
     @Override
     public void exitWhile_expr(OperonModuleParser.While_exprContext ctx) {
-        log.debug("EXIT While_expr :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT While_expr :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         io.operon.runner.node.While whileNode = new io.operon.runner.node.While(this.currentStatement);
 
@@ -1081,7 +1101,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     
     @Override
     public void enterMap_expr(OperonModuleParser.Map_exprContext ctx) {
-        log.debug("ENTER Map_expr :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("ENTER Map_expr :: Stack size :: " + this.stack.size());
         Statement mapStatement = new DefaultStatement(this.getModuleContext());
         mapStatement.setId("MapStatement");
         this.setPreviousStatementForStatement(mapStatement);
@@ -1089,11 +1109,12 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     
     @Override
     public void exitMap_expr(OperonModuleParser.Map_exprContext ctx) {
-        log.debug("EXIT Map_expr :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Map_expr :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         io.operon.runner.node.Map map = new io.operon.runner.node.Map(this.currentStatement);
         Node mapExpr = this.stack.pop();
         map.setMapExpr(mapExpr);
+        map.setSourceCodeLineNumber(ctx.start.getLine());
         
         //System.out.println("EXIT MAP EXPR");
         //System.out.println("MAP EXPR=\"" + mapExpr.getExpr() + "\", class name=" + mapExpr.getClass().getName());
@@ -1112,7 +1133,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     
     @Override
     public void exitValue_ref(OperonModuleParser.Value_refContext ctx) {
-        log.debug("EXIT Value_ref :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Value_ref :: Stack size :: " + this.stack.size());
         ValueRef vrNode = new ValueRef(this.currentStatement);
         
         // Set correct symbol:
@@ -1136,12 +1157,6 @@ public class ModuleCompiler extends OperonModuleBaseListener {
             this.getModuleContext().getConfigs().setSupportPos(true);
             this.getModuleContext().getConfigs().setSupportParent(true);
         }
-        // ._$
-        else if (ctx.OBJ_ROOT_REFERENCE() != null) {
-            symbol = ctx.OBJ_ROOT_REFERENCE().toString();
-            this.getModuleContext().getConfigs().setSupportPos(true);
-            this.getModuleContext().getConfigs().setSupportParent(true);
-        }
         // $        
         else if (ctx.ROOT_VALUE() != null) {
             symbol = ctx.ROOT_VALUE().toString();
@@ -1153,7 +1168,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
             vrNode.getNamespaces().add(ns);
         }
         
-        log.debug("  >> valueRef :: " + symbol);
+        //:OFF:log.debug("  >> valueRef :: " + symbol);
         this.stack.push(vrNode);
     }
 
@@ -1162,7 +1177,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     //
     @Override
     public void exitComputed_value_ref(OperonModuleParser.Computed_value_refContext ctx) {
-        log.debug("EXIT Computed_value_ref :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Computed_value_ref :: Stack size :: " + this.stack.size());
         //System.out.println("COMPILER :: EXIT Computed_value_ref, currentStatement=" + this.currentStatement);
         ValueRef vrNode = new ValueRef(this.currentStatement);
         
@@ -1187,7 +1202,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     public void exitFunction_regular_argument(OperonModuleParser.Function_regular_argumentContext ctx) {
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         int subNodesSize = subNodes.size();
-        log.debug("EXIT Function_regular_argument :: SUBNODES :: " + subNodesSize + ". VALUE :: " + subNodes.get(0).getText());
+        //:OFF:log.debug("EXIT Function_regular_argument :: SUBNODES :: " + subNodesSize + ". VALUE :: " + subNodes.get(0).getText());
         FunctionRegularArgument fra = new FunctionRegularArgument(this.currentStatement);
         Node regArg = this.stack.pop();
         fra.setArgument(regArg);
@@ -1198,12 +1213,12 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     public void exitFunction_named_argument(OperonModuleParser.Function_named_argumentContext ctx) {
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         int subNodesSize = subNodes.size();
-        log.debug("EXIT Function_named_argument :: SUBNODES :: " + subNodesSize + ". VALUE :: " + subNodes.get(0).getText());
+        //:OFF:log.debug("EXIT Function_named_argument :: SUBNODES :: " + subNodesSize + ". VALUE :: " + subNodes.get(0).getText());
         FunctionNamedArgument fna = new FunctionNamedArgument(this.currentStatement);
         String argName = "";
         if (subNodes.get(0) instanceof TerminalNode) {
             argName = subNodes.get(0).getText();
-            log.debug("  >> Arg-name :: " + argName);
+            //:OFF:log.debug("  >> Arg-name :: " + argName);
         }
         Node argValue = this.stack.pop();
         fna.setArgumentName(argName);
@@ -1215,7 +1230,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     public void exitFunction_arguments(OperonModuleParser.Function_argumentsContext ctx) {
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         int subNodesSize = subNodes.size();
-        log.debug("EXIT Function_arguments :: SUBNODES :: " + subNodesSize + ". " + subNodes.get(0).getText());
+        //:OFF:log.debug("EXIT Function_arguments :: SUBNODES :: " + subNodesSize + ". " + subNodes.get(0).getText());
         
         FunctionArguments fArgs = new FunctionArguments(this.currentStatement);
         // Collect arguments:
@@ -1237,7 +1252,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
             
             // Add argument
             else {
-                log.debug("  Adding argument");
+                //:OFF:log.debug("  Adding argument");
                 Node functionArgument = this.stack.pop();
                 functionArguments.add(functionArgument);
             }
@@ -1251,14 +1266,14 @@ public class ModuleCompiler extends OperonModuleBaseListener {
 
     @Override
     public void exitFunction_ref_argument_placeholder(OperonModuleParser.Function_ref_argument_placeholderContext ctx) {
-        log.debug("EXIT Function_ref_argument_placeholder :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Function_ref_argument_placeholder :: Stack size :: " + this.stack.size());
         FunctionRefArgumentPlaceholder frArgPlaceholder = new FunctionRefArgumentPlaceholder(this.currentStatement);
         this.stack.push(frArgPlaceholder);
     }
 
     @Override
     public void exitFunction_ref_invoke(OperonModuleParser.Function_ref_invokeContext ctx) {
-        log.debug("EXIT Function_ref_invoke :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Function_ref_invoke :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         
         FunctionArguments fArgs = (FunctionArguments) this.stack.pop();
@@ -1286,7 +1301,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     
     @Override
     public void exitFunction_ref_invoke_full(OperonModuleParser.Function_ref_invoke_fullContext ctx) {
-        log.debug("EXIT Function_ref_invoke_full :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Function_ref_invoke_full :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         
         FunctionArguments fArgs = (FunctionArguments) this.stack.pop();
@@ -1314,8 +1329,8 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     
     @Override
     public void exitJson(OperonModuleParser.JsonContext ctx) {
-        log.debug("EXIT Json :: Stack size :: " + this.stack.size());
-        log.debug("    >> TRYING TO PEEK");
+        //:OFF:log.debug("EXIT Json :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("    >> TRYING TO PEEK");
         Node n = this.stack.peek();
         assert (n != null): "exitJson :: null value from stack";
         //
@@ -1323,19 +1338,19 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         //       was already evaluated, which it is not at this stage.
         if (this.currentStatement != null) {
             this.currentStatement.setNode(n);
-            log.debug("    >> NODE SET");
+            //:OFF:log.debug("    >> NODE SET");
         } else {
-            log.debug("    >> CURRENT STATEMENT WAS NULL");
+            //:OFF:log.debug("    >> CURRENT STATEMENT WAS NULL");
         }
     }
     
     @Override
     public void exitJson_value(OperonModuleParser.Json_valueContext ctx) {
-        log.debug("EXIT Json_value :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Json_value :: Stack size :: " + this.stack.size());
         OperonValue jsonValue = new OperonValue(this.currentStatement);
         List<ParseTree> subNodes = this.getContextChildNodes(ctx);
         
-        log.debug("CHILD NODES :: " + subNodes.size() + " :: CHILD NODE [0] TYPE :: " + subNodes.get(0).getClass().getName());
+        //:OFF:log.debug("CHILD NODES :: " + subNodes.size() + " :: CHILD NODE [0] TYPE :: " + subNodes.get(0).getClass().getName());
         
         if (subNodes.size() > 0 
             && subNodes.get(0) instanceof RuleNode 
@@ -1347,10 +1362,10 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         else if (subNodes.size() > 0 
             && subNodes.get(0) instanceof RuleNode 
             && subNodes.get(0) instanceof OperonModuleParser.Json_arrayContext) {
-            log.debug("SETTING JSON VALUE --> JSON ARRAY.");
+            //:OFF:log.debug("SETTING JSON VALUE --> JSON ARRAY.");
             Node value = this.stack.pop();
             if (value == null) {
-                log.error("WARNING:: POPPED NULL VALUE!!!");
+                //:OFF:log.error("WARNING:: POPPED NULL VALUE!!!");
             }
             jsonValue.setValue(value); // set ArrayType from stack   
         }
@@ -1358,10 +1373,10 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         else if (subNodes.size() > 0 
             && subNodes.get(0) instanceof RuleNode 
             && subNodes.get(0) instanceof OperonParser.Path_valueContext) {
-            log.debug("SETTING VALUE --> Path-value.");
+            //:OFF:log.debug("SETTING VALUE --> Path-value.");
             Node value = this.stack.pop();
             if (value == null) {
-                log.error("WARNING:: POPPED NULL VALUE!!!");
+                //:OFF:log.error("WARNING:: POPPED NULL VALUE!!!");
             }
             jsonValue.setValue(value); // set PathValue from stack   
         }
@@ -1369,10 +1384,10 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         else if (subNodes.size() > 0 
             && subNodes.get(0) instanceof RuleNode 
             && subNodes.get(0) instanceof OperonParser.Compiler_obj_config_lookupContext) {
-            log.debug("SETTING VALUE --> Compiler_obj_config_lookupContext-value.");
+            //:OFF:log.debug("SETTING VALUE --> Compiler_obj_config_lookupContext-value.");
             Node value = this.stack.pop();
             if (value == null) {
-                log.error("WARNING:: POPPED NULL VALUE!!!");
+                //:OFF:log.error("WARNING:: POPPED NULL VALUE!!!");
             }
             jsonValue.setValue(value); // set PathValue from stack   
         }
@@ -1383,7 +1398,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
             if (token != null) {
                 StringType sNode = new StringType(this.currentStatement);
                 String symbolText = token.getSymbol().getText();
-                log.debug("TerminalNode. Text :: " + symbolText);
+                //:OFF:log.debug("TerminalNode. Text :: " + symbolText);
                 sNode.setValue(symbolText);
                 jsonValue.setValue(sNode);
             }
@@ -1391,7 +1406,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
             else if ( (token = ctx.getToken(OperonModuleParser.NUMBER, 0)) != null) {
                 NumberType nNode = new NumberType(this.currentStatement);
                 String symbolText = token.getSymbol().getText().toLowerCase();
-                log.debug("TerminalNode. Text :: " + symbolText);
+                //:OFF:log.debug("TerminalNode. Text :: " + symbolText);
                 
                 int dotPos = symbolText.indexOf(".");
                 int expPos = symbolText.indexOf("e");
@@ -1438,10 +1453,13 @@ public class ModuleCompiler extends OperonModuleBaseListener {
                 jsonValue.setValue(raw);
             }
 
+            //
+            // """
+            //
             else if ( (token = ctx.getToken(OperonParser.MULTILINE_STRING, 0)) != null) {
                 StringType sNode = new StringType(this.currentStatement);
                 String symbolText = token.getSymbol().getText();
-                log.debug("TerminalNode: String. Text :: " + symbolText);
+                //:OFF:log.debug("TerminalNode: String. Text :: " + symbolText);
                 
                 // replace \r \n \t
                 StringBuilder sb = new StringBuilder();
@@ -1458,6 +1476,9 @@ public class ModuleCompiler extends OperonModuleBaseListener {
                     else if (c == '\t') {
                         sb.append("\\t");
                     }
+                    else if (c == '"') {
+                        sb.append("\\\"");
+                    }
                     else {
                         sb.append(c);
                     }
@@ -1469,11 +1490,13 @@ public class ModuleCompiler extends OperonModuleBaseListener {
                 jsonValue.setValue(sNode);
             }
 
-            else if ( (token = ctx.getToken(OperonParser.MULTILINE_PADDED_STRING, 0)) != null) {
-                //System.out.println("MULTILINE_PADDED_STRING");
+            //
+            // """|
+            // 
+            else if ( (token = ctx.getToken(OperonParser.MULTILINE_STRIPPED_STRING, 0)) != null) {
                 StringType sNode = new StringType(this.currentStatement);
                 String symbolText = token.getSymbol().getText();
-                log.debug("TerminalNode: String. Text :: " + symbolText);
+                //:OFF:log.debug("TerminalNode: String. Text :: " + symbolText);
                 
                 StringBuilder sb = new StringBuilder();
                 
@@ -1492,7 +1515,12 @@ public class ModuleCompiler extends OperonModuleBaseListener {
                                 sb.append("\\t");
                             }
                             else {
-                                sb.append(c);
+                                if (c == '"') {
+                                    sb.append("\\\"");
+                                }
+                                else {
+                                    sb.append(c);
+                                }
                             }
                         }
                     }
@@ -1507,22 +1535,43 @@ public class ModuleCompiler extends OperonModuleBaseListener {
                 jsonValue.setValue(sNode);
             }
 
+            //
+            // """>
+            //
             else if ( (token = ctx.getToken(OperonParser.MULTILINE_PADDED_LINES_STRING, 0)) != null) {
                 //System.out.println("MULTILINE_PADDED_LINES_STRING");
                 StringType sNode = new StringType(this.currentStatement);
                 String symbolText = token.getSymbol().getText();
-                log.debug("TerminalNode: String. Text :: " + symbolText);
+                //:OFF:log.debug("TerminalNode: String. Text :: " + symbolText);
                 
                 StringBuilder sb = new StringBuilder();
                 
+                // strip the whitespace and tabs from the beginning of each line
                 boolean strippingMode = false;
+                int initialStrippedCounter = 0;
+                int lineStrippedCounter = 0;
+                boolean initialStrippedCounterSet = false;
                 for (int i = 4; i < symbolText.length() - 3; i ++) {
                     char c = symbolText.charAt(i);
                     if (c != '\r' && c != '\n') {
                         if (strippingMode) {
                             if (c != ' ' && c != '\t') {
-                                sb.append(c);
                                 strippingMode = false;
+                                initialStrippedCounterSet = true;
+                                // Set rest of the white-spaces:
+                                //System.out.println("Line stripped counter2=" + lineStrippedCounter);
+                                for (int s = 0; s < lineStrippedCounter - initialStrippedCounter; s ++) {
+                                    sb.append(" ");
+                                }
+                                sb.append(c);
+                            }
+                            else {
+                                if (initialStrippedCounterSet == false) {
+                                    initialStrippedCounter += 1;
+                                }
+                                lineStrippedCounter += 1;
+                                //System.out.println("Line stripped counter1=" + lineStrippedCounter);
+                                
                             }
                         }
                         else {
@@ -1530,7 +1579,12 @@ public class ModuleCompiler extends OperonModuleBaseListener {
                                 sb.append("\\t");
                             }
                             else {
-                                sb.append(c);
+                                if (c == '"') {
+                                    sb.append("\\\"");
+                                }
+                                else {
+                                    sb.append(c);
+                                }
                             }
                         }
                     }
@@ -1541,6 +1595,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
                         if (c == '\n') {
                             sb.append("\\n");
                         }
+                        lineStrippedCounter = 0;
                         strippingMode = true;
                     }
                 }
@@ -1569,7 +1624,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     
     @Override
     public void exitJson_array(OperonModuleParser.Json_arrayContext ctx) {
-        log.debug("EXIT Json_array :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Json_array :: Stack size :: " + this.stack.size());
         List<ParseTree> ruleChildNodes = this.getContextChildRuleNodes(ctx);
         int childCount = ruleChildNodes.size();
         
@@ -1597,13 +1652,13 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     
     @Override
     public void exitJson_obj(OperonModuleParser.Json_objContext ctx) {
-        log.debug("EXIT Json_obj :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Json_obj :: Stack size :: " + this.stack.size());
         List<ParseTree> ruleChildNodes = this.getContextChildRuleNodes(ctx);
         int pairsCount = ruleChildNodes.size();
         
         ObjectType jsonObj = new ObjectType(this.currentStatement);
-        jsonObj.setObjId(Integer.toString(this.objIndex));
-        log.debug("    Set objId :: " + Integer.toString(this.objIndex));
+        jsonObj.setObjId(this.objIndex);
+        //:OFF:log.debug("    Set objId :: " + Integer.toString(this.objIndex));
         this.objIndex = this.objIndex + 1;
         List<PairType> jsonPairs = new ArrayList<PairType>();
         
@@ -1626,7 +1681,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     
     @Override
     public void exitJson_pair(OperonModuleParser.Json_pairContext ctx) {
-        log.debug("EXIT Json_pair :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Json_pair :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = this.getContextChildNodes(ctx);
         PairType jsonPair = new PairType(this.currentStatement);
 
@@ -1657,14 +1712,31 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         
         //System.out.println("Setted key:: " + key);
         
-        if (subNodes.size() == 4) {
-            OperonValueConstraint jvc = (OperonValueConstraint) this.stack.pop();
+        //         
+        // Add OperonValueConstraint, if such exists
+        // 
+        if (subNodes.size() >= 4 && this.stack.peek() instanceof OperonValueConstraint) {
+            //System.out.println("Constraint found.");
+            OperonValueConstraint ovc = (OperonValueConstraint) this.stack.pop();
+            ovc.setSourceCodeLineNumber(ctx.start.getLine());
             String constraintAsString = subNodes.get(1).getText();
-            jvc.setConstraintAsString(constraintAsString);
-            jsonPair.setOperonValueConstraint(jvc);
+            ovc.setConstraintAsString(constraintAsString);
+            jsonPair.setOperonValueConstraint(ovc);
         }
         
-        log.debug("   PairType subNodes :: " + subNodes.size());
+        //
+        // Add configs-object for Pair.
+        // Available options:
+        //    "hidden" --> controls if the value is serialized or not.
+        //
+        if (subNodes.size() >= 4 && this.stack.size() > 0 && this.stack.peek() instanceof ObjectType) {
+            //System.out.println("ConfigObject found.");
+            Node pairConfigs = this.stack.pop();
+            jsonPair.setConfigs(pairConfigs);
+            //System.out.println("ConfigObject set.");
+        }
+        
+        //:OFF:log.debug("   PairType subNodes :: " + subNodes.size());
         
         jsonPair.setPair(key, value);
         this.stack.push(jsonPair);
@@ -1680,7 +1752,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     //
     @Override
     public void exitCompiler_obj_config_lookup(OperonModuleParser.Compiler_obj_config_lookupContext ctx) {
-        log.debug("EXIT Compiler_obj_config_lookup :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Compiler_obj_config_lookup :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         String symbolText = null;
         OperonValue result = null;
@@ -1720,7 +1792,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     
     @Override
     public void exitJson_value_constraint(OperonModuleParser.Json_value_constraintContext ctx) {
-        log.debug("EXIT Json_value_constraint :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Json_value_constraint :: Stack size :: " + this.stack.size());
         OperonValueConstraint jsonValueConstraint = new OperonValueConstraint(this.currentStatement);
         jsonValueConstraint.setValueConstraint(this.stack.pop());
         this.stack.push(jsonValueConstraint);
@@ -1736,20 +1808,21 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         else {
             throw new RuntimeException("exitObj_access :: unknown symbol");
         }
-        log.debug("EXIT OBJ_ACCESS :: " + ctx.ID()); 
+        //:OFF:log.debug("EXIT OBJ_ACCESS :: " + ctx.ID()); 
         ObjAccess objAccess = new ObjAccess(this.currentStatement); 
-        objAccess.setObjAccessKey(accessKey); 
+        objAccess.setObjAccessKey(accessKey);
+        objAccess.setSourceCodeLineNumber(ctx.start.getLine());
         this.stack.push(objAccess);
     }
     
     @Override
     public void exitObj_dynamic_access(OperonModuleParser.Obj_dynamic_accessContext ctx) {
-        log.debug("EXIT OBJ_DYNAMIC_ACCESS :: stack size :: " + this.stack.size()); 
+        //:OFF:log.debug("EXIT OBJ_DYNAMIC_ACCESS :: stack size :: " + this.stack.size()); 
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         
         ObjDynamicAccess objDynamicAccess = new ObjDynamicAccess(this.currentStatement); 
         objDynamicAccess.setKeyExpr(this.stack.pop());
-        
+        objDynamicAccess.setSourceCodeLineNumber(ctx.start.getLine());
         ObjectType configs = null;
         
         //
@@ -1765,7 +1838,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
 
     @Override
     public void exitObj_deep_scan(OperonModuleParser.Obj_deep_scanContext ctx) {
-        log.debug("EXIT OBJ_DEEP_SCAN :: " + ctx.ID());
+        //:OFF:log.debug("EXIT OBJ_DEEP_SCAN :: " + ctx.ID());
         ObjDeepScan objDeepScan = new ObjDeepScan(this.currentStatement);
         objDeepScan.setObjDeepScanKey(ctx.ID().getSymbol().getText());
         this.stack.push(objDeepScan);
@@ -1773,12 +1846,12 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     
     @Override
     public void exitObj_dynamic_deep_scan(OperonModuleParser.Obj_dynamic_deep_scanContext ctx) {
-        log.debug("EXIT OBJ_DYNAMIC_DEEP_SCAN");
+        //:OFF:log.debug("EXIT OBJ_DYNAMIC_DEEP_SCAN");
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         
         ObjDynamicDeepScan objDynamicDeepScan = new ObjDynamicDeepScan(this.currentStatement);
         objDynamicDeepScan.setKeyExpr(this.stack.pop());
-        
+        objDynamicDeepScan.setSourceCodeLineNumber(ctx.start.getLine());
         ObjectType configs = null;
         
         //
@@ -1797,7 +1870,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     // 
     @Override
     public void exitPath_matches(OperonModuleParser.Path_matchesContext ctx) {
-        log.debug("EXIT PathMatches, stack size=" + this.stack.size());
+        //:OFF:log.debug("EXIT PathMatches, stack size=" + this.stack.size());
         PathMatches pathMatches = new PathMatches(this.currentStatement);
         List<ParseTree> nodes = getContextChildNodes(ctx);
         int startPos = 1; // 'PathMatches' '('
@@ -1909,7 +1982,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
 
     @Override
     public void exitWhere_expr(OperonModuleParser.Where_exprContext ctx) {
-        log.debug("EXIT Where, stack size=" + this.stack.size());
+        //:OFF:log.debug("EXIT Where, stack size=" + this.stack.size());
         Where where = new Where(this.currentStatement);
         List<ParseTree> nodes = getContextChildNodes(ctx);
         Node predExprNode = this.stack.peek();
@@ -1935,8 +2008,53 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     }
 
     @Override
+    public void exitObj_update_expr(OperonModuleParser.Obj_update_exprContext ctx) {
+        //:OFF:log.debug("EXIT Obj_update, stack size=" + this.stack.size());
+        Update update = new Update(this.currentStatement);
+        List<ParseTree> nodes = getContextChildNodes(ctx);
+        
+        //
+        // Update {foo: 123} End
+        // << {foo: 123};
+        //
+        //System.out.println("nodes size=" + nodes.size());
+        //for (int i = 0; i < nodes.size(); i ++) {
+        //    System.out.println(nodes.get(i).getText());
+        //}
+        //System.out.println("===");
+        
+        // Skip from end: "End", skip from start "Update"
+        UpdatePair up = new UpdatePair();
+
+        //System.out.println("Stack size=" + this.stack.size());
+        //System.out.println("Pop value");
+        Node popUpdateValue = this.stack.pop();
+        
+        up.setIsObject(true);
+        up.setUpdateValue(popUpdateValue);
+        
+        update.getPathUpdates().add(up);
+        
+        //
+        // Configuration object is optional.
+        //
+        if (this.stack.size() > 0 && nodes.get(1).getText().charAt(0) == '{') {
+            //System.out.println("Peeking");
+            Node peeked = this.stack.peek();
+            //System.out.println("Peeked type=" + peeked.getClass().getName());
+            
+            if (peeked != null && peeked instanceof ObjectType) {
+                Node updateConfiguration = this.stack.pop();
+                update.setConfigs(updateConfiguration);
+            }
+        }
+        
+        this.stack.push(update);
+    }
+
+    @Override
     public void exitUpdate_expr(OperonModuleParser.Update_exprContext ctx) {
-        log.debug("EXIT Update, stack size=" + this.stack.size());
+        //:OFF:log.debug("EXIT Update, stack size=" + this.stack.size());
         Update update = new Update(this.currentStatement);
         List<ParseTree> nodes = getContextChildNodes(ctx);
         
@@ -2001,7 +2119,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     // 
     @Override
     public void exitUpdate_array_expr(OperonModuleParser.Update_array_exprContext ctx) {
-        log.debug("EXIT Update array expr, stack size=" + this.stack.size());
+        //:OFF:log.debug("EXIT Update array expr, stack size=" + this.stack.size());
         List<ParseTree> nodes = getContextChildNodes(ctx);
         
         //
@@ -2069,7 +2187,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     //
     @Override
     public void exitPath_value(OperonModuleParser.Path_valueContext ctx) {
-        log.debug("EXIT Path_value");
+        //:OFF:log.debug("EXIT Path_value");
         io.operon.runner.node.type.Path path = new io.operon.runner.node.type.Path(this.currentStatement);
         List<ParseTree> nodes = getContextChildNodes(ctx);
         int startPos = 2;
@@ -2107,7 +2225,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
 
     @Override
     public void exitRange_expr(OperonModuleParser.Range_exprContext ctx) {
-        log.debug("EXIT Range_expr. Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Range_expr. Stack size :: " + this.stack.size());
         Range rangeExpr = new Range(this.currentStatement);
         rangeExpr.setRhs(this.stack.pop());
         rangeExpr.setLhs(this.stack.pop());
@@ -2116,12 +2234,12 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     
     
     @Override
-    public void exitIntegration_call(OperonModuleParser.Integration_callContext ctx) {
-        log.debug("EXIT Integration_call :: Stack size :: " + this.stack.size());
+    public void exitIo_call(OperonModuleParser.Io_callContext ctx) {
+        //:OFF:log.debug("EXIT Io_call :: Stack size :: " + this.stack.size());
         List<ParseTree> nodes = getContextChildNodes(ctx);
 
-        IntegrationCall integrationCall = new IntegrationCall(this.currentStatement);
-        
+        IOCall ioCall = new IOCall(this.currentStatement);
+        ioCall.setSourceCodeLineNumber(ctx.start.getLine());
         
         // Possible combinations:
         //  0  1 2  3  4 5
@@ -2139,9 +2257,9 @@ public class ModuleCompiler extends OperonModuleBaseListener {
             componentId = nodes.get(3).toString();
         }
         
-        log.debug("COMPILER :: Integration Call :: " + componentName + ":" + componentId);
-        integrationCall.setComponentName(componentName);
-        integrationCall.setComponentId(componentId);
+        //:OFF:log.debug("COMPILER :: Integration Call :: " + componentName + ":" + componentId);
+        ioCall.setComponentName(componentName);
+        ioCall.setComponentId(componentId);
         
         // TODO: read the components -definition file?
         //       Or should this be done from the componentsUtil?
@@ -2160,18 +2278,18 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         }
         //System.out.println("ComponentsPath adjusted :: " + moduleFilePathAdjusted);
 
-        integrationCall.setComponentsDefinitionFilePath(moduleFilePathAdjusted);
+        ioCall.setComponentsDefinitionFilePath(moduleFilePathAdjusted);
         
-        log.debug("MODULE COMPILER :: Integration call :: NODES LEN :: " + nodes.size());
+        //:OFF:log.debug("MODULE COMPILER :: Integration call :: NODES LEN :: " + nodes.size());
 
         if (nodes.size() == 6 && nodes.get(5).getClass().getName().equals("io.operon.parser.OperonModuleParser$Json_objContext")
             || nodes.size() == 4 && nodes.get(3).getClass().getName().equals("io.operon.parser.OperonModuleParser$Json_objContext")
             ) {
-            log.debug("COMPILER :: Integration call :: pop stack (Json_obj)");
+            //:OFF:log.debug("COMPILER :: Integration call :: pop stack (Json_obj)");
             ObjectType jsonConfigValue = (ObjectType) this.stack.pop();
             // Don't log at this point, as it would cause obj-serialization,
             // which (currently) cannot be done at compile-time (e.g. ValueRef).
-            integrationCall.setJsonConfiguration(jsonConfigValue);
+            ioCall.setJsonConfiguration(jsonConfigValue);
         }
         
         if (this.getOperonTestsContext() != null) {
@@ -2225,17 +2343,17 @@ public class ModuleCompiler extends OperonModuleBaseListener {
                     mnode.addNode(mockFunctionCall);
                 }
                 catch (Exception e) {
-                    throw new RuntimeException("Compiler :: IntegrationCall :: failed to create mock");
+                    throw new RuntimeException("Compiler :: IOCall :: failed to create mock");
                 }
                 this.stack.push(mnode);
             }
             
             if (assertComponents != null && assertComponents.size() > 0) {
                 //
-                // create MultiNode, with (IntegrationCall, FunctionCall(s))
+                // create MultiNode, with (IOCall, FunctionCall(s))
                 //
                 MultiNode mnode = new MultiNode(this.currentStatement);
-                mnode.addNode(integrationCall);
+                mnode.addNode(ioCall);
                 
                 for (AssertComponent assertComponent : assertComponents) {
                     //
@@ -2250,27 +2368,27 @@ public class ModuleCompiler extends OperonModuleBaseListener {
                         mnode.addNode(assertFunctionCall);
                     }
                     catch (Exception e) {
-                        throw new RuntimeException("Compiler :: IntegrationCall :: failed to create assert");
+                        throw new RuntimeException("Compiler :: IOCall :: failed to create assert");
                     }
                 }
                 this.stack.push(mnode);
             }
             
             if (mockComponent == null && (assertComponents == null || assertComponents.size() == 0)) {
-                this.stack.push(integrationCall);
+                this.stack.push(ioCall);
             }
         }
         else {
-            this.stack.push(integrationCall);
+            this.stack.push(ioCall);
         }
     }
     
     @Override
     public void enterAuto_invoke_ref(OperonModuleParser.Auto_invoke_refContext ctx) {
-        log.debug("ENTER AutoInvokeRef :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("ENTER AutoInvokeRef :: Stack size :: " + this.stack.size());
         Statement functionStatement = new FunctionStatement(this.getModuleContext());
         functionStatement.setId("LambdaFunctionStatement");
-        log.debug("    >> Set previousStatement: " + this.getCurrentStatement().getId());
+        //:OFF:log.debug("    >> Set previousStatement: " + this.getCurrentStatement().getId());
         this.getStatementStack().push(this.getCurrentStatement());
         functionStatement.setPreviousStatement(this.getCurrentStatement());
         this.getStatementStack().push(functionStatement);
@@ -2283,10 +2401,10 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     //
     @Override
     public void exitAuto_invoke_ref(OperonModuleParser.Auto_invoke_refContext ctx) {
-        log.debug("EXIT AutoInvokeRef :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT AutoInvokeRef :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         int subNodesSize = subNodes.size();
-        log.debug("    >> AutoInvokeRef :: SUBNODES :: " + subNodesSize + ". " + subNodes.get(0).getText());
+        //:OFF:log.debug("    >> AutoInvokeRef :: SUBNODES :: " + subNodesSize + ". " + subNodes.get(0).getText());
         
         LambdaFunctionRef lfnRef = new LambdaFunctionRef(this.currentStatement);
         lfnRef.setInvokeOnAccess(true);
@@ -2301,16 +2419,16 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         this.stack.push(lfnRef);
         this.getStatementStack().pop(); // Remove functionStatement from the statementStack
         Statement previousStatement = this.getStatementStack().pop();
-        log.debug("    >> Set currentStatement with previousStatement: " + previousStatement.getId());
+        //:OFF:log.debug("    >> Set currentStatement with previousStatement: " + previousStatement.getId());
         this.setCurrentStatement(previousStatement);
     }
     
     @Override
     public void enterLambda_function_ref(OperonModuleParser.Lambda_function_refContext ctx) {
-        log.debug("ENTER LambdaFunctionRef :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("ENTER LambdaFunctionRef :: Stack size :: " + this.stack.size());
         Statement functionStatement = new FunctionStatement(this.getModuleContext());
         functionStatement.setId("LambdaFunctionStatement");
-        log.debug("    >> Set previousStatement: " + this.getCurrentStatement().getId());
+        //:OFF:log.debug("    >> Set previousStatement: " + this.getCurrentStatement().getId());
         this.getStatementStack().push(this.getCurrentStatement());
         functionStatement.setPreviousStatement(this.getCurrentStatement());
         this.getStatementStack().push(functionStatement);
@@ -2319,10 +2437,10 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     
     @Override
     public void exitLambda_function_ref(OperonModuleParser.Lambda_function_refContext ctx) {
-        log.debug("EXIT LambdaFunctionRef :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT LambdaFunctionRef :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         int subNodesSize = subNodes.size();
-        log.debug("    >> LAMBDA FUNCTION :: SUBNODES :: " + subNodesSize + ". " + subNodes.get(0).getText());
+        //:OFF:log.debug("    >> LAMBDA FUNCTION :: SUBNODES :: " + subNodesSize + ". " + subNodes.get(0).getText());
 
         String exprAsString = this.getExpressionAsString(subNodes);
         LambdaFunctionRef lfnRef = new LambdaFunctionRef(this.currentStatement);
@@ -2334,7 +2452,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         int startPos = 2;
         int paramsEndParenthesesIndex = 0;
         
-        log.debug("    pop lambdaExpr");
+        //:OFF:log.debug("    pop lambdaExpr");
         Node lambdaExpr = this.stack.pop();
 
         //
@@ -2344,7 +2462,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         for (int i = startPos; i < subNodesSize - 3; i ++) {
             // Reach end of params
             if (subNodes.get(i) instanceof TerminalNode && subNodes.get(i).getText().equals(")")) {
-                log.debug("    Reached end of params.");
+                //:OFF:log.debug("    Reached end of params.");
                 paramsEndParenthesesIndex = i;
                 break;
             }
@@ -2361,48 +2479,48 @@ public class ModuleCompiler extends OperonModuleBaseListener {
             }
         }
         
-        log.debug("    popped lambdaExpr");
+        //:OFF:log.debug("    popped lambdaExpr");
         //String constId = "";
         List<Node> lambdaFunctionParams = new ArrayList<Node>();
 
-        log.debug("  Collect params");
+        //:OFF:log.debug("  Collect params");
         for (int i = startPos; i < subNodesSize - 3; i ++) {
-            log.debug("  subNode :: " + i);
+            //:OFF:log.debug("  subNode :: " + i);
             if (subNodes.get(i) instanceof TerminalNode) {
-                log.debug("  subNode [" + i + "] :: " + subNodes.get(i).getText());
+                //:OFF:log.debug("  subNode [" + i + "] :: " + subNodes.get(i).getText());
             }
             // Reach end of params
             if (subNodes.get(i) instanceof TerminalNode && subNodes.get(i).getText().equals(")")) {
-                log.debug("    Reached end of params.");
+                //:OFF:log.debug("    Reached end of params.");
                 paramsEndParenthesesIndex = i;
                 break;
             }
             
             // Skip param value marker
             else if (subNodes.get(i) instanceof TerminalNode && subNodes.get(i).getText().equals(":")) {
-                log.debug("    Skip param value marker.");
+                //:OFF:log.debug("    Skip param value marker.");
                 continue;
             }
             
             // Skip argument separator
             else if (subNodes.get(i) instanceof TerminalNode && subNodes.get(i).getText().equals(",")) {
-                log.debug("    Skip argument separator.");
+                //:OFF:log.debug("    Skip argument separator.");
                 continue;
             }
             
             else {
-                log.debug("    pop paramExpr");
+                //:OFF:log.debug("    pop paramExpr");
                 Node paramExpr = this.stack.pop();
-                log.debug("    popped paramExpr");
+                //:OFF:log.debug("    popped paramExpr");
                 // For lambda-ref, all params should be LambdaFunctionRefNamedArguments
                 if (paramExpr instanceof LambdaFunctionRefNamedArgument) {
-                    log.debug("    >>>> FunctionRefNamedArgument found!");
+                    //:OFF:log.debug("    >>>> FunctionRefNamedArgument found!");
                 }
                 lambdaFunctionParams.add(paramExpr);
             }
         }
         
-        log.debug("    Add the params");
+        //:OFF:log.debug("    Add the params");
         
         // Finally, add the params:
         Map<String, OperonValueConstraint> lfrnaConstraintMap = new HashMap<String, OperonValueConstraint>();
@@ -2413,9 +2531,9 @@ public class ModuleCompiler extends OperonModuleBaseListener {
             lfrnaConstraintMap.put(lfrna.getArgumentName(), lfrna.getOperonValueConstraint());
         }
         
-        log.debug(" lambdaFunctionParams size :: " + lambdaFunctionParams.size());
+        //:OFF:log.debug(" lambdaFunctionParams size :: " + lambdaFunctionParams.size());
         
-        log.debug(" functionParamValueMap size :: " + functionParamValueMap.size());
+        //:OFF:log.debug(" functionParamValueMap size :: " + functionParamValueMap.size());
         
         lfnRef.setParams(functionParamValueMap);
         lfnRef.setParamConstraints(lfrnaConstraintMap);
@@ -2423,13 +2541,13 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         this.stack.push(lfnRef);
         this.getStatementStack().pop(); // Remove functionStatement from the statementStack
         Statement previousStatement = this.getStatementStack().pop();
-        log.debug("    >> Set currentStatement with previousStatement: " + previousStatement.getId());
+        //:OFF:log.debug("    >> Set currentStatement with previousStatement: " + previousStatement.getId());
         this.setCurrentStatement(previousStatement);
     }
 
     @Override
     public void exitLambda_function_ref_named_argument(OperonModuleParser.Lambda_function_ref_named_argumentContext ctx) {
-        log.debug("EXIT LambdaFunctionRefNamedArgument :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT LambdaFunctionRefNamedArgument :: Stack size :: " + this.stack.size());
         LambdaFunctionRefNamedArgument lfrna = new LambdaFunctionRefNamedArgument(this.currentStatement);
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         int subNodesSize = subNodes.size();
@@ -2437,24 +2555,25 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         // Extract the arg name and expr-value and set into frna:
         String argName = subNodes.get(0).getText();
         lfrna.setArgumentName(argName);
-        log.debug("   argName :: " + argName);
+        //:OFF:log.debug("   argName :: " + argName);
         if (this.stack.peek() instanceof FunctionRefArgumentPlaceholder) {
-            log.debug("  Found FunctionArgumentPlaceholder");
+            //:OFF:log.debug("  Found FunctionArgumentPlaceholder");
             FunctionRefArgumentPlaceholder frap = (FunctionRefArgumentPlaceholder) this.stack.pop(); // new FunctionRefArgumentPlaceholder(this.currentStatement);
             lfrna.setExprNode(frap);
             lfrna.setHasPlaceholder(true);
         }
         
         else {
-            log.debug("   popping argValue");
+            //:OFF:log.debug("   popping argValue");
             Node argValue = this.stack.pop();
             lfrna.setExprNode(argValue);
         }
         
         if (subNodes.get(subNodes.size() - 3).getText().charAt(0) == '<') {
             if (this.stack.size() > 0 && this.stack.peek() instanceof OperonValueConstraint) {
-                OperonValueConstraint jvc = (OperonValueConstraint) this.stack.pop();
-                lfrna.setOperonValueConstraint(jvc);
+                OperonValueConstraint ovc = (OperonValueConstraint) this.stack.pop();
+                ovc.setSourceCodeLineNumber(ctx.start.getLine());
+                lfrna.setOperonValueConstraint(ovc);
             }
         }
         
@@ -2463,7 +2582,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
 
     @Override
     public void exitFunction_ref_named_argument(OperonModuleParser.Function_ref_named_argumentContext ctx) {
-        log.debug("EXIT FunctionRefNamedArgument :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT FunctionRefNamedArgument :: Stack size :: " + this.stack.size());
         FunctionRefNamedArgument frna = new FunctionRefNamedArgument(this.currentStatement);
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         int subNodesSize = subNodes.size();
@@ -2471,16 +2590,16 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         // Extract the arg name and expr-value and set into frna:
         String argName = subNodes.get(0).getText();
         frna.setArgumentName(argName);
-        log.debug("   argName :: " + argName);
+        //:OFF:log.debug("   argName :: " + argName);
         if (this.stack.peek() instanceof FunctionRefArgumentPlaceholder) {
-            log.debug("  Found FunctionArgumentPlaceholder");
+            //:OFF:log.debug("  Found FunctionArgumentPlaceholder");
             FunctionRefArgumentPlaceholder frap = (FunctionRefArgumentPlaceholder) this.stack.pop(); // new FunctionRefArgumentPlaceholder(this.currentStatement);
             frna.setExprNode(frap);
             frna.setHasPlaceholder(true);
         }
         
         else {
-            log.debug("   popping argValue");
+            //:OFF:log.debug("   popping argValue");
             Node argValue = this.stack.pop();
             frna.setExprNode(argValue);
         }
@@ -2495,7 +2614,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
 /*
     @Override
     public void exitLambda_function_ref_named_argument(OperonModuleParser.Lambda_function_ref_named_argumentContext ctx) {
-        log.debug("EXIT FunctionRefNamedArgument :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT FunctionRefNamedArgument :: Stack size :: " + this.stack.size());
         FunctionRefNamedArgument frna = new FunctionRefNamedArgument(this.currentStatement);
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         int subNodesSize = subNodes.size();
@@ -2503,17 +2622,17 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         // Extract the arg name and expr-value and set into frna:
         String argName = subNodes.get(0).getText();
         frna.setArgumentName(argName);
-        log.debug("   argName :: " + argName);
+        //:OFF:log.debug("   argName :: " + argName);
         if (this.stack.size() > 0) {
             if (this.stack.peek() instanceof FunctionRefArgumentPlaceholder) {
-                log.debug("  Found FunctionArgumentPlaceholder");
+                //:OFF:log.debug("  Found FunctionArgumentPlaceholder");
                 FunctionRefArgumentPlaceholder frap = (FunctionRefArgumentPlaceholder) this.stack.pop();
                 frna.setExpr(frap);
                 frna.setHasPlaceholder(true);
             }
             
             else {
-                log.debug("   popping argValue");
+                //:OFF:log.debug("   popping argValue");
                 Node argValue = this.stack.pop();
                 frna.setExpr(argValue);
             }
@@ -2530,9 +2649,9 @@ public class ModuleCompiler extends OperonModuleBaseListener {
 */
     @Override
     public void enterLambda_function_call(OperonModuleParser.Lambda_function_callContext ctx) {
-        log.debug("ENTER LambdaFunction Stmt :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("ENTER LambdaFunction Stmt :: Stack size :: " + this.stack.size());
         Statement functionStatement = new FunctionStatement(this.getModuleContext());
-        log.debug("    >> Set previousStatement: " + this.getCurrentStatement().getId());
+        //:OFF:log.debug("    >> Set previousStatement: " + this.getCurrentStatement().getId());
         this.getStatementStack().push(this.getCurrentStatement());
         functionStatement.setPreviousStatement(this.getCurrentStatement());
         this.getStatementStack().push(functionStatement);
@@ -2541,10 +2660,10 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     
     @Override
     public void exitLambda_function_call(OperonModuleParser.Lambda_function_callContext ctx) {
-        log.debug("EXIT LambdaFunction Stmt :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT LambdaFunction Stmt :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         int subNodesSize = subNodes.size();
-        log.debug("    >> LAMBDA FUNCTION :: SUBNODES :: " + subNodesSize + ". " + subNodes.get(0).getText());
+        //:OFF:log.debug("    >> LAMBDA FUNCTION :: SUBNODES :: " + subNodesSize + ". " + subNodes.get(0).getText());
 
         // Collect params:
         java.util.Map<String, Node> functionParamValueMap = new HashMap<String, Node>();
@@ -2562,7 +2681,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         this.stack.push(lfnCall);
         this.getStatementStack().pop(); // Remove functionStatement from the statementStack
         Statement previousStatement = this.getStatementStack().pop();
-        log.debug("    >> Set currentStatement with previousStatement: " + previousStatement.getId());
+        //:OFF:log.debug("    >> Set currentStatement with previousStatement: " + previousStatement.getId());
         this.setCurrentStatement(previousStatement);
     }
     
@@ -2573,7 +2692,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         //
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         int subNodesSize = subNodes.size();
-        log.debug("EXIT Function_ref :: SUBNODES :: " + subNodesSize + ". " + subNodes.get(0).getText() + ", stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Function_ref :: SUBNODES :: " + subNodesSize + ". " + subNodes.get(0).getText() + ", stack size :: " + this.stack.size());
         
         String functionNamespace = "";
         String functionName = "";
@@ -2593,7 +2712,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
             }
         }
         
-        log.debug("    >> FUNCTION :: " + functionName + ". Namespace: " + functionNamespace);
+        //:OFF:log.debug("    >> FUNCTION :: " + functionName + ". Namespace: " + functionNamespace);
 
         // Collect params:
         
@@ -2635,14 +2754,14 @@ public class ModuleCompiler extends OperonModuleBaseListener {
             //}
             
             else if (subNodes.get(i) instanceof FunctionRefArgumentPlaceholder) {
-                log.debug("  FunctionRefArgumentPlaceholder DETECTED!!!");
+                //:OFF:log.debug("  FunctionRefArgumentPlaceholder DETECTED!!!");
                 Node functionParam = this.stack.pop();
                 functionParams.add(functionParam);
             }
             
             // Add params
             else {
-                log.debug("adding param from stack");
+                //:OFF:log.debug("adding param from stack");
                 Node functionParam = this.stack.pop();
                 functionParams.add(functionParam);
             }
@@ -2671,11 +2790,11 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         // User-defined function:
         else {
             FunctionRef fnRef = new FunctionRef(this.currentStatement);
-            log.debug("  FQ-name :: " + fullyQualifiedName);
+            //:OFF:log.debug("  FQ-name :: " + fullyQualifiedName);
             fnRef.setFunctionName(functionName);
             fnRef.setFunctionFQName(fullyQualifiedName);
             Collections.reverse(functionParams);
-            log.debug("functionParams.size() = " + functionParams.size());
+            //:OFF:log.debug("functionParams.size() = " + functionParams.size());
             fnRef.getParams().addAll(functionParams);
             this.stack.push(fnRef);
         }
@@ -2685,7 +2804,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     public void exitFunction_ref_curry(OperonModuleParser.Function_ref_curryContext ctx) {
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         int subNodesSize = subNodes.size();
-        log.debug("EXIT Function_ref_curry :: stack size :: " + this.stack.size() + ", SUBNODES :: " + subNodesSize + ". " + subNodes.get(0).getText());
+        //:OFF:log.debug("EXIT Function_ref_curry :: stack size :: " + this.stack.size() + ", SUBNODES :: " + subNodesSize + ". " + subNodes.get(0).getText());
         
         List<Node> functionParams = new ArrayList<Node>();
         int startPos = 1;
@@ -2695,41 +2814,41 @@ public class ModuleCompiler extends OperonModuleBaseListener {
             // Reach end of params
             if (subNodes.get(i) instanceof TerminalNode && subNodes.get(i).getText().equals(")")) {
                 paramsEndParenthesesIndex = i;
-                log.debug("Reached possible end, there might be more");
+                //:OFF:log.debug("Reached possible end, there might be more");
                 //break;
                 continue;
             }
             
             // Skip argument separator
             else if (subNodes.get(i) instanceof TerminalNode && subNodes.get(i).getText().equals(",")) {
-                log.debug("Skipping argument separator");
+                //:OFF:log.debug("Skipping argument separator");
                 continue;
             }
             
             // Skip start of params
             else if (subNodes.get(i) instanceof TerminalNode && subNodes.get(i).getText().equals("(")) {
-                log.debug("Skipping arguments start");
+                //:OFF:log.debug("Skipping arguments start");
                 continue;
             }
             
             else if (subNodes.get(i) instanceof FunctionRefArgumentPlaceholder) {
-                log.debug("  FunctionRefArgumentPlaceholder detected");
+                //:OFF:log.debug("  FunctionRefArgumentPlaceholder detected");
                 Node functionParam = this.stack.pop();
                 functionParams.add(functionParam);
             }
             
             // Add params
             else {
-                log.debug("Function_ref_curry :: Adding param (pop stack)");
+                //:OFF:log.debug("Function_ref_curry :: Adding param (pop stack)");
                 Node functionParam = this.stack.pop();
-                log.debug("FunctionParam type :: " + functionParam.getClass().getName());
+                //:OFF:log.debug("FunctionParam type :: " + functionParam.getClass().getName());
                 functionParams.add(functionParam);
             }
         }
         FunctionRefCurry curry = new FunctionRefCurry(this.currentStatement);
         Collections.reverse(functionParams);
         curry.getArguments().addAll(functionParams);
-        log.debug("Function curry params size :: " + functionParams.size());
+        //:OFF:log.debug("Function curry params size :: " + functionParams.size());
         
         //throw new RuntimeException("FunctionRefCurry not implemented yet!");
         this.stack.push(curry);
@@ -2739,7 +2858,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     public void exitFunction_call(OperonModuleParser.Function_callContext ctx) {
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         int subNodesSize = subNodes.size();
-        log.debug("EXIT Function_call :: SUBNODES :: " + subNodesSize + ". " + subNodes.get(0).getText());
+        //:OFF:log.debug("EXIT Function_call :: SUBNODES :: " + subNodesSize + ". " + subNodes.get(0).getText());
         
         String functionNamespace = "";
         String functionName = "";
@@ -2759,7 +2878,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
             }
         }
         
-        log.debug("    >> FUNCTION :: " + functionName + ". Namespace: " + functionNamespace);
+        //:OFF:log.debug("    >> FUNCTION :: " + functionName + ". Namespace: " + functionNamespace);
 
         // Collect params:
         
@@ -2770,36 +2889,36 @@ public class ModuleCompiler extends OperonModuleBaseListener {
             startPos = 3;
         }
         int paramsEndParenthesesIndex = 0;
-        log.debug("FunctionCall :: looping arguments :: " + subNodesSize);
+        //:OFF:log.debug("FunctionCall :: looping arguments :: " + subNodesSize);
         
         for (int i = startPos; i < subNodesSize - 1; i ++) {
             
             // Reach end of params
             if (subNodes.get(i) instanceof TerminalNode && subNodes.get(i).getText().equals(")")) {
-                log.debug("  >> )");
+                //:OFF:log.debug("  >> )");
                 paramsEndParenthesesIndex = i;
                 break;
             }
             
             // Skip argument separator
             else if (subNodes.get(i) instanceof TerminalNode && subNodes.get(i).getText().equals(",")) {
-                log.debug("  >> ,");
+                //:OFF:log.debug("  >> ,");
                 continue;
             }
             
             else if (subNodes.get(i) instanceof TerminalNode && subNodes.get(i).getText().equals("(")) {
-                log.debug("  >> (");
+                //:OFF:log.debug("  >> (");
                 break;
             }
             
             // Add params
             else {
-                log.debug("  >> Add params (pop stack)");
+                //:OFF:log.debug("  >> Add params (pop stack)");
                 Node functionParam = this.stack.pop();
                 functionParams.add(functionParam);
             }
         }
-        log.debug("  >> Looping done.");
+        //:OFF:log.debug("  >> Looping done.");
         
         String fqName = functionNamespace + ":" + functionName + ":" + functionParams.size();
         if (fqName.equals(":pos:0") || fqName.equals("core:pos:0")) {
@@ -2869,15 +2988,15 @@ public class ModuleCompiler extends OperonModuleBaseListener {
 
     @Override
     public void exitJson_type_function_shortcut(OperonModuleParser.Json_type_function_shortcutContext ctx) {
-        log.debug("Exit Json_type_function_shortcut. Stack size :: " + this.stack.size());
+        //:OFF:log.debug("Exit Json_type_function_shortcut. Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = this.getContextChildNodes(ctx);
-        log.debug("    SubNodes size :: " + subNodes.size());
-        log.debug("    SubNodes :: " + subNodes);
+        //:OFF:log.debug("    SubNodes size :: " + subNodes.size());
+        //:OFF:log.debug("    SubNodes :: " + subNodes);
 
         String jsonType = subNodes.get(0).toString();
         //System.out.println("Type :: ["+ jsonType + "], stack size :: " + this.stack.size());
         
-        log.debug(jsonType);
+        //:OFF:log.debug(jsonType);
     
         if (jsonType.equals("Boolean") == false
             && jsonType.equals("Lambda") == false
@@ -3002,7 +3121,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     
     @Override
     public void exitThrow_exception(OperonModuleParser.Throw_exceptionContext ctx) {
-        log.debug("EXIT Throw_exception :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Throw_exception :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         Node exceptionValue = this.stack.pop();
         ThrowException throwExceptionNode = new ThrowException(this.currentStatement);
@@ -3012,7 +3131,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
 
     @Override
     public void exitTry_catch(OperonModuleParser.Try_catchContext ctx) {
-        log.debug("EXIT Try_catch :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Try_catch :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         TryCatch tc = new TryCatch(this.getCurrentStatement());
         Node catchExpr = this.stack.pop();
@@ -3033,7 +3152,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
 
     @Override
     public void enterException_stmt(OperonModuleParser.Exception_stmtContext ctx) {
-        log.debug("ENTER Exception-stmt :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("ENTER Exception-stmt :: Stack size :: " + this.stack.size());
         Statement exceptionStatement = new DefaultStatement(this.getModuleContext());
         exceptionStatement.setId("ExceptionStatement");
         if (this.getCurrentStatement() != null) {
@@ -3045,7 +3164,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     // Exception -stmt is not supported in the Module if attached to root-level
     @Override
     public void exitException_stmt(OperonModuleParser.Exception_stmtContext ctx) {
-        log.debug("EXIT Exception_stmt :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT Exception_stmt :: Stack size :: " + this.stack.size());
         //System.out.println("ModuleCompiler :: Exit ExceptionStatement");
         List<ParseTree> subNodes = getContextChildNodes(ctx);
         Node exceptionHandlerExpr = this.stack.pop();
@@ -3087,7 +3206,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     
     @Override
     public void exitAggregate_expr(OperonModuleParser.Aggregate_exprContext ctx) {
-        log.debug("EXIT aggregate_expr :: Stack size :: " + this.stack.size());
+        //:OFF:log.debug("EXIT aggregate_expr :: Stack size :: " + this.stack.size());
         
         Aggregate aggregate = new Aggregate(this.getCurrentStatement(), Integer.toString(aggregateIndex));
         aggregateIndex = aggregateIndex + 1;
@@ -3150,7 +3269,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
     //      Sets the @statement as currentStatement
     private void setPreviousStatementForStatement(Statement statement) {
         if (this.getCurrentStatement() != null) {
-            log.debug("    >> Set previousStatement: " + this.getCurrentStatement().getId());
+            //:OFF:log.debug("    >> Set previousStatement: " + this.getCurrentStatement().getId());
         }
         this.getStatementStack().push(this.getCurrentStatement());
         statement.setPreviousStatement(this.getCurrentStatement());
@@ -3168,7 +3287,7 @@ public class ModuleCompiler extends OperonModuleBaseListener {
         this.getStatementStack().pop();
         Statement previousStatement = this.getStatementStack().pop();
         if (previousStatement != null) {
-            log.debug("    >> Set currentStatement with previousStatement: " + previousStatement.getId());
+            //:OFF:log.debug("    >> Set currentStatement with previousStatement: " + previousStatement.getId());
         }
         this.setCurrentStatement(previousStatement);
     }

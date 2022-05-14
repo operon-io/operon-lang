@@ -44,7 +44,7 @@ import org.apache.logging.log4j.LogManager;
 // Does not support attributes!
 // 
 public class ArrayReverseSort extends BaseArity1 implements Node, Arity1 /*, SupportsAttributes*/ {
-    private static Logger log = LogManager.getLogger(ArrayReverseSort.class);
+     // no logger 
     
     public ArrayReverseSort(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);

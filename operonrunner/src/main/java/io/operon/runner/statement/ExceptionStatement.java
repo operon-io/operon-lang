@@ -32,7 +32,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class ExceptionStatement extends BaseStatement implements Statement {
-    private static Logger log = LogManager.getLogger(ExceptionStatement.class);
+     // no logger 
     
     private OperonGenericException exception;
     
@@ -42,7 +42,7 @@ public class ExceptionStatement extends BaseStatement implements Statement {
     }
     
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("Exception-statement :: evaluate()");
+        //:OFF:log.debug("Exception-statement :: evaluate()");
         //System.out.println("Exception-statement :: evaluate()");
 
         Statement exceptionStatement = this.getNode().getStatement();
@@ -72,14 +72,14 @@ public class ExceptionStatement extends BaseStatement implements Statement {
 	    Node exceptionHandlerExpr = this.getNode();
 	    
 	    if (exceptionHandlerExpr == null) {
-	        log.debug(">> ExceptionStatement :: exceptionHandlerExpr was null!");
+	        //:OFF:log.debug(">> ExceptionStatement :: exceptionHandlerExpr was null!");
 	    }
 	    OperonValue exceptionValue = null;
 	    try {
             exceptionValue = exceptionHandlerExpr.evaluate();
             this.synchronizeState();
 	    } catch (OperonGenericException oge) {
-	        log.debug("ExceptionStatement :: Catch OperonGenericException");
+	        //:OFF:log.debug("ExceptionStatement :: Catch OperonGenericException");
 	        //System.err.println("Registered ExceptionHandler :: " + exceptionHandlerExpr.getExpr());
 	        //System.err.println("oge msg :: " + oge.getMessage());
 	        //System.err.println("oge errorValue :: " + oge.getErrorValue());
@@ -102,7 +102,7 @@ public class ExceptionStatement extends BaseStatement implements Statement {
                 this.rethrow(rethrowValue);
             }
 	    } catch (Exception e) {
-	        log.debug("ExceptionStatement :: Catch Exception :: do nothing");
+	        //:OFF:log.debug("ExceptionStatement :: Catch Exception :: do nothing");
 	        //System.err.println("Registered ExceptionHandler :: " + exceptionHandlerExpr.getExpr());
 	        //System.err.println("ERROR SIGNAL :: " + e.getMessage());
             this.setErrorHandled(exceptionHandlerExpr.getStatement().isErrorHandled());
@@ -125,7 +125,7 @@ public class ExceptionStatement extends BaseStatement implements Statement {
             OperonValueConstraint c = this.getOperonValueConstraint();
             OperonValueConstraint.evaluateConstraintAgainstOperonValue(this.getEvaluatedValue(), c);
         }
-        log.debug("ExceptionStatement evaluatedValue :: " + this.getEvaluatedValue());
+        //:OFF:log.debug("ExceptionStatement evaluatedValue :: " + this.getEvaluatedValue());
 
         //
         // Transfer state to this statement:
@@ -147,12 +147,12 @@ public class ExceptionStatement extends BaseStatement implements Statement {
         if (this.isErrorHandled() == false) {
             this.rethrow(exceptionValue);
         }
-        log.debug("ExceptionStatement evaluate() done");
+        //:OFF:log.debug("ExceptionStatement evaluate() done");
         return this.getEvaluatedValue();
     }
 
     private void rethrow(OperonValue exceptionValue) throws OperonGenericException {
-        log.debug("ExceptionStatement :: rethrow");
+        //:OFF:log.debug("ExceptionStatement :: rethrow");
         //System.out.println("ExceptionStatement :: rethrow :: " + exceptionValue);
         OperonGenericException e = null;
         if (this.getException() != null) {
@@ -170,9 +170,9 @@ public class ExceptionStatement extends BaseStatement implements Statement {
         // Rethrow Exception only if this is not the final-errorHandler
         //
         if (this.getPreviousStatement() instanceof FromStatement == false) {
-            log.debug("ExceptionStatement :: rethrow exception");
+            //:OFF:log.debug("ExceptionStatement :: rethrow exception");
             e.setCurrentValue(exceptionValue);
-            log.debug("ExceptionStatement :: rethrowing now");
+            //:OFF:log.debug("ExceptionStatement :: rethrowing now");
             throw e;
         }
         else {

@@ -37,10 +37,10 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class ArrayType extends OperonValue implements Node {
-    private static Logger log = LogManager.getLogger(ArrayType.class);
+     // no logger 
     
     private List<Node> values; // Refactor to use OperonValue
-    private String arrayId;
+    private int arrayId;
     
     public ArrayType(Statement stmt) {
         super(stmt);
@@ -53,7 +53,7 @@ public class ArrayType extends OperonValue implements Node {
         }
         
         else if (value instanceof Range) {
-            log.debug("ArrayType :: Range -element found");
+            //:OFF:log.debug("ArrayType :: Range -element found");
             Range range = (Range) value;
             
             try {            
@@ -62,8 +62,8 @@ public class ArrayType extends OperonValue implements Node {
                     int rangeLhs = range.getEvaluatedLhs();
                     int rangeRhs = range.getEvaluatedRhs();
 
-                    log.debug("    ArrayType :: Range :: rangeLhs :: " + rangeLhs);
-                    log.debug("    ArrayType :: Range :: rangeRhs :: " + rangeRhs);
+                    //:OFF:log.debug("    ArrayType :: Range :: rangeLhs :: " + rangeLhs);
+                    //:OFF:log.debug("    ArrayType :: Range :: rangeRhs :: " + rangeRhs);
                     
                     int steps = 0;
                     if (rangeLhs >= rangeRhs) {
@@ -89,7 +89,7 @@ public class ArrayType extends OperonValue implements Node {
                         }
                     }
                     
-                    log.debug("  ArrayType :: Range :: added values.");
+                    //:OFF:log.debug("  ArrayType :: Range :: added values.");
             }
             
             } catch (Exception e) {
@@ -230,6 +230,14 @@ public class ArrayType extends OperonValue implements Node {
         }
     }
     
+    public void setArrayId(int id) {
+        this.arrayId = id;
+    }
+    
+    public int getArrayId() {
+        return this.arrayId;
+    }
+    
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -263,6 +271,7 @@ public class ArrayType extends OperonValue implements Node {
         sb.append(ofmt.arrayStart + System.lineSeparator());
         ofmt.spaces = (short) (ofmt.spaces + ofmt.spacing);
         for (int i = 0; i < this.getValues().size(); i ++) {
+            //System.out.println("<<< ArrayType, i=" + i + ", arrayId=" + this.getArrayId());
             Node arrayValue = this.getValues().get(i);
             //assert (arrayValue != null): "ArrayType :: toString :: index at " + i + ", was null.";
             
@@ -287,50 +296,95 @@ public class ArrayType extends OperonValue implements Node {
 
     @Override
     public String toYamlString(YamlFormatter yf) {
-        //System.out.println("ArrayType :: toYamlString, spaces = " + yf.spaces);
-        if (yf == null) {yf = new YamlFormatter();}
+        //System.out.println("ArrayType :: toYamlString, spaces = " + yf.spaces + ", arrayId=" + this.getArrayId());
+        if (yf == null) {
+            //System.out.println("ArrayType :: toYamlString :: yf was null, creating new YamlFormatter");
+            yf = new YamlFormatter();
+        }
         StringBuilder sb = new StringBuilder();
-        //sb.append(yf.arrayStart + " ");
-        //yf.spaces = (short) (yf.spaces + yf.spacing);
+
         boolean spacingIncreased = false;
         for (int i = 0; i < this.getValues().size(); i ++) {
-            try {
-                OperonValue arrayValue = this.getValues().get(i).evaluate();
-                String arrayValueStr = null;
-                
-                if (arrayValue instanceof ArrayType) {
-                    yf.spaces = (short) (yf.spaces + yf.spacing);
-                    spacingIncreased = true;
-                    arrayValueStr = yf.arrayStart + System.lineSeparator() + 
-                                    arrayValue.toYamlString(yf);
-                }
+            Node arrayValue = this.getValues().get(i); //.evaluate();
+            String arrayValueStr = null;
+            
+            // Sub-array:
+            if (arrayValue instanceof ArrayType) {
+                arrayValueStr = yf.spaces() + yf.arrayStart;
+                yf.spaces = (short) (yf.spaces + yf.spacing);
+                spacingIncreased = true;
+                arrayValueStr += System.lineSeparator() + arrayValue.toYamlString(yf);
+            }
 
+            else {
+                String appendValue = arrayValue.toYamlString(yf); // "    value"
+                int markPos = 0; // --> "   - value"
+                for (int ix = 0; ix < appendValue.length(); ix ++) {
+                    if (appendValue.charAt(ix) != ' ') {
+                        markPos = ix;
+                        break;
+                    }
+                }
+                if (markPos >= 2) {
+                    arrayValueStr = appendValue.substring(0, markPos - 2) +
+                                    yf.arrayStart + " " +
+                                    appendValue.substring(markPos, appendValue.length());
+                }
                 else {
                     arrayValueStr = yf.spaces() + yf.arrayStart + " " + arrayValue.toYamlString(yf);
                 }
-                
-                if (spacingIncreased) {
-                  yf.spaces = (short) (yf.spaces - yf.spacing); // reset spacing
-                  spacingIncreased = false;
-                }
-                
-                // Check if EmptyValue
-                if (arrayValueStr.isEmpty()) {
-                    continue;
-                }
-    
-                sb.append(arrayValueStr);
-                if (i < this.getValues().size() - 1) {
-                    sb.append(System.lineSeparator());
-                }
             }
-            catch (OperonGenericException oge) {
-                // TODO: change sig to throw Exception
+            
+            if (spacingIncreased) {
+                yf.spaces = (short) (yf.spaces - yf.spacing); // reset spacing
+                spacingIncreased = false;
+            }
+            
+            // Check if EmptyValue
+            if (arrayValueStr.isEmpty()) {
+                continue;
+            }
+
+            sb.append(arrayValueStr);
+            if (i < this.getValues().size() - 1) {
+                sb.append(System.lineSeparator());
             }
         }
         //sb.append(System.lineSeparator());
         String result = sb.toString();
+        //sb = null;
+        //System.out.println("ArrayType :: toYamlString :: RESULT :: [[[" + result + "]]]");
+        return result;
+    }
+
+    @Override
+    public String toTomlString(OutputFormatter ofmt) {
+        if (ofmt == null) {ofmt = new OutputFormatter();}
+        StringBuilder sb = new StringBuilder();
+        sb.append(ofmt.arrayStart + System.lineSeparator());
+        ofmt.spaces = (short) (ofmt.spaces + ofmt.spacing);
+        for (int i = 0; i < this.getValues().size(); i ++) {
+            //System.out.println("<<< ArrayType, i=" + i + ", arrayId=" + this.getArrayId());
+            Node arrayValue = this.getValues().get(i);
+            //assert (arrayValue != null): "ArrayType :: toString :: index at " + i + ", was null.";
+            
+            String arrayValueStr = ofmt.spaces() + arrayValue.toTomlString(ofmt);
+
+            // Check if EmptyValue
+            if (arrayValueStr.isEmpty()) {
+                continue;
+            }
+
+            sb.append(arrayValueStr);
+            if (i < this.getValues().size() - 1) {
+                sb.append("," + System.lineSeparator());
+            }
+        }
+        ofmt.spaces = (short) (ofmt.spaces - ofmt.spacing); // reset spacing
+        sb.append(System.lineSeparator() + ofmt.spaces() + ofmt.arrayEnd);
+        String result = sb.toString();
         sb = null;
         return result;
     }
+
 }

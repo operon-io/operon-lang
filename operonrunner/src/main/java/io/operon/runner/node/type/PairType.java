@@ -29,12 +29,13 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager; 
  
 public class PairType extends OperonValue implements Node { 
-    private static Logger log = LogManager.getLogger(PairType.class); 
+     // no logger  
     private String key; 
     private OperonValue value; 
     private OperonValue evaluatedValue; 
     private OperonValueConstraint constraint; 
     private int position; // Required in Filter
+    private Node configs; // for "hidden" -option
     
     private ObjectType parentObj;
     
@@ -55,7 +56,7 @@ public class PairType extends OperonValue implements Node {
     }
  
     public PairType evaluate() throws OperonGenericException { 
-        log.debug("PairType :: " + key + ", evaluate :: " + this.getValue().getClass().getName());
+        //:OFF:log.debug("PairType :: " + key + ", evaluate :: " + this.getValue().getClass().getName());
         
         if (this.getUnboxed() == true && this.getPreventReEvaluation() == true) {
             return this;
@@ -68,8 +69,9 @@ public class PairType extends OperonValue implements Node {
         // Set '_' (surrounding object, i.e. "this / self")
         //
         if (this.getParentObj() != null && this.getParentObj() instanceof ObjectType) {
-            //System.out.println("PairType evaluate --> @=Object :: setting _ and _$");
+            //System.out.println("PairType evaluate --> @=Object :: setting _ (self)");
             ObjectType obj = (ObjectType) this.getParentObj();
+            
             ObjectType objSurround = new ObjectType(this.getStatement());
             
             for (int i = 0; i < obj.getPairs().size(); i ++) {
@@ -81,18 +83,15 @@ public class PairType extends OperonValue implements Node {
                     objSurround.addPair(p);
                 }
             }
-            
-            //System.out.println("Filled surroundObj");
-            //System.out.println("  _ = " + obj);
-            
-            this.getStatement().getRuntimeValues().put("_", objSurround); 
+
+            this.getStatement().getRuntimeValues().put("_", objSurround);
         }
-        
+
         OperonValue evaluatedValue = this.getValue().evaluate(); 
-        this.setEvaluatedValue(evaluatedValue); 
+        this.setEvaluatedValue(evaluatedValue.copy()); 
          
         if (this.getOperonValueConstraint() != null) { 
-            log.debug("Evaluating constraint. Statement id :: " + this.getStatement().getId()); 
+            //:OFF:log.debug("Evaluating constraint. Statement id :: " + this.getStatement().getId()); 
             // Apply constraint-check: 
             OperonValueConstraint c = this.getOperonValueConstraint(); 
              
@@ -170,16 +169,25 @@ public class PairType extends OperonValue implements Node {
             return ""; 
         } 
         
+        else if (this.configs != null) {
+            try {
+                Info info = this.resolveConfigs(this.getStatement());
+                if (info.hidden) {
+                    return "";
+                }
+            } catch (OperonGenericException oge) {
+                
+            }
+        }
+        
+        OperonValue evaluatedValue = this.getEvaluatedValue();
+        String strValue = evaluatedValue.toString();
+        if (strValue.isEmpty()) {
+            return "";
+        }
         else {
-            OperonValue evaluatedValue = this.getEvaluatedValue();
-            String strValue = evaluatedValue.toString();
-            if (strValue.isEmpty()) {
-                return "";
-            }
-            else {
-                return this.getKey() + ": " + strValue;
-            }
-        } 
+            return this.getKey() + ": " + strValue;
+        }
     }
     
     @Override
@@ -189,66 +197,195 @@ public class PairType extends OperonValue implements Node {
             return ""; 
         } 
         
+        else if (this.configs != null) {
+            try {
+                Info info = this.resolveConfigs(this.getStatement());
+                if (info.hidden) {
+                    return "";
+                }
+            } catch (OperonGenericException oge) {
+                
+            }
+        }
+        
+        String strValue = this.getEvaluatedValue().toFormattedString(ofmt);
+        if (strValue.isEmpty()) {
+            return "";
+        }
         else {
-            String strValue = this.getEvaluatedValue().toFormattedString(ofmt);
-            if (strValue.isEmpty()) {
-                return "";
-            }
-            else {
-                return this.getKey() + ": " + strValue;
-            }
-        } 
+            return this.getKey() + ": " + strValue;
+        }
     }
     
     @Override
     public String toYamlString(YamlFormatter yf) {
-        if (yf == null) {yf = new YamlFormatter();}
+        if (yf == null) {
+            //System.out.println("PairType :: toYamlString :: yf was null, creating new YamlFormatter");
+            yf = new YamlFormatter();
+        }
         if (this.isEmptyValue()) {
             return ""; 
         } 
         
-        else {
-            String strValue = null;
-            OperonValue ev = null;
+        else if (this.configs != null) {
             try {
-                ev = this.getEvaluatedValue().evaluate();
+                Info info = this.resolveConfigs(this.getStatement());
+                if (info.hidden) {
+                    return "";
+                }
             } catch (OperonGenericException oge) {
-                return "Error()";
+                
             }
-            //System.out.println("ev = " + ev);
-            //System.out.println("  yf.spaces = " + yf.spaces);
+        }
+        
+        String strValue = null;
+        OperonValue ev = this.getEvaluatedValue();
+        //System.out.println("ev = " + ev);
+        //System.out.println("  yf.spaces = " + yf.spaces);
+        if (ev instanceof ArrayType) {
+            yf.spaces = (short) (yf.spaces + yf.spacing);
+            //System.out.println("  arrItem - inc yf.spaces = " + yf.spaces);
+            strValue = ev.toYamlString(yf);
+            yf.spaces = (short) (yf.spaces - yf.spacing); // reset spacing
+            //System.out.println("  arrItem - dec yf.spaces = " + yf.spaces);
+        }
+        else if (ev instanceof ObjectType) {
+            yf.spaces = (short) (yf.spaces + yf.spacing);
+            //System.out.println("  objItem - inc yf.spaces = " + yf.spaces);
+            strValue = ev.toYamlString(yf);
+            yf.spaces = (short) (yf.spaces - yf.spacing); // reset spacing
+            //System.out.println("  objItem - dec yf.spaces = " + yf.spaces);
+        }
+        else {
+            //System.out.println("  print string-value, yf.spaces = " + yf.spaces);
+            //System.out.println("ev class-name=" + ev.getClass().getName());
+            strValue = ev.toYamlString(yf);
+        }
+        
+        if (strValue.isEmpty()) {
+            return "";
+        }
+        else {
             if (ev instanceof ArrayType) {
-                yf.spaces = (short) (yf.spaces + yf.spacing);
-                //System.out.println("  - inc yf.spaces = " + yf.spaces);
-                strValue = ev.toYamlString(yf);
-                yf.spaces = (short) (yf.spaces - yf.spacing); // reset spacing
-                //System.out.println("  - dec yf.spaces = " + yf.spaces);
+                String result = yf.spaces() + this.getKey().substring(1, this.getKey().length() - 1) + ":" + System.lineSeparator() + strValue;
+                //System.out.println("toYamlString :: PAIR RETURN: Array :: [[[" + result + "]]]");
+                return result;
             }
-            if (ev instanceof ObjectType) {
-                yf.spaces = (short) (yf.spaces + yf.spacing);
-                strValue = ev.toYamlString(yf);
-                yf.spaces = (short) (yf.spaces - yf.spacing); // reset spacing
+            else if (ev instanceof ObjectType) {
+                String result = this.getKey().substring(1, this.getKey().length() - 1) + ":" + System.lineSeparator() + strValue;
+                //System.out.println("toYamlString :: PAIR RETURN: Object");
+                return result;
             }
             else {
-                strValue = ev.toYamlString(yf);
+                //System.out.println("  else, yf.spaces = " + yf.spaces);
+                //System.out.println("PairType :: RETURN :: " + strValue);
+                //System.out.println("toYamlString :: PAIR RETURN: Value");
+                return yf.spaces() + this.getKey().substring(1, this.getKey().length() - 1) + ": " + strValue;
             }
-            
-            if (strValue.isEmpty()) {
-                return "";
-            }
-            else {
-                if (ev instanceof ArrayType) {
-                    String result = this.getKey().substring(1, this.getKey().length() - 1) + ":" + System.lineSeparator() + strValue;
-                    return result;
-                }
-                else if (ev instanceof ObjectType) {
-                    String result = this.getKey().substring(1, this.getKey().length() - 1) + ":" + System.lineSeparator() + strValue;
-                    return result;
-                }
-                else {
-                    return this.getKey().substring(1, this.getKey().length() - 1) + ": " + strValue;
-                }
-            }
+        }
+    }
+
+    @Override
+    public String toTomlString(OutputFormatter ofmt) {
+        if (ofmt == null) {ofmt = new OutputFormatter();}
+        if (this.isEmptyValue()) {
+            return ""; 
         } 
+        
+        else if (this.configs != null) {
+            try {
+                Info info = this.resolveConfigs(this.getStatement());
+                if (info.hidden) {
+                    return "";
+                }
+            } catch (OperonGenericException oge) {
+                
+            }
+        }
+        
+        OperonValue ev = this.getEvaluatedValue(); //.toTomlString(ofmt);
+        StringBuilder sb = new StringBuilder();
+        if (ev instanceof ObjectType) {
+            //
+            // TODO: should look up for parent!
+            //
+            // this.getParentObj();
+            //
+            sb.append("[" + this.getKey().substring(1, this.getKey().length() - 1) + "]" + System.lineSeparator());
+            String strValue = ev.toTomlString(ofmt);
+            if (strValue.isEmpty()) {
+                sb.append("");
+            }
+            else {
+                sb.append(strValue);
+            }
+            return sb.toString();
+        }
+        else {
+            String strValue = ev.toTomlString(ofmt);
+            if (strValue.isEmpty()) {
+                sb.append("");
+            }
+            else {
+                sb.append(this.getKey().substring(1, this.getKey().length() - 1) + " = " + strValue);
+            }
+            return sb.toString();
+        }
+    }
+
+    public void setConfigs(Node conf) {
+        this.configs = conf;
+    }
+    
+    //
+    // This is for JsonUtil's copy
+    //
+    public Node getConfigsNode() {
+        return this.configs;
+    }
+    
+    public ObjectType getConfigs() throws OperonGenericException {
+        if (this.configs == null) {
+            return new ObjectType(this.getStatement());
+        }
+        this.configs = (ObjectType) this.configs.evaluate();
+        return (ObjectType) this.configs;
+    }
+
+    //
+    // Lazyly resolved on serialization
+    //
+    public Info resolveConfigs(Statement stmt) throws OperonGenericException {
+        Info info = new Info();
+        
+        if (this.configs == null) {
+            return info;
+        }
+        
+        OperonValue currentValueCopy = stmt.getCurrentValue().copy();
+        
+        for (PairType pair : this.getConfigs().getPairs()) {
+            String key = pair.getKey();
+            switch (key.toLowerCase()) {
+                case "\"hidden\"":
+                    OperonValue hiddenValue = pair.getEvaluatedValue();
+                    if (hiddenValue instanceof FalseType) {
+                        info.hidden = false;
+                    }
+                    else {
+                        info.hidden = true;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        
+        stmt.setCurrentValue(currentValueCopy);
+        return info;
+    }
+    
+    private class Info {
+        public boolean hidden = false;
     }
 }

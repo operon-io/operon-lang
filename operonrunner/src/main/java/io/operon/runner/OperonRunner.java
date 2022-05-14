@@ -23,6 +23,7 @@ import io.operon.parser.*;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -41,10 +42,12 @@ import io.operon.runner.node.type.OperonValue;
 import io.operon.runner.system.InputSourceDriver;
 import io.operon.runner.model.InputSource;
 import io.operon.runner.model.OperonConfigs;
+import io.operon.runner.model.ModuleDefinition;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.statement.LetStatement;
 import io.operon.runner.statement.FromStatement;
 import io.operon.runner.node.Node;
+import io.operon.runner.processor.function.core.module.ModuleAdd;
 import io.operon.runner.util.JsonUtil;
 
 import org.apache.logging.log4j.Logger;
@@ -53,7 +56,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class OperonRunner implements Runnable {
-    private static Logger log = LogManager.getLogger(OperonRunner.class);
+     // no logger 
     private OperonContext operonContext;
     
     private InputSource fromInputSource;
@@ -119,16 +122,16 @@ public class OperonRunner implements Runnable {
             long compilingEndTime = System.nanoTime();
             // TODO: print only if statistics are enabled:
             //System.out.println("Compilation time: " + (compilingEndTime - startTime) + " ns (" + (compilingEndTime - startTime) / 1000000 + " ms.)");
-            log.info("Starting to run query.");
+            //:OFF:log.info("Starting to run query.");
             
             FromStatement fromStatement = operonContext.getFromStatement();
             if (fromStatement == null) {
-                log.debug("OperonRunner :: FromStatement was null");
+                //:OFF:log.debug("OperonRunner :: FromStatement was null");
                 throw new RuntimeException("OperonRunner :: FromStatement was null");
             }
             this.fromInputSource = fromStatement.getInputSource();
             if (this.fromInputSource == null) {
-                log.debug("OperonRunner :: fromInputSource was null");
+                //:OFF:log.debug("OperonRunner :: fromInputSource was null");
                 throw new RuntimeException("OperonRunner :: fromInputSource was null");
             }
             // NOTE: isd not loaded at this point
@@ -139,13 +142,13 @@ public class OperonRunner implements Runnable {
             this.isd = this.fromInputSource.getInputSourceDriver();
 
             if (this.getIsd() == null) {
-                log.debug("OperonRunner :: isd was null");
+                //:OFF:log.debug("OperonRunner :: isd was null");
                 throw new RuntimeException("OperonRunner :: isd was null");
             }
 
             long endTime = System.nanoTime();
             //System.out.println("Total execution time: " + (endTime - startTime) + " ns (" + (endTime - startTime) / 1000000 + " ms.)");
-            log.info("Done.");
+            //:OFF:log.info("Done.");
  
             while (this.isRunning) {
                 Thread.sleep(100);
@@ -247,7 +250,7 @@ public class OperonRunner implements Runnable {
             objectInputStream.close();
             return ctx;
         } catch (ClassNotFoundException cnfe) {
-            log.debug("OperonRunner :: Could not find OperonContext from file");
+            //:OFF:log.debug("OperonRunner :: Could not find OperonContext from file");
             throw new RuntimeException("Could not find OperonContext from file");
         }
     }
@@ -468,8 +471,8 @@ public class OperonRunner implements Runnable {
             ctx.shutdown();
             return selectResult;
         } catch (Exception e) {
-            log.debug("OperonRunner :: doQuery :: Exception");
-            log.debug("    OperonRunner :: doQuery :: Exception :: " + e.getMessage());
+            //:OFF:log.debug("OperonRunner :: doQuery :: Exception");
+            //:OFF:log.debug("    OperonRunner :: doQuery :: Exception :: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -483,8 +486,8 @@ public class OperonRunner implements Runnable {
             ctx.shutdown();
             return selectResult;
         } catch (Exception e) {
-            log.debug("OperonRunner :: doQuery :: Exception");
-            log.debug("    OperonRunner :: doQuery :: Exception :: " + e.getMessage());
+            //:OFF:log.debug("OperonRunner :: doQuery :: Exception");
+            //:OFF:log.debug("    OperonRunner :: doQuery :: Exception :: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -498,24 +501,19 @@ public class OperonRunner implements Runnable {
             ctx.shutdown();
             return selectResult;
         } catch (Exception e) {
-            log.debug("OperonRunner :: doQueryWithInitialValue :: Exception");
-            log.debug("    OperonRunner :: doQueryWithInitialValue :: Exception :: " + e.getMessage());
+            //:OFF:log.debug("OperonRunner :: doQueryWithInitialValue :: Exception");
+            //:OFF:log.debug("    OperonRunner :: doQueryWithInitialValue :: Exception :: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
 
     public static OperonValue doQueryWithInitialValue(String query, String initialValueStr) throws OperonGenericException {
         try {
-            OperonContext ctx = OperonRunner.createNewOperonContext(query, "dynamic", null);
             OperonValue initialValue = JsonUtil.operonValueFromString(initialValueStr);
-            Main.setInitialValueForJsonSystem(ctx, initialValue);
-            ctx.start(OperonContextManager.ContextStrategy.SINGLETON);
-            OperonValue selectResult = ctx.getOutputOperonValue();
-            ctx.shutdown();
-            return selectResult;
+            return doQueryWithInitialValue(query, initialValue);
         } catch (Exception e) {
-            log.debug("OperonRunner :: doQueryWithInitialValue :: Exception");
-            log.debug("    OperonRunner :: doQueryWithInitialValue :: Exception :: " + e.getMessage());
+            //:OFF:log.debug("OperonRunner :: doQueryWithInitialValue :: Exception");
+            //:OFF:log.debug("    OperonRunner :: doQueryWithInitialValue :: Exception :: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -530,25 +528,46 @@ public class OperonRunner implements Runnable {
             ctx.shutdown();
             return selectResult;
         } catch (Exception e) {
-            log.debug("OperonRunner :: doQueryWithInitialValue :: Exception");
-            log.debug("    OperonRunner :: doQueryWithInitialValue :: Exception :: " + e.getMessage());
+            //:OFF:log.debug("OperonRunner :: doQueryWithInitialValue :: Exception");
+            //:OFF:log.debug("    OperonRunner :: doQueryWithInitialValue :: Exception :: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
 
     public static OperonValue doQueryWithInitialValue(String query, String initialValueStr, OperonConfigs configs) throws OperonGenericException {
         try {
+            OperonValue initialValue = JsonUtil.operonValueFromString(initialValueStr);
+            return doQueryWithInitialValue(query, initialValue, configs);
+        } catch (Exception e) {
+            //:OFF:log.debug("OperonRunner :: doQueryWithInitialValue :: Exception");
+            //:OFF:log.debug("    OperonRunner :: doQueryWithInitialValue :: Exception :: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static OperonValue doQueryWithInitialValueAndModules(String query, OperonValue initialValue, OperonConfigs configs, List<ModuleDefinition> modules) throws OperonGenericException {
+        try {
             OperonContext ctx = OperonRunner.createNewOperonContext(query, "dynamic", null);
             ctx.setConfigs(configs);
-            OperonValue initialValue = JsonUtil.operonValueFromString(initialValueStr);
+            
+            //
+            // Enrich the modules
+            //
+            for (ModuleDefinition md : modules) {
+                String moduleBody = md.getBody();
+                String moduleNamespace = md.getNamespace();
+                String moduleFilePath = md.getFilePath();
+                ModuleAdd.addModule(ctx, null, moduleBody, moduleFilePath, moduleNamespace, false);
+            }
+            
             Main.setInitialValueForJsonSystem(ctx, initialValue);
             ctx.start(OperonContextManager.ContextStrategy.SINGLETON);
             OperonValue selectResult = ctx.getOutputOperonValue();
             ctx.shutdown();
             return selectResult;
         } catch (Exception e) {
-            log.debug("OperonRunner :: doQueryWithInitialValue :: Exception");
-            log.debug("    OperonRunner :: doQueryWithInitialValue :: Exception :: " + e.getMessage());
+            //:OFF:log.debug("OperonRunner :: doQueryWithInitialValue :: Exception");
+            //:OFF:log.debug("    OperonRunner :: doQueryWithInitialValue :: Exception :: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }

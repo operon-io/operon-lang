@@ -26,7 +26,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class MockComponent {
-    private static Logger log = LogManager.getLogger(MockComponent.class);
+     // no logger 
     
     private String componentNamespace;
     private String componentName;

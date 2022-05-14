@@ -49,6 +49,9 @@ public class GenericRoot extends BaseArity0 implements Node, Arity0 {
                 //System.out.println("No objLink");
                 result = this.getStatement().getCurrentValue();
             }
+            else {
+                //System.out.println("objLink found");
+            }
 
             //Do not set new path!
             return result;

@@ -37,7 +37,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class ArrayMin extends BaseArity1 implements Node, Arity1 {
-    private static Logger log = LogManager.getLogger(ArrayMin.class);
+     // no logger 
 
     public ArrayMin(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);

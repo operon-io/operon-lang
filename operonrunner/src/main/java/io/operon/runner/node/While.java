@@ -44,7 +44,7 @@ import org.apache.logging.log4j.LogManager;
  *  
  */ 
 public class While extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(While.class); 
+     // no logger  
 
     private Node whileExpr;
     private Node predicateExpr; // While (predicateExpr): whileExpr;

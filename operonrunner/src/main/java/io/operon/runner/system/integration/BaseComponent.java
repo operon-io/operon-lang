@@ -48,7 +48,7 @@ import org.apache.logging.log4j.LogManager;
 
 
 public abstract class BaseComponent implements IntegrationComponent {
-    private static Logger log = LogManager.getLogger(BaseComponent.class);
+     // no logger 
     
     private String componentName;
     private String componentId;

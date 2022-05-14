@@ -28,6 +28,9 @@ import io.operon.runner.model.exception.OperonGenericException;
  */
 public interface BinaryNodeProcessor {
 
+	public int getSourceCodeLineNumber();
+	public void setSourceCodeLineNumber(int ln);
+	
     public OperonValue process(Statement statement, Node lhs, Node rhs) throws OperonGenericException;
 
 }

@@ -32,7 +32,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class LambdaFunctionCall extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(LambdaFunctionCall.class);
+     // no logger 
     
     private Map<String, Node> params;
     private Node functionBodyExpr;
@@ -51,7 +51,7 @@ public class LambdaFunctionCall extends AbstractNode implements Node {
     }
     
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER LambdaFunctionCall.evaluate()");
+        //:OFF:log.debug("ENTER LambdaFunctionCall.evaluate()");
         
         OperonValue currentValue = null;
         //
@@ -63,16 +63,16 @@ public class LambdaFunctionCall extends AbstractNode implements Node {
         //
         // Get current value from the previous statement (scope)
         //
-        log.debug("    LambdaFunctionCall :: >> Current-stmt: " + this.getStatement().getId());
-        log.debug("    LambdaFunctionCall :: >> Accessing previous-statement: ");
+        //:OFF:log.debug("    LambdaFunctionCall :: >> Current-stmt: " + this.getStatement().getId());
+        //:OFF:log.debug("    LambdaFunctionCall :: >> Accessing previous-statement: ");
         
         Statement previousStatement = this.getStatement().getPreviousStatement();
         // DO not log these (serialization for recursive values causes problems)
-        //log.debug("        LambdaFunctionCall :: >> Prev-stmt: " + previousStatement.getId());
-        //log.debug("          LambdaFunctionCall :: Runtimevalues (previousStatement) :: " + previousStatement.getRuntimeValues());
+        ////:OFF:log.debug("        LambdaFunctionCall :: >> Prev-stmt: " + previousStatement.getId());
+        ////:OFF:log.debug("          LambdaFunctionCall :: Runtimevalues (previousStatement) :: " + previousStatement.getRuntimeValues());
         
         // Comment this after testing:
-        //log.debug("        LambdaFunctionCall :: >> Prev-stmt current-value: " + previousStatement.getCurrentValue());
+        ////:OFF:log.debug("        LambdaFunctionCall :: >> Prev-stmt current-value: " + previousStatement.getCurrentValue());
         // BUG: previous stmt currentValue might be null, if Let-stmt
         OperonValue previousStatementCurrentValue = previousStatement.getCurrentValue();
         
@@ -87,45 +87,45 @@ public class LambdaFunctionCall extends AbstractNode implements Node {
         // set current value for function
         this.getStatement().getRuntimeValues().put("@", currentValue);
         
-        //log.debug("     LambdaFunctionCall :: Runtimevalues (before) :: " + this.getStatement().getRuntimeValues());
+        ////:OFF:log.debug("     LambdaFunctionCall :: Runtimevalues (before) :: " + this.getStatement().getRuntimeValues());
         
         //this.getStatement().setCurrentValue(currentValue); // Added while fixing LambdaFunctionRefTests
         
-        log.debug("    LambdaFunctionCall :: >> Copied current-value.");
+        //:OFF:log.debug("    LambdaFunctionCall :: >> Copied current-value.");
         FunctionStatement functionStatement = (FunctionStatement) this.getStatement();
         functionStatement.setNode(this.getFunctionBodyExpr());
         for (Map.Entry<String, Node> param : this.getParams().entrySet()) {
-            //log.debug("  LambdaFunctionCall :: Param map :: " + param.getKey());
+            ////:OFF:log.debug("  LambdaFunctionCall :: Param map :: " + param.getKey());
             Node paramValue = param.getValue();
             while (!(paramValue instanceof OperonValue)) {
-                //log.debug("  LambdaFunctionCall :: Unbox param-value :: " + paramValue.getClass().getName());
+                ////:OFF:log.debug("  LambdaFunctionCall :: Unbox param-value :: " + paramValue.getClass().getName());
                 try {
                     paramValue = paramValue.evaluate();
                 } catch (NullPointerException npe) {
                     ErrorUtil.createErrorValueAndThrow(this.getStatement(), "LAMBDA_FUNCTION_CALL", "ARGUMENTS", "missing argument for " + param.getKey());
                 }
-                //log.debug("  LambdaFunctionCall :: Unboxing param-value done");
+                ////:OFF:log.debug("  LambdaFunctionCall :: Unboxing param-value done");
             }
             //if (paramValue == null) {
-            //    log.debug("LambdaFunctionCall :: PARAM VALUE WAS NULL!!!");
+            //    //:OFF:log.debug("LambdaFunctionCall :: PARAM VALUE WAS NULL!!!");
             //}
             
-            //log.debug("ACCESSING PARAM :: " + param.getKey() + " -> " + param.getValue());
+            ////:OFF:log.debug("ACCESSING PARAM :: " + param.getKey() + " -> " + param.getValue());
             //System.out.println("SET PARAM: " + param.getKey() + " :: " + (OperonValue) paramValue);
             this.getStatement().getRuntimeValues().put(param.getKey(), (OperonValue) paramValue);
             
             this.getStatement().setCurrentValue(currentValue); // Set back the current-value, so previous evaluation won't change it for next argument.
-            log.debug("     LambdaFunctionCall :: REMOVE :: Current value in the loop :: " + currentValue);
+            //:OFF:log.debug("     LambdaFunctionCall :: REMOVE :: Current value in the loop :: " + currentValue);
         }
-        //log.debug("    >> Evaluate body expr. Current value :: " + currentValue);
+        ////:OFF:log.debug("    >> Evaluate body expr. Current value :: " + currentValue);
         
         //System.out.println("FS RT :: " + functionStatement.getRuntimeValues());
         OperonValue result = functionStatement.evaluate();
         
         this.getStatement().setCurrentValue(result);
         this.getStatement().getPreviousStatement().setCurrentValue(result);
-        log.debug("     LambdaFunctionCall :: Runtimevalues (after, stmt :: " + this.getStatement().getId() + ") :: " + this.getStatement().getRuntimeValues());
-        log.debug("     LambdaFunctionCall :: evaluatedValue :: " + this.getEvaluatedValue());
+        //:OFF:log.debug("     LambdaFunctionCall :: Runtimevalues (after, stmt :: " + this.getStatement().getId() + ") :: " + this.getStatement().getRuntimeValues());
+        //:OFF:log.debug("     LambdaFunctionCall :: evaluatedValue :: " + this.getEvaluatedValue());
 
         return result;
     }

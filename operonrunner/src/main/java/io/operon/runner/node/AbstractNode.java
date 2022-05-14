@@ -42,9 +42,10 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public abstract class AbstractNode implements Node, java.io.Serializable {
-    private static Logger log = LogManager.getLogger(AbstractNode.class);
+     // no logger 
     
     private Statement statement;
+    protected int sourceCodeLineNumber = -1;
     
     private boolean isEmpty = false; // compiler sets this if value is EmptyType
     
@@ -202,5 +203,18 @@ public abstract class AbstractNode implements Node, java.io.Serializable {
     @Override
     public String toYamlString(YamlFormatter yf) {
         return this.toString();
+    }
+    
+    @Override
+    public String toTomlString(OutputFormatter pp) {
+        return this.toString();
+    }
+    
+    public int getSourceCodeLineNumber() {
+        return this.sourceCodeLineNumber;
+    }
+
+    public void setSourceCodeLineNumber(int ln) {
+        this.sourceCodeLineNumber = ln;
     }
 }

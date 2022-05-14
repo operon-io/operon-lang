@@ -45,7 +45,7 @@ import org.apache.logging.log4j.LogManager;
 
 public class ArrayRotate extends BaseArity1 implements Node, Arity1 {
     
-    private static Logger log = LogManager.getLogger(ArrayRotate.class);
+     // no logger 
     
     public ArrayRotate(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);

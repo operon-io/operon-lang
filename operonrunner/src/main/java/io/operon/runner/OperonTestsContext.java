@@ -43,7 +43,7 @@ import org.apache.logging.log4j.LogManager;
  * 
  */
 public class OperonTestsContext extends BaseContext implements Context, java.io.Serializable {
-    private static Logger log = LogManager.getLogger(OperonTestsContext.class);
+     // no logger 
     
     private FromStatement fromStatement;
     

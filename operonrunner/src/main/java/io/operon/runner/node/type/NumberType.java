@@ -30,7 +30,7 @@ import io.operon.runner.util.YamlFormatter;
 
 public class NumberType extends OperonValue implements Node, AtomicOperonValue, Comparable {
 
-	private static Locale defaultLocale = Locale.US;
+	public static Locale defaultLocale = Locale.US;
 	private static DecimalFormatSymbols dfs = new DecimalFormatSymbols(defaultLocale);
 	private static NumberFormat DF_1 =       new DecimalFormat("0", dfs);
 	private static NumberFormat DF_PREC_1 =  new DecimalFormat("0.0", dfs);
@@ -225,61 +225,7 @@ public class NumberType extends OperonValue implements Node, AtomicOperonValue, 
     @Override
     public String toFormattedString(OutputFormatter ofmt) {
         if (ofmt == null) {ofmt = new OutputFormatter();}
-		//System.out.println("Default locale=" + defaultLocale);
-		//System.out.println("Default locale minus=" + dfs.getMinusSign());
-		//System.out.println("Precision=" + this.getPrecision());
-		if (this.getPrecision() != -1 && this.getPrecision() == 0) {
-            return DF_1.format(this.getDoubleValue());
-        }
-        
-        else if (this.getPrecision() != -1 && this.getPrecision() > 0) {
-			NumberFormat format = null;
-			switch (this.getPrecision()) {
-				case 1: format = DF_PREC_1;
-					break;
-				case 2: format = DF_PREC_2;
-					break;
-				case 3: format = DF_PREC_3;
-					break;
-				case 4: format = DF_PREC_4;
-					break;
-				case 5: format = DF_PREC_5;
-					break;
-				case 6: format = DF_PREC_6;
-					break;
-				case 7: format = DF_PREC_7;
-					break;
-				case 8: format = DF_PREC_8;
-					break;
-				case 9: format = DF_PREC_9;
-					break;
-				case 10: format = DF_PREC_10;
-					break;
-				case 11: format = DF_PREC_11;
-					break;
-				case 12: format = DF_PREC_12;
-					break;
-				case 13: format = DF_PREC_13;
-					break;
-				case 14: format = DF_PREC_14;
-					break;
-				case 15: format = DF_PREC_15;
-					break;
-				case 16: format = DF_PREC_16;
-					break;
-				case 17: format = DF_PREC_17;
-					break;
-				case 18: format = DF_PREC_18;
-					break;
-				default: format = DF_PREC_18;
-			}
-            return format.format(this.getDoubleValue());
-        }
-        
-        else {
-            String result = String.valueOf(this.getDoubleValue());
-            return DF_1.format(this.getDoubleValue());
-        }
+		return this.toString();
     }
     
     @Override
@@ -340,5 +286,11 @@ public class NumberType extends OperonValue implements Node, AtomicOperonValue, 
             String result = String.valueOf(this.getDoubleValue());
             return DF_1.format(this.getDoubleValue());
         }
+    }
+    
+    @Override
+    public String toTomlString(OutputFormatter ofmt) {
+        if (ofmt == null) {ofmt = new OutputFormatter();}
+		return this.toString();
     }
 }

@@ -66,7 +66,7 @@ import org.apache.logging.log4j.LogManager;
 // Also known as "operon" -component
 //
 public class SocketComponent extends BaseComponent implements IntegrationComponent {
-    private static Logger log = LogManager.getLogger(SocketComponent.class);
+     // no logger 
 
     public SocketComponent() {}
     
@@ -380,7 +380,7 @@ public class SocketComponent extends BaseComponent implements IntegrationCompone
                     }
                     break;
                 default:
-                    log.debug("operon -producer: no mapping for configuration key: " + key);
+                    //:OFF:log.debug("operon -producer: no mapping for configuration key: " + key);
                     System.err.println("operon -producer: no mapping for configuration key: " + key);
                     ErrorUtil.createErrorValueAndThrow(currentValue.getStatement(), "OPERON", "ERROR", "operon -producer: no mapping for configuration key: " + key);
             }

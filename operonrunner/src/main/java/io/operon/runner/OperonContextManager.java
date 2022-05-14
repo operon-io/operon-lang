@@ -53,7 +53,7 @@ import org.apache.logging.log4j.LogManager;
  * 
  */
 public class OperonContextManager {
-    private static Logger log = LogManager.getLogger(OperonContextManager.class);
+     // no logger 
     
     private OperonContextManager.ContextStrategy contextStrategy;
     private OperonContext operonContext;

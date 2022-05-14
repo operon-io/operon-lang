@@ -44,7 +44,7 @@ import org.apache.logging.log4j.LogManager;
 // Tests predicate-expression (given as functionRef) for each value in an array
 // 
 public class ArrayForAtMost extends BaseArity2 implements Node, Arity2, SupportsAttributes {
-    private static Logger log = LogManager.getLogger(ArrayForAtMost.class);
+     // no logger 
     
     public ArrayForAtMost(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
@@ -73,7 +73,7 @@ public class ArrayForAtMost extends BaseArity2 implements Node, Arity2, Supports
             resetPath.setObjLink(objLink);
 
             for (int i = 0; i < arrayToTest.getValues().size(); i ++) {
-                log.debug("loop, i == " + i);
+                //:OFF:log.debug("loop, i == " + i);
                 
                 Path currentPathCopy = currentPath.copy();
                 PathPart pp = new PosPathPart(i + 1);

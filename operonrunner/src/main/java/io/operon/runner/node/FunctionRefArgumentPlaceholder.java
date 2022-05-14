@@ -35,7 +35,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class FunctionRefArgumentPlaceholder extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(FunctionRefArgumentPlaceholder.class);
+     // no logger 
     
     public FunctionRefArgumentPlaceholder(Statement stmnt) {
         super(stmnt);

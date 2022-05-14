@@ -20,6 +20,7 @@ import io.operon.runner.BaseContext;
 import io.operon.runner.Context;
 import io.operon.runner.OperonContext;
 import io.operon.runner.OperonTestsContext;
+import io.operon.runner.model.OperonConfigs;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.statement.DefaultStatement;
 import io.operon.runner.statement.FunctionStatement;
@@ -40,7 +41,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class ValueRef extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(ValueRef.class);
+     // no logger 
     private Node computedValueRef; // $(expr), which after evaluated will set the this.valueRef
     private String valueRef; // this is the symbol we are looking for (@, $, _$, $foo, etc.)
     private List<String> namespaces;
@@ -53,9 +54,9 @@ public class ValueRef extends AbstractNode implements Node {
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER ValueRef.evaluate()");
+        //:OFF:log.debug("ENTER ValueRef.evaluate()");
         // Value resolution strategy:
-        
+        //System.out.println("ValueRef, key=" + this.getValueRef());
         // TODO: check from modules, which have the matching namespace
         
         // 1. Check value from local scope
@@ -65,7 +66,7 @@ public class ValueRef extends AbstractNode implements Node {
         
         //System.out.println("ValueRef :: evaluate, stmtClass=" + this.getStatement().getClass().getName());
         //System.out.println("VR >> stmt id=" + stmtId + ", stmt = " + this.getStatement() + ", prototype: " + this.getStatement().isPrototype());
-        log.debug("    >> Check value [" + getValueRef() + "] from stmt: " + this.getStatement().getId());
+        //:OFF:log.debug("    >> Check value [" + getValueRef() + "] from stmt: " + this.getStatement().getId());
         //System.out.println("    >> Check value [" + getValueRef() + "] from stmt: " + this.getStatement().getId());
         
         // **************************************** DEBUG
@@ -136,6 +137,8 @@ public class ValueRef extends AbstractNode implements Node {
             // Get from statement's own runtimeValues (statement may be e.g. Select, Let, Function)
             //
             //System.out.println("ValueRef :: statement :: " + this.getStatement().getId() + ", getKey=" + getKey);
+            //System.out.println("ValueRef, get from runtimeValues");
+            //System.out.println("RT size=" + this.getStatement().getRuntimeValues().size());
             //System.out.println(" >> runtimeValues :: " + this.getStatement().getRuntimeValues());
             value = this.resolveFromStatementOwnRuntimeValues(getKey);
             
@@ -162,7 +165,7 @@ public class ValueRef extends AbstractNode implements Node {
             // Key didn't exist, check from parent-scopes:
             //
             if (value == null) {
-                log.debug("    >> Value not resolved, checking from parent-scopes.");
+                //:OFF:log.debug("    >> Value not resolved, checking from parent-scopes.");
                 value = this.resolveFromParentScope(getKey);
             }
             
@@ -186,19 +189,19 @@ public class ValueRef extends AbstractNode implements Node {
             }
             
             if (value == null) {
-                log.debug("ValueRef :: cannot resolve value :: " + getKey);
+                //:OFF:log.debug("ValueRef :: cannot resolve value :: " + getKey);
                 ErrorUtil.createErrorValueAndThrow(this.getStatement(), "VALUE_REF", "ERROR", "Cannot resolve value: " + getKey);
             }
         }
 
-        log.debug("Value resolved.");
-        log.debug(">> Value :: " + value);
+        //:OFF:log.debug("Value resolved.");
+        ////:OFF:log.debug(">> Value :: " + value); // DO NOT LOG HERE! Causes error on self-reference.
         
         if (valueBoundToOperator == false) {
             this.doGlobalBindValue(value);
         }
         
-        log.debug(">> Value [" + getKey + "] bindings size now :: " + value.getBindings().size() + ", do bindings :: " + value.getDoBindings());
+        //:OFF:log.debug(">> Value [" + getKey + "] bindings size now :: " + value.getBindings().size() + ", do bindings :: " + value.getDoBindings());
         
         // update the currentValue from the statement
         //System.out.println("ValueRef evaluation done");
@@ -260,7 +263,7 @@ public class ValueRef extends AbstractNode implements Node {
     }
     
     private OperonValue resolveFromLetStatement(String getKey) throws OperonGenericException {
-        log.debug("    >> Value not resolved, checking from Context's Let-statements.");
+        //:OFF:log.debug("    >> Value not resolved, checking from Context's Let-statements.");
         LetStatement letStatement = (LetStatement) this.getStatement().getOperonContext().getLetStatements().get(getKey);
         OperonValue result = getValueFromLetStatement(letStatement, getKey);
         if (result != null) {
@@ -315,10 +318,10 @@ public class ValueRef extends AbstractNode implements Node {
     private OperonValue resolveFromSubmodules(String getKey) throws OperonGenericException {
         OperonValue value = null;
         String ns1 = this.getNamespaces().get(0);
-        log.debug("Checking from module :: " + ns1);
+        //:OFF:log.debug("Checking from module :: " + ns1);
         Context module = this.getStatement().getOperonContext().getModules().get(ns1);
         if (module != null) {
-            log.debug("ValueRef :: resolved module");
+            //:OFF:log.debug("ValueRef :: resolved module");
             
             Map<String, LetStatement> letStatements = module.getLetStatements();
             
@@ -327,7 +330,7 @@ public class ValueRef extends AbstractNode implements Node {
                 LetStatement letStatement = (LetStatement) letStatements.get(this.getValueRef());
                 
                 if (letStatement != null) {
-                    log.debug("ValueRef :: found LetStatement from Module, evaluating it 1");
+                    //:OFF:log.debug("ValueRef :: found LetStatement from Module, evaluating it 1");
                     OperonValue currentValue = this.getStatement().getCurrentValue(); // FIXME: might be null: ImportTests#import14Test
                     OperonValue currentValueCopy = currentValue.copy();
                     letStatement.setCurrentValue(currentValueCopy);
@@ -339,7 +342,7 @@ public class ValueRef extends AbstractNode implements Node {
                     letStatement = (LetStatement) letStatements.get(subGetKey);
                     
                     if (letStatement != null) {
-                        log.debug("ValueRef :: found LetStatement from Module, evaluating it 2");
+                        //:OFF:log.debug("ValueRef :: found LetStatement from Module, evaluating it 2");
                         OperonValue currentValue = this.getStatement().getCurrentValue();
                         OperonValue currentValueCopy = currentValue.copy();
                         letStatement.setCurrentValue(currentValueCopy);
@@ -412,11 +415,11 @@ public class ValueRef extends AbstractNode implements Node {
                 
                 String getKey = this.buildKey(this.getNamespaces());
                 
-                log.debug(" >> putting bindings: " + getKey);
+                //:OFF:log.debug(" >> putting bindings: " + getKey);
                 List<Operator> operators = bindValues.get(getKey);
                 for (Operator op : operators) {
                     String operatorStr = op.getOperator();
-                    log.debug("  >> binding :: " + operatorStr);
+                    //:OFF:log.debug("  >> binding :: " + operatorStr);
                     //System.out.println("PUT from ValueRef: " + getKey);
                     value.getBindings().put(operatorStr, op); // could also put just FunctionRef from Operator
                 }
@@ -433,11 +436,11 @@ public class ValueRef extends AbstractNode implements Node {
                 
                 String getKey = this.buildKey(this.getNamespaces());
                 
-                log.debug(" >> putting bindings: " + getKey);
+                //:OFF:log.debug(" >> putting bindings: " + getKey);
                 List<Operator> operators = bindValues.get(getKey);
                 for (Operator op : operators) {
                     String operatorStr = op.getOperator();
-                    log.debug("  >> binding :: " + operatorStr);
+                    //:OFF:log.debug("  >> binding :: " + operatorStr);
                     //System.out.println("PUT from ValueRef: " + getKey);
                     value.getBindings().put(operatorStr, op); // could also put just FunctionRef from Operator
                 }

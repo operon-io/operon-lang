@@ -34,7 +34,7 @@ import org.apache.logging.log4j.LogManager;
 // Used in Update -expr
 //
 public class Update extends AbstractNode implements Node, java.io.Serializable {
-    private static Logger log = LogManager.getLogger(Update.class);
+     // no logger 
 
     private List<UpdatePair> pathUpdates;
     private Node configs;
@@ -45,19 +45,31 @@ public class Update extends AbstractNode implements Node, java.io.Serializable {
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER Update.evaluate()");
+        //:OFF:log.debug("ENTER Update.evaluate()");
         //System.out.println("Update.evaluate()");
         OperonValue result = this.getStatement().getCurrentValue();
+        Info info = this.resolveConfigs(this.getStatement());
+        
         for (int i = 0; i < this.getPathUpdates().size(); i ++) {
             //System.out.println("Apply update");
             UpdatePair up = this.getPathUpdates().get(i);
             List<Node> params = new ArrayList<Node>();
-            params.add(up.getPath()); // $target
+            
+            if (up.getIsObject() == false) {
+                params.add(up.getPath()); // $target
+            }
+            else {
+                ObjectType emptyObj = new ObjectType(this.getStatement());
+                params.add(emptyObj);
+            }
             params.add(up.getUpdateValue()); // $value
             //System.out.println("prepare GenericUpdate");
             //System.out.println("$value=" + up.getUpdateValue());
             //System.out.println("$target=" + up.getPath());
             GenericUpdate genUp = new GenericUpdate(this.getStatement(), params);
+            if (info.upsert) {
+                genUp.setIsUpsert(true);
+            }
             genUp.getStatement().setCurrentValue(result);
             result = genUp.evaluate();
         }
@@ -82,6 +94,40 @@ public class Update extends AbstractNode implements Node, java.io.Serializable {
         }
         this.configs = (ObjectType) this.configs.evaluate();
         return (ObjectType) this.configs;
+    }
+
+    public Info resolveConfigs(Statement stmt) throws OperonGenericException {
+        Info info = new Info();
+        
+        if (this.configs == null) {
+            return info;
+        }
+        
+        OperonValue currentValueCopy = stmt.getCurrentValue().copy();
+        
+        for (PairType pair : this.getConfigs().getPairs()) {
+            String key = pair.getKey();
+            switch (key.toLowerCase()) {
+                case "\"upsert\"":
+                    OperonValue upsertValue = pair.getEvaluatedValue();
+                    if (upsertValue instanceof FalseType) {
+                        info.upsert = false;
+                    }
+                    else {
+                        info.upsert = true;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        
+        stmt.setCurrentValue(currentValueCopy);
+        return info;
+    }
+
+    private class Info {
+        public boolean upsert = false;
     }
 
 }

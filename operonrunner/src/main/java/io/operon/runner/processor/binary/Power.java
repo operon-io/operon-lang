@@ -36,22 +36,22 @@ import org.apache.logging.log4j.LogManager;
  * 
  */
 public class Power extends BaseBinaryNodeProcessor implements BinaryNodeProcessor {
-    private static Logger log = LogManager.getLogger(Power.class);
+     // no logger 
 
     private String binaryOperator = "^";
 
     public OperonValue process(Statement statement, Node lhs, Node rhs) throws OperonGenericException {
-        log.debug("Power OP");
+        //:OFF:log.debug("Power OP");
         this.preprocess(statement, lhs, rhs);
-        log.debug("Power OP :: done preprocessing");
+        //:OFF:log.debug("Power OP :: done preprocessing");
         
         if ( customBindingCheck(lhs, rhs, binaryOperator) ) {
-            log.debug("Power OP :: custom binding detected");
+            //:OFF:log.debug("Power OP :: custom binding detected");
             return doCustomBinding(statement, lhs, rhs, binaryOperator);
         }
         
         else if (lhsResult instanceof NumberType && rhsResult instanceof NumberType) {
-            log.debug("Power OP :: regular op");
+            //:OFF:log.debug("Power OP :: regular op");
             NumberType result = new NumberType(statement);
             
             NumberType lhsResultJN = (NumberType) lhsResult;
@@ -74,11 +74,18 @@ public class Power extends BaseBinaryNodeProcessor implements BinaryNodeProcesso
         }
         
         else {
-            log.error("INCOMPATIBLE TYPES: " + lhsResult.getClass() + ", " + rhsResult.getClass());
+            //:OFF:log.error("INCOMPATIBLE TYPES: " + lhsResult.getClass() + ", " + rhsResult.getClass());
             
             String lhsType = ErrorUtil.mapTypeFromJavaClass(lhsResult);
             String rhsType = ErrorUtil.mapTypeFromJavaClass(rhsResult);
-            return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "POWER", "Not defined: " + lhsType + " " + binaryOperator + " " + rhsType);
+            return ErrorUtil.createErrorValueAndThrow(statement,
+                "OPERATOR", 
+                "POWER", 
+                "Not defined: " + lhsType + " " + binaryOperator + " " + rhsType +
+                    ", at line #" + this.getSourceCodeLineNumber() +
+                    ". lhs value: " + lhs.toString() + ", rhs value: " + rhs.toString()
+            
+            );
         }
         
     }

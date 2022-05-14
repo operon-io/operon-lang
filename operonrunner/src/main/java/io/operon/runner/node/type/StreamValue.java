@@ -66,4 +66,9 @@ public class StreamValue extends OperonValue implements Node, AtomicOperonValue 
         return "\"Stream()\"";
     }
 
+    @Override
+    public String toTomlString(OutputFormatter ofmt) {
+        return "\"Stream()\"";
+    }
+
 }

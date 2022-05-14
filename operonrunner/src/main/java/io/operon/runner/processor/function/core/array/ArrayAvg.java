@@ -39,7 +39,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class ArrayAvg extends BaseArity0 implements Node, Arity0 {
-    private static Logger log = LogManager.getLogger(ArrayAvg.class);
+     // no logger 
     
     public ArrayAvg(Statement statement) {
         super(statement);

@@ -38,6 +38,7 @@ import io.operon.runner.node.*;
 import io.operon.runner.node.type.*;
 import io.operon.runner.compiler.OperonCompiler;
 import io.operon.runner.compiler.JSONCompiler;
+import io.operon.runner.compiler.CompilerFlags;
 import io.operon.runner.Context;
 import io.operon.runner.EmptyContext;
 import io.operon.runner.OperonContext;
@@ -54,10 +55,10 @@ import org.apache.logging.log4j.LogManager;
  * 
  */
 public class JsonUtil {
-    private static Logger log = LogManager.getLogger(JsonUtil.class);
+     // no logger 
     
     public static ArrayType copyArray(ArrayType json) throws OperonGenericException {
-        log.debug("JsonUtil :: copyOperonValue");
+        //:OFF:log.debug("JsonUtil :: copyOperonValue");
         //System.out.println("JsonUtil :: copyOperonValue, parentKey = " + json.getParentKey());
         //int position = json.getPosition();
         //String attr_parentKey = json.getParentKey();
@@ -115,7 +116,7 @@ public class JsonUtil {
     }
     
     public static OperonValue copyOperonValue(OperonValue json, Statement stmt, boolean deepCopyArrays) throws OperonGenericException {
-        log.debug("JsonUtil :: copyOperonValue");
+        //:OFF:log.debug("JsonUtil :: copyOperonValue");
         //System.out.println("JsonUtil :: copyOperonValue, parentKey = " + json.getParentKey());
         if (stmt == null) {
             //stmt = json.getStatement();
@@ -123,17 +124,60 @@ public class JsonUtil {
         }
         
         if (json instanceof ObjectType) {
-            //System.out.println("copy ObjectType 1");
+            //System.out.println("Copy object 1");
             List<PairType> pairs = ((ObjectType) json).getPairs();
             ObjectType result = new ObjectType(stmt);
-            log.debug("  >> copy ObjectType instance, pairs :: " + pairs.size());
+            //:OFF:log.debug("  >> copy ObjectType instance, pairs :: " + pairs.size());
 
             for (PairType pair : pairs) {
                 PairType copyPair = new PairType(stmt);
                 copyPair.setIsEmptyValue(pair.isEmptyValue());
                 copyPair.setPreventReEvaluation(pair.getPreventReEvaluation());
                 copyPair.setUnboxed(pair.getUnboxed());
+                copyPair.setConfigs(pair.getConfigsNode());
+                
+                //Path pathCopy = pair.getStatement().getCurrentPath();
+                //System.out.println("  - pair pathCopy=" + pathCopy);
+                //System.out.println("  - pair pathCopy obj=" + pathCopy.getObjLink());
+                //copyPair.getStatement().setCurrentPath(pathCopy);
 
+                // Copy the object-value constraints:
+                if (pair.getOperonValueConstraint() != null) {
+                    copyPair.setOperonValueConstraint(pair.getOperonValueConstraint());
+                }
+                
+                // FIXME: BugTests#
+                // Originates from BaseBinaryNodeProcessor->preprocess->
+                //  initialValueRhsCopy = initialValue.copy();
+                OperonValue copyPairValue = pair.getValue().copy(deepCopyArrays);
+                copyPairValue.setUnboxed(pair.getValue().getUnboxed());
+                copyPairValue.setPreventReEvaluation(pair.getValue().getPreventReEvaluation());
+                copyPair.setPair(pair.getKey(), copyPairValue);
+                copyPair.setEvaluatedValue(pair.getEvaluatedValue().copy());
+                result.addPair(copyPair);
+            }
+
+            if (((ObjectType) json).getIndexedPairs() != null) {
+                result.setIndexedPairs(((ObjectType) json).getIndexedPairs());
+            }
+            result.setUnboxed(((ObjectType) json).getUnboxed());
+            result.setPreventReEvaluation(((ObjectType) json).getPreventReEvaluation());
+            return result;
+        }
+        
+        else if (json.getValue() instanceof ObjectType) {
+            //System.out.println("Copy object 2");
+            List<PairType> pairs = ((ObjectType) json.getValue()).getPairs();
+            ObjectType result = new ObjectType(stmt);
+            //:OFF:log.debug("  >> copy ObjectType evaluated instance, pairs :: " + pairs.size());
+            
+            for (PairType pair : pairs) {
+                PairType copyPair = new PairType(stmt);
+                copyPair.setIsEmptyValue(pair.isEmptyValue());
+                copyPair.setPreventReEvaluation(pair.getPreventReEvaluation());
+                copyPair.setUnboxed(pair.getUnboxed());
+                copyPair.setConfigs(pair.getConfigsNode());
+                
                 // Copy the object-value constraints:
                 if (pair.getOperonValueConstraint() != null) {
                     copyPair.setOperonValueConstraint(pair.getOperonValueConstraint());
@@ -146,34 +190,8 @@ public class JsonUtil {
                 copyPair.setEvaluatedValue(pair.getEvaluatedValue().copy());
                 result.addPair(copyPair);
             }
-            result.setUnboxed(((ObjectType) json).getUnboxed());
-            result.setPreventReEvaluation(((ObjectType) json).getPreventReEvaluation());
-            return result;
-        }
-        
-        else if (json.getValue() instanceof ObjectType) {
-            //System.out.println("copy ObjectType 2");
-            List<PairType> pairs = ((ObjectType) json.getValue()).getPairs();
-            ObjectType result = new ObjectType(stmt);
-            log.debug("  >> copy ObjectType evaluated instance, pairs :: " + pairs.size());
-            
-            for (PairType pair : pairs) {
-                PairType copyPair = new PairType(stmt);
-                copyPair.setIsEmptyValue(pair.isEmptyValue());
-                copyPair.setPreventReEvaluation(pair.getPreventReEvaluation());
-                copyPair.setUnboxed(pair.getUnboxed());
-                
-                // Copy the object-value constraints:
-                if (pair.getOperonValueConstraint() != null) {
-                    copyPair.setOperonValueConstraint(pair.getOperonValueConstraint());
-                }
-                
-                OperonValue copyPairValue = pair.getValue().copy(deepCopyArrays);
-                copyPairValue.setUnboxed(pair.getValue().getUnboxed());
-                copyPairValue.setPreventReEvaluation(pair.getValue().getPreventReEvaluation());
-                copyPair.setPair(pair.getKey(), copyPairValue);
-                copyPair.setEvaluatedValue(pair.getEvaluatedValue().copy());
-                result.addPair(copyPair);
+            if (((ObjectType) json.getValue()).getIndexedPairs() != null) {
+                result.setIndexedPairs(((ObjectType) json.getValue()).getIndexedPairs());
             }
             result.setUnboxed(((ObjectType) json.getValue()).getUnboxed());
             result.setPreventReEvaluation(((ObjectType) json.getValue()).getPreventReEvaluation());
@@ -223,7 +241,7 @@ public class JsonUtil {
         }
         
         else if (json instanceof NumberType) {
-            log.debug("JsonUtil :: copy NumberType 1");
+            //:OFF:log.debug("JsonUtil :: copy NumberType 1");
             NumberType nnode = new NumberType(stmt);
             nnode.setDoubleValue(((NumberType) json).getDoubleValue());
             nnode.setPrecision( ((NumberType) json.getValue()).getPrecision() );
@@ -231,7 +249,7 @@ public class JsonUtil {
         }
         
         else if (json.getValue() instanceof NumberType) {
-            log.debug("JsonUtil :: copy NumberType 2");
+            //:OFF:log.debug("JsonUtil :: copy NumberType 2");
             NumberType nnode = new NumberType(stmt);
             nnode.setDoubleValue(((NumberType) json.getValue()).getDoubleValue());
             nnode.setPrecision( ((NumberType) json.getValue()).getPrecision() );
@@ -331,36 +349,46 @@ public class JsonUtil {
         }
 
         else if (json.getValue() instanceof BinaryNode) {
-            OperonValue result = ((BinaryNode) json.getValue()).getEvaluatedValue().copy(deepCopyArrays);
+            //System.out.println("COPY BinaryNode");
+            Node bn = ((BinaryNode) json.getValue());
+            OperonValue lhsValue = ((BinaryNode) bn).getLhs().getEvaluatedValue();
+            OperonValue rhsValue = ((BinaryNode) bn).getRhs().getEvaluatedValue();
+            OperonValue bnValue = bn.getEvaluatedValue();
+
+            if (bnValue == null) {
+                throw new OperonGenericException("BinaryNode");
+            }
+
+            OperonValue result = bnValue.copy(deepCopyArrays);
             return result;
         }
         
         else if (json.getValue() instanceof MultiNode) {
-            log.debug("  >> copy MultiNode");
+            //:OFF:log.debug("  >> copy MultiNode");
             OperonValue result = ((MultiNode) json.getValue()).getEvaluatedValue().copy(deepCopyArrays);
             return result;
         }
 
         else if (json instanceof FunctionRef) {
-            log.debug("  >> copy FunctionRef instance");
+            //:OFF:log.debug("  >> copy FunctionRef instance");
             OperonValue result = json;
             return result;
         }
         
         else if (json.getValue() instanceof FunctionRef) {
-            log.debug("  >> copy FunctionRef");
+            //:OFF:log.debug("  >> copy FunctionRef");
             OperonValue result = (OperonValue) json.getValue();
             return result;
         }
         
         else if (json instanceof LambdaFunctionRef) {
-            log.debug("  >> copy LambdaFunctionRef instance");
+            //:OFF:log.debug("  >> copy LambdaFunctionRef instance");
             OperonValue result = (OperonValue) json;
             return result;
         }
         
         else if (json.getValue() instanceof LambdaFunctionRef) {
-            log.debug("  >> copy LambdaFunctionRef");
+            //:OFF:log.debug("  >> copy LambdaFunctionRef");
             OperonValue result = (OperonValue) json.getValue();
             return result;
         }
@@ -394,7 +422,7 @@ public class JsonUtil {
         }
         
         else if (json.getValue() instanceof OperonValue) {
-            log.debug("  >> unbox json");
+            //:OFF:log.debug("  >> unbox json");
             OperonValue copyFrom = (OperonValue) json.getValue();
             //System.out.println("    >>>COPY From parentKey :: " + json.getParentObj());
             OperonValue copyResult = JsonUtil.copyOperonValue(copyFrom);
@@ -407,7 +435,7 @@ public class JsonUtil {
     public static Node copyEvaluatedNode(Node n, boolean deepCopyArrays) throws OperonGenericException {
         //System.out.println("Copy EvaluatedNode");
         assert (n != null) : "JsonUtil :: copyEvaluatedNode :: node was null";
-        log.debug("JsonUtil :: copyEvaluatedNode :: " + n.getClass().getName());
+        //:OFF:log.debug("JsonUtil :: copyEvaluatedNode :: " + n.getClass().getName());
         if (n instanceof UnaryNode) {
             //System.out.println("Copy UnaryNode");
             Node result = null;
@@ -699,6 +727,10 @@ public class JsonUtil {
     }
 
     public static OperonValue operonValueFromString(String json) throws OperonGenericException {
+        return JsonUtil.operonValueFromString(json, null);   
+    }
+
+    public static OperonValue operonValueFromString(String json, CompilerFlags[] compilerFlags) throws OperonGenericException {
         try {
             InputStream is = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
             
@@ -734,7 +766,7 @@ public class JsonUtil {
             ParseTreeWalker walker = new ParseTreeWalker();
             
             // Walk the tree created during the parse, trigger callbacks
-            JSONCompiler compiler = new JSONCompiler();
+            JSONCompiler compiler = new JSONCompiler(compilerFlags);
             
             Context jsonContext = new EmptyContext();
             Statement jsonStatement = new DefaultStatement(jsonContext);

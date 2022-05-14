@@ -45,7 +45,7 @@ import org.apache.logging.log4j.LogManager;
 
 public class ArrayRemove extends BaseArity1 implements Node, Arity1 {
 
-    private static Logger log = LogManager.getLogger(ArrayRemove.class);
+     // no logger 
 
     public ArrayRemove(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);

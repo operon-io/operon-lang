@@ -39,7 +39,7 @@ import org.apache.logging.log4j.LogManager;
 // Container for filter-expressions (predicate / number) / splicing-expressions
 //
 public class FilterList extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(FilterList.class);
+     // no logger 
     
     private OperonValue valueToApplyAgainst;
     private Filter.Info resolvedConfigs;
@@ -52,7 +52,7 @@ public class FilterList extends AbstractNode implements Node {
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER FilterList.evaluate(). Stmt: " + this.getStatement().getId());
+        //:OFF:log.debug("ENTER FilterList.evaluate(). Stmt: " + this.getStatement().getId());
         if (this.getValueToApplyAgainst() instanceof ArrayType) {
             return this.evaluateArray();
         }
@@ -72,14 +72,14 @@ public class FilterList extends AbstractNode implements Node {
         String type = "FILTER";
         String code = "INPUT";
         String message = "Cannot filter against " + this.getValueToApplyAgainst().getClass().getName();
-        return ErrorUtil.createErrorValueAndThrow(this.getStatement(), type, code, message);
+        return ErrorUtil.createErrorValueAndThrow(this.getStatement(), type, code, message + ". Line #" + this.getSourceCodeLineNumber());
     }
 
     public OperonValue evaluatePath() throws OperonGenericException {
         Path resultPath = new Path(this.getStatement());
         
         OperonValue valueToFilter = this.getValueToApplyAgainst();
-        log.debug("    Evaluate :: size :: " + this.getFilterExprList().size());
+        //:OFF:log.debug("    Evaluate :: size :: " + this.getFilterExprList().size());
 
         for (FilterListExpr filterExpr : this.getFilterExprList()) {
             OperonValue currentValueCopy = valueToFilter.copy();
@@ -91,7 +91,7 @@ public class FilterList extends AbstractNode implements Node {
             //
             
             if (filterListFilterExpr instanceof SpliceLeft) {
-                log.debug("FilterList :: SpliceLeft");
+                //:OFF:log.debug("FilterList :: SpliceLeft");
                 SpliceLeft splicingLeft = (SpliceLeft) filterListFilterExpr;
                 splicingLeft.setValueToApplyAgainst((Path) currentValueCopy);
                 Path splicingResult = (Path) splicingLeft.evaluate();
@@ -99,7 +99,7 @@ public class FilterList extends AbstractNode implements Node {
             }
             
             else if (filterListFilterExpr instanceof SpliceRight) {
-                log.debug("FilterList :: SpliceRight");
+                //:OFF:log.debug("FilterList :: SpliceRight");
                 SpliceRight splicingRight = (SpliceRight) filterListFilterExpr;
                 splicingRight.setValueToApplyAgainst((Path) currentValueCopy);
                 Path splicingResult = (Path) splicingRight.evaluate();
@@ -107,7 +107,7 @@ public class FilterList extends AbstractNode implements Node {
             }
             
             else if (filterListFilterExpr instanceof SpliceRange) {
-                log.debug("FilterList :: SpliceRange");
+                //:OFF:log.debug("FilterList :: SpliceRange");
                 SpliceRange splicingRange = (SpliceRange) filterListFilterExpr;
                 splicingRange.setValueToApplyAgainst((Path) currentValueCopy);
                 Path splicingResult = (Path) splicingRange.evaluate();
@@ -115,7 +115,7 @@ public class FilterList extends AbstractNode implements Node {
             }
             
             else if (filterListFilterExpr instanceof Range) {
-                log.debug("FilterList :: Range");
+                //:OFF:log.debug("FilterList :: Range");
                 Range range = (Range) filterListFilterExpr;
                 range = (Range) range.evaluate();
                 
@@ -124,9 +124,9 @@ public class FilterList extends AbstractNode implements Node {
             }
             
             else {
-                log.debug("FilterList :: Filter");
+                //:OFF:log.debug("FilterList :: Filter");
                 
-                log.debug(filterListFilterExpr.getClass().getName());
+                //:OFF:log.debug(filterListFilterExpr.getClass().getName());
                 
                 Filter filter = new Filter(this.getStatement());
                 filter.setFilterListExpression(filterListFilterExpr);
@@ -151,7 +151,7 @@ public class FilterList extends AbstractNode implements Node {
         StringBuilder sbResult = new StringBuilder();
         
         OperonValue valueToFilter = this.getValueToApplyAgainst();
-        log.debug("    Evaluate :: size :: " + this.getFilterExprList().size());
+        //:OFF:log.debug("    Evaluate :: size :: " + this.getFilterExprList().size());
 
         for (FilterListExpr filterExpr : this.getFilterExprList()) {
             OperonValue currentValueCopy = valueToFilter.copy();
@@ -159,7 +159,7 @@ public class FilterList extends AbstractNode implements Node {
             Node filterListFilterExpr = filterExpr.getFilterExpr();
             
             if (filterListFilterExpr instanceof SpliceLeft) {
-                log.debug("FilterList :: SpliceLeft");
+                //:OFF:log.debug("FilterList :: SpliceLeft");
                 SpliceLeft splicingLeft = (SpliceLeft) filterListFilterExpr;
                 splicingLeft.setValueToApplyAgainst((StringType) currentValueCopy);
                 StringType splicingResult = (StringType) splicingLeft.evaluate();
@@ -167,7 +167,7 @@ public class FilterList extends AbstractNode implements Node {
             }
             
             else if (filterListFilterExpr instanceof SpliceRight) {
-                log.debug("FilterList :: SpliceRight");
+                //:OFF:log.debug("FilterList :: SpliceRight");
                 SpliceRight splicingRight = (SpliceRight) filterListFilterExpr;
                 splicingRight.setValueToApplyAgainst((StringType) currentValueCopy);
                 StringType splicingResult = (StringType) splicingRight.evaluate();
@@ -175,7 +175,7 @@ public class FilterList extends AbstractNode implements Node {
             }
             
             else if (filterListFilterExpr instanceof SpliceRange) {
-                log.debug("FilterList :: SpliceRange");
+                //:OFF:log.debug("FilterList :: SpliceRange");
                 SpliceRange splicingRange = (SpliceRange) filterListFilterExpr;
                 splicingRange.setValueToApplyAgainst((StringType) currentValueCopy);
                 StringType splicingResult = (StringType) splicingRange.evaluate();
@@ -183,7 +183,7 @@ public class FilterList extends AbstractNode implements Node {
             }
 
             else if (filterListFilterExpr instanceof Range) {
-                log.debug("FilterList :: Range");
+                //:OFF:log.debug("FilterList :: Range");
                 Range range = (Range) filterListFilterExpr;
                 range = (Range) range.evaluate();
                 
@@ -192,9 +192,9 @@ public class FilterList extends AbstractNode implements Node {
             }
             
             else {
-                log.debug("FilterList :: Filter");
+                //:OFF:log.debug("FilterList :: Filter");
                 
-                log.debug(filterListFilterExpr.getClass().getName());
+                //:OFF:log.debug(filterListFilterExpr.getClass().getName());
                 
                 Filter filter = new Filter(this.getStatement());
                 filter.setFilterListExpression(filterListFilterExpr);
@@ -220,7 +220,7 @@ public class FilterList extends AbstractNode implements Node {
         ArrayType arrayResult = new ArrayType(this.getStatement());
         
         OperonValue valueToFilter = this.getValueToApplyAgainst();
-        log.debug("    Evaluate :: size :: " + this.getFilterExprList().size());
+        //:OFF:log.debug("    Evaluate :: size :: " + this.getFilterExprList().size());
         
         //System.out.println("FilterList parallel: " + this.getResolvedConfigs().parallel);
         //if (this.getResolvedConfigs().parallel == false) {
@@ -230,7 +230,7 @@ public class FilterList extends AbstractNode implements Node {
                 Node filterListFilterExpr = filterExpr.getFilterExpr();
                 
                 if (filterListFilterExpr instanceof SpliceLeft) {
-                    log.debug("FilterList :: SpliceLeft");
+                    //:OFF:log.debug("FilterList :: SpliceLeft");
                     SpliceLeft splicingLeft = (SpliceLeft) filterListFilterExpr;
                     splicingLeft.setValueToApplyAgainst((ArrayType) currentValueCopy);
                     ArrayType splicingListResult = (ArrayType) splicingLeft.evaluate();
@@ -240,7 +240,7 @@ public class FilterList extends AbstractNode implements Node {
                 }
                 
                 else if (filterListFilterExpr instanceof SpliceRight) {
-                    log.debug("FilterList :: SpliceRight");
+                    //:OFF:log.debug("FilterList :: SpliceRight");
                     SpliceRight splicingRight = (SpliceRight) filterListFilterExpr;
                     splicingRight.setValueToApplyAgainst((ArrayType) currentValueCopy);
                     ArrayType splicingListResult = (ArrayType) splicingRight.evaluate();
@@ -250,8 +250,8 @@ public class FilterList extends AbstractNode implements Node {
                 }
                 
                 else if (filterListFilterExpr instanceof SpliceRange) {
-                    log.debug("FilterList :: SpliceRange");
-                    log.debug("  currentValueCopy :: " + currentValueCopy);
+                    //:OFF:log.debug("FilterList :: SpliceRange");
+                    //:OFF:log.debug("  currentValueCopy :: " + currentValueCopy);
                     SpliceRange splicingRange = (SpliceRange) filterListFilterExpr;
                     splicingRange.setValueToApplyAgainst((ArrayType) currentValueCopy);
                     ArrayType splicingListResult = (ArrayType) splicingRange.evaluate();
@@ -261,7 +261,7 @@ public class FilterList extends AbstractNode implements Node {
                 }
                 
                 else if (filterListFilterExpr instanceof Range) {
-                    log.debug("FilterList :: Range");
+                    //:OFF:log.debug("FilterList :: Range");
                     Range range = (Range) filterListFilterExpr;
                     range = (Range) range.evaluate();
                     
@@ -272,8 +272,8 @@ public class FilterList extends AbstractNode implements Node {
                 }
                 
                 else {
-                    log.debug("FilterList :: Filter");
-                    log.debug(filterListFilterExpr.getClass().getName());
+                    //:OFF:log.debug("FilterList :: Filter");
+                    //:OFF:log.debug(filterListFilterExpr.getClass().getName());
                     
                     Filter filter = new Filter(this.getStatement());
                     filter.setFilterListExpression(filterListFilterExpr);
@@ -350,7 +350,7 @@ public class FilterList extends AbstractNode implements Node {
             OperonValue currentValueCopy = valueToFilter.copy();
             //System.out.println("FilterList :: currentPath :: " + currentPath);
             if (filterExpr.getFilterExpr() instanceof SpliceLeft) {
-                log.debug("FilterList :: SpliceLeft");
+                //:OFF:log.debug("FilterList :: SpliceLeft");
                 SpliceLeft splicingLeft = (SpliceLeft) filterExpr.getFilterExpr();
                 splicingLeft.setValueToApplyAgainst((ObjectType) currentValueCopy);
                 ObjectType splicingListResult = (ObjectType) splicingLeft.evaluate();
@@ -360,7 +360,7 @@ public class FilterList extends AbstractNode implements Node {
             }
             
             else if (filterExpr.getFilterExpr() instanceof SpliceRight) {
-                log.debug("FilterList :: SpliceRight");
+                //:OFF:log.debug("FilterList :: SpliceRight");
                 SpliceRight splicingRight = (SpliceRight) filterExpr.getFilterExpr();
                 splicingRight.setValueToApplyAgainst((ObjectType) currentValueCopy);
                 ObjectType splicingListResult = (ObjectType) splicingRight.evaluate();
@@ -370,7 +370,7 @@ public class FilterList extends AbstractNode implements Node {
             }
             
             else if (filterExpr.getFilterExpr() instanceof SpliceRange) {
-                log.debug("FilterList :: SpliceRange");
+                //:OFF:log.debug("FilterList :: SpliceRange");
                 SpliceRange splicingRange = (SpliceRange) filterExpr.getFilterExpr();
                 splicingRange.setValueToApplyAgainst((ObjectType) currentValueCopy);
                 ObjectType splicingListResult = (ObjectType) splicingRange.evaluate();
@@ -380,7 +380,7 @@ public class FilterList extends AbstractNode implements Node {
             }
             
             else if (filterExpr.getFilterExpr() instanceof Range) {
-                log.debug("FilterList :: Range");
+                //:OFF:log.debug("FilterList :: Range");
                 Range range = (Range) filterExpr.getFilterExpr();
                 range = (Range) range.evaluate();
                 
@@ -391,7 +391,7 @@ public class FilterList extends AbstractNode implements Node {
             }
             
             else {
-                log.debug("FilterList :: evaluateObj");
+                //:OFF:log.debug("FilterList :: evaluateObj");
                 Filter filter = new Filter(this.getStatement());
                 filter.setFilterListExpression(filterExpr.getFilterExpr());
                 filter.setValueToApplyAgainst((ObjectType) currentValueCopy);
@@ -429,7 +429,7 @@ public class FilterList extends AbstractNode implements Node {
     }
     
     public void setValueToApplyAgainst(OperonValue value) {
-        log.debug("  FilterList :: setting value to apply against :: " + value);
+        //:OFF:log.debug("  FilterList :: setting value to apply against :: " + value);
         this.valueToApplyAgainst = value;
     }
     

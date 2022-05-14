@@ -45,7 +45,7 @@ import org.apache.logging.log4j.LogManager;
 //  functionName()
 //
 public class FunctionRef extends OperonValue /*AbstractNode*/ implements Node {
-    private static Logger log = LogManager.getLogger(FunctionRef.class);
+     // no logger 
     private String functionName; // name without namespace
     private String functionFQName;
 
@@ -68,17 +68,17 @@ public class FunctionRef extends OperonValue /*AbstractNode*/ implements Node {
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER FunctionRef.evaluate() :: " + this.getFunctionFQName());
+        //:OFF:log.debug("ENTER FunctionRef.evaluate() :: " + this.getFunctionFQName());
         this.getStatement().setCurrentValue(this);
         this.setUnboxed(false);
         return this;
     }
     
     public OperonValue invoke() throws OperonGenericException {
-        log.debug("ENTER FunctionRef.invoke() :: " + this.getFunctionFQName());
+        //:OFF:log.debug("ENTER FunctionRef.invoke() :: " + this.getFunctionFQName());
         //System.out.println("FunctionRef invoke");
         //System.out.println("  >> RuntimeValues=" + this.getStatement().getRuntimeValues() + ", STMT=" + this.getStatement().getId());
-        //log.debug(" REMOVE :: currentValue :: " + this.getCurrentValueForFunction());
+        ////:OFF:log.debug(" REMOVE :: currentValue :: " + this.getCurrentValueForFunction());
         
         //
         // User-defined function:
@@ -156,8 +156,8 @@ public class FunctionRef extends OperonValue /*AbstractNode*/ implements Node {
         //
         // Try to load function from Module
         //
-        log.debug("Try load function from module :: " + functionFQName);
-        log.debug("Modules :: " + stmt.getOperonContext().getModules());
+        //:OFF:log.debug("Try load function from module :: " + functionFQName);
+        //:OFF:log.debug("Modules :: " + stmt.getOperonContext().getModules());
         java.util.Map<String, Context> modules = stmt.getOperonContext().getModules();
         String [] namespaces = functionFQName.split(":");
         if (namespaces.length > 0) {
@@ -165,10 +165,10 @@ public class FunctionRef extends OperonValue /*AbstractNode*/ implements Node {
             //System.out.println("NS1 :: " + ns1);
             Context module = modules.get(ns1);
             if (module != null) {
-                log.debug("Function found from module");
-                log.debug("function-stmts :: " + module.getFunctionStatements());
+                //:OFF:log.debug("Function found from module");
+                //:OFF:log.debug("function-stmts :: " + module.getFunctionStatements());
                 String ns2 = functionFQName.substring(ns1.length(), functionFQName.length());
-                log.debug("Getting function-stmt :: " + ns2);
+                //:OFF:log.debug("Getting function-stmt :: " + ns2);
                 // Remove the ":" prefix only if there are 3 or more ":"
                 // Therefore case like ":local:foo:0" is not valid, it should be "local:foo:0"
                 char nsSeparator = ':';
@@ -220,7 +220,7 @@ public class FunctionRef extends OperonValue /*AbstractNode*/ implements Node {
     }
 
     public void setArgument(Node arg) throws OperonGenericException {
-        log.debug("SetArgument :: " + this.getParams());
+        //:OFF:log.debug("SetArgument :: " + this.getParams());
         //System.out.println("SetArgument :: " + this.getParams());
         
         FunctionStatement fnStatement = null;
@@ -332,19 +332,19 @@ public class FunctionRef extends OperonValue /*AbstractNode*/ implements Node {
         
         for (int i = 0; i < this.getParams().size(); i ++) {
             if (this.getParams().get(i) instanceof FunctionRefArgumentPlaceholder) {
-                log.debug(">>Replace FunctionRefArgumentPlaceholder");
+                //:OFF:log.debug(">>Replace FunctionRefArgumentPlaceholder");
                 //System.out.println("    >>Replace FunctionRefArgumentPlaceholder");
                 
                 String matchingFunctionStatementParam = functionStatementParamsList.get(i).getParam();
-                log.debug(">> Matching argument name :: " + matchingFunctionStatementParam);
+                //:OFF:log.debug(">> Matching argument name :: " + matchingFunctionStatementParam);
                 FunctionNamedArgument functionNamedArgument = new FunctionNamedArgument(this.getStatement());
                 functionNamedArgument.setArgumentName(matchingFunctionStatementParam);
                 if (arg instanceof FunctionRegularArgument) {
                     arg = ((FunctionRegularArgument) arg).getArgument();
                 }
                 functionNamedArgument.setArgumentValue(arg);
-                log.debug("  >> do bindings :: " + arg.getDoBindings());
-                log.debug("  ARG debug :: " + arg.getClass().getName()); // afraid, that this is still ValueRef
+                //:OFF:log.debug("  >> do bindings :: " + arg.getDoBindings());
+                //:OFF:log.debug("  ARG debug :: " + arg.getClass().getName()); // afraid, that this is still ValueRef
                 this.getParams().set(i, functionNamedArgument);
                 return;
             }
@@ -361,7 +361,7 @@ public class FunctionRef extends OperonValue /*AbstractNode*/ implements Node {
                 boolean hasPlaceholder = frna.getHasPlaceholder();
                 if (hasPlaceholder) {
                     //String matchingFunctionStatementParam = functionStatementParamsList.get(i).getArgument();
-                    //log.debug(">> Matching argument name :: " + matchingFunctionStatementParam);
+                    ////:OFF:log.debug(">> Matching argument name :: " + matchingFunctionStatementParam);
                     //System.out.println(">> Matching argument name: " + frna.getArgumentName());
                     FunctionNamedArgument functionNamedArgument = new FunctionNamedArgument(this.getStatement());
                     functionNamedArgument.setArgumentName(frna.getArgumentName());
@@ -385,8 +385,8 @@ public class FunctionRef extends OperonValue /*AbstractNode*/ implements Node {
                         functionNamedArgument.setArgumentValue(arg);
                     }
                     
-                    log.debug("  >> do bindings :: " + arg.getDoBindings());
-                    log.debug("  ARG debug :: " + arg.getClass().getName()); // afraid, that this is still ValueRef
+                    //:OFF:log.debug("  >> do bindings :: " + arg.getDoBindings());
+                    //:OFF:log.debug("  ARG debug :: " + arg.getClass().getName()); // afraid, that this is still ValueRef
                     this.getParams().set(i, functionNamedArgument);
                     return;
                 }
@@ -405,7 +405,7 @@ public class FunctionRef extends OperonValue /*AbstractNode*/ implements Node {
         fr.setCurrentValueForFunction(currentValueCopy);
         
         if (fArgs != null) {
-            log.debug("  FunctionRefInvoke :: setting the function arguments. Amount :: " + fArgs.getArguments().size());
+            //:OFF:log.debug("  FunctionRefInvoke :: setting the function arguments. Amount :: " + fArgs.getArguments().size());
             //System.out.println("  FunctionRefInvoke :: setting the function arguments. Amount :: " + fArgs.getArguments().size());
             //
             // Set the function arguments before invoking it
@@ -435,7 +435,7 @@ public class FunctionRef extends OperonValue /*AbstractNode*/ implements Node {
                 }
             }
         }
-        log.debug("  FunctionRefInvoke :: invoking function");
+        //:OFF:log.debug("  FunctionRefInvoke :: invoking function");
         OperonValue result = fr.invoke();
         return result;
     }

@@ -46,7 +46,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 public class ComponentSystemUtil {
-    private static Logger log = LogManager.getLogger(ComponentSystemUtil.class);
+     // no logger 
 
     public static final String DEFAULT_COMPONENTS_DEFINITION_FILE = "components.json";
 
@@ -105,7 +105,7 @@ public class ComponentSystemUtil {
                 }
                 if (typeMatch && nameMatch) {
                     result = obj;
-                    log.debug("Found component-object: " + obj);
+                    //:OFF:log.debug("Found component-object: " + obj);
                     //System.out.println("Found component-object: " + obj);
                     return result;
                 }
@@ -147,9 +147,9 @@ public class ComponentSystemUtil {
         //System.out.println("loadComponent :: working directory: " + System.getProperty("user.dir"));
         //System.out.println("    JAR_URL :: " + JAR_URL);
         //System.out.println("    JAR_FILE_PATH :: " + JAR_FILE_PATH);
-        log.debug("loadComponent :: working directory: " + System.getProperty("user.dir"));
-        log.debug("    JAR_URL :: " + JAR_URL);
-        log.debug("    JAR_FILE_PATH :: " + JAR_FILE_PATH);
+        //:OFF:log.debug("loadComponent :: working directory: " + System.getProperty("user.dir"));
+        //:OFF:log.debug("    JAR_URL :: " + JAR_URL);
+        //:OFF:log.debug("    JAR_FILE_PATH :: " + JAR_FILE_PATH);
         URLClassLoader urlClassLoader;
         try {
             // Create a URL that refers to a jar file in the file system
@@ -163,21 +163,21 @@ public class ComponentSystemUtil {
              
             // Get jar file name
             //System.out.println("Jar Name: " + jarFile.getName());
-            log.debug("Jar Name: " + jarFile.getName());
+            //:OFF:log.debug("Jar Name: " + jarFile.getName());
             
             // When no entry is specified on the URL, the entry name is null
             //System.out.println("\nJar Entry: " + jarURLConnection.getJarEntry());
-            log.debug("\nJar Entry: " + jarURLConnection.getJarEntry());
+            //:OFF:log.debug("\nJar Entry: " + jarURLConnection.getJarEntry());
              
             // Get the manifest of the jar
             Manifest manifest = jarFile.getManifest();
  
             // Print the manifest attributes
             //System.out.println("\nManifest file attributes: ");
-            log.debug("\nManifest file attributes: ");
+            //:OFF:log.debug("\nManifest file attributes: ");
             for (Entry entry : manifest.getMainAttributes().entrySet()) {
                 //System.out.println(entry.getKey() +": "+ entry.getValue());
-                log.debug(entry.getKey() +": "+ entry.getValue());
+                //:OFF:log.debug(entry.getKey() +": "+ entry.getValue());
             }
             //System.out.println("\nExternal JAR Execution output: ");
  

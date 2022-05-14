@@ -71,7 +71,7 @@ import org.apache.logging.log4j.LogManager;
 
 
 public class QueueComponent extends BaseComponent implements IntegrationComponent {
-    private static Logger log = LogManager.getLogger(QueueComponent.class);
+     // no logger 
 
     private JedisPool jedisPool = null;
 
@@ -254,7 +254,7 @@ public class QueueComponent extends BaseComponent implements IntegrationComponen
                     }
                     break;
                 default:
-                    log.debug("queue -producer: no mapping for configuration key: " + key);
+                    //:OFF:log.debug("queue -producer: no mapping for configuration key: " + key);
                     System.err.println("queue -producer: no mapping for configuration key: " + key);
                     ErrorUtil.createErrorValueAndThrow(currentValue.getStatement(), "QUEUE", "ERROR", "queue -producer: no mapping for configuration key: " + key);
             }

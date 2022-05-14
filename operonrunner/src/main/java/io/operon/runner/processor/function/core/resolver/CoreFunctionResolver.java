@@ -46,7 +46,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class CoreFunctionResolver {
-    private static Logger log = LogManager.getLogger(CoreFunctionResolver.class);
+     // no logger 
     
     public static boolean isCoreFunction(String functionNamespace, String functionName, List<Node> functionParams) {
         String fqFunctionName = functionNamespace + ":" + functionName + ":" + functionParams.size();
@@ -112,6 +112,7 @@ public class CoreFunctionResolver {
             || fqFunctionName.equals("core:array:forAtMost:2") || fqFunctionName.equals("array:forAtMost:2") || fqFunctionName.equals(":forAtMost:2")
             || fqFunctionName.equals("core:array:forEach:1") || fqFunctionName.equals("array:forEach:1") || fqFunctionName.equals(":forEach:1")
             || fqFunctionName.equals("core:array:forEachPair:2") || fqFunctionName.equals("array:forEachPair:2") || fqFunctionName.equals(":forEachPair:2")
+            || fqFunctionName.equals("core:array:contains:1") || fqFunctionName.equals("array:contains:1")
             || fqFunctionName.equals("core:array:groupBy:0") || fqFunctionName.equals("array:groupBy:0") || fqFunctionName.equals("core:array:groupBy:1") || fqFunctionName.equals("array:groupBy:1")
                 || fqFunctionName.equals(":groupBy:0") || fqFunctionName.equals(":groupBy:1")
             || fqFunctionName.equals("core:array:search:1") || fqFunctionName.equals("array:search:1")
@@ -198,6 +199,9 @@ public class CoreFunctionResolver {
             || fqFunctionName.equals("core:string:fromBase64:0") || fqFunctionName.equals("string:fromBase64:0") || fqFunctionName.equals("core:string:fromBase64:1") || fqFunctionName.equals("string:fromBase64:1")
             || fqFunctionName.equals("core:string:toRaw:0") || fqFunctionName.equals("string:toRaw:0")
             || fqFunctionName.equals("core:string:toPath:0") || fqFunctionName.equals("string:toPath:0")
+            || fqFunctionName.equals("core:string:urlEncode:0") || fqFunctionName.equals("string:urlEncode:0") || fqFunctionName.equals(":urlEncode:0")
+            || fqFunctionName.equals("core:string:urlDecode:0") || fqFunctionName.equals("string:urlDecode:0") || fqFunctionName.equals(":urlDecode:0")
+            || fqFunctionName.equals("core:string:isNumeric:0") || fqFunctionName.equals("string:isNumeric:0") || fqFunctionName.equals(":isNumeric:0")
             
             || fqFunctionName.equals("core:number:random:0") || fqFunctionName.equals("number:random:0") || fqFunctionName.equals("number:random:1")
                 || fqFunctionName.equals(":random:0") || fqFunctionName.equals(":random:1") || fqFunctionName.equals("core:number:random:1")
@@ -299,7 +303,7 @@ public class CoreFunctionResolver {
     public static Node getCoreFunction(String fqFunctionName, 
                 List<Node> functionParams, Statement currentStatement) throws OperonGenericException {
         //System.out.println("getCoreFunction :: " + fqFunctionName);
-        log.debug("getCoreFunction :: currentStatement :: " + currentStatement);
+        //:OFF:log.debug("getCoreFunction :: currentStatement :: " + currentStatement);
         
         if (fqFunctionName.equals("core:number") || fqFunctionName.equals(":number")) { return new CastNumber(currentStatement, functionParams); }
         else if (fqFunctionName.equals("core:array") || fqFunctionName.equals(":array")) { return new CastArray(currentStatement); }
@@ -347,6 +351,7 @@ public class CoreFunctionResolver {
         else if (fqFunctionName.equals("core:array:forAtMost") || fqFunctionName.equals("array:forAtMost") || fqFunctionName.equals(":forAtMost")) { return new ArrayForAtMost(currentStatement, functionParams); }
         else if (fqFunctionName.equals("core:array:forEach") || fqFunctionName.equals("array:forEach") || fqFunctionName.equals(":forEach")) { return new ArrayForEach(currentStatement, functionParams); }
         else if (fqFunctionName.equals("core:array:forEachPair") || fqFunctionName.equals("array:forEachPair") || fqFunctionName.equals(":forEachPair")) { return new ArrayForEachPair(currentStatement, functionParams); }
+        else if (fqFunctionName.equals("core:array:contains") || fqFunctionName.equals("array:contains")) { return new ArrayContains(currentStatement, functionParams); }
         else if (fqFunctionName.equals("core:array:groupBy") || fqFunctionName.equals("array:groupBy") || fqFunctionName.equals(":groupBy")) { return new ArrayGroupBy(currentStatement, functionParams); }
         else if (fqFunctionName.equals("core:array:search") || fqFunctionName.equals("array:search")) { return new ArraySearch(currentStatement, functionParams); }
         else if (fqFunctionName.equals("core:array:sort") || fqFunctionName.equals("array:sort") || fqFunctionName.equals(":sort")) { return new ArraySort(currentStatement, functionParams); }
@@ -433,6 +438,9 @@ public class CoreFunctionResolver {
         else if (fqFunctionName.equals("core:string:fromBase64") || fqFunctionName.equals("string:fromBase64")) { return new StringFromBase64(currentStatement, functionParams); }
         else if (fqFunctionName.equals("core:string:toRaw") || fqFunctionName.equals("string:toRaw")) { return new StringToRaw(currentStatement); }
         else if (fqFunctionName.equals("core:string:toPath") || fqFunctionName.equals("string:toPath")) { return new StringToPath(currentStatement); }
+        else if (fqFunctionName.equals("core:string:urlEncode") || fqFunctionName.equals("string:urlEncode") || fqFunctionName.equals(":urlEncode")) { return new StringUrlEncode(currentStatement); }
+        else if (fqFunctionName.equals("core:string:urlDecode") || fqFunctionName.equals("string:urlDecode") || fqFunctionName.equals(":urlDecode")) { return new StringUrlDecode(currentStatement); }
+        else if (fqFunctionName.equals("core:string:isNumeric") || fqFunctionName.equals(":isNumeric") || fqFunctionName.equals("string:isNumeric")) { return new StringIsNumeric(currentStatement); }
         
         else if (fqFunctionName.equals("core:number:random") || fqFunctionName.equals("number:random") || fqFunctionName.equals(":random")) { return new NumberRandom(currentStatement, functionParams); }
         

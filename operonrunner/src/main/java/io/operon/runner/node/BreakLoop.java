@@ -33,14 +33,14 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class BreakLoop extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(BreakLoop.class);
+     // no logger 
 
     public BreakLoop(Statement stmnt) {
         super(stmnt);
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER BreakLoop.evaluate()");
+        //:OFF:log.debug("ENTER BreakLoop.evaluate()");
         throw new BreakLoopException();
     }
 

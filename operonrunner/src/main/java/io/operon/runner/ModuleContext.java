@@ -46,7 +46,7 @@ import org.apache.logging.log4j.LogManager;
  * 
  */
 public class ModuleContext extends BaseContext implements Context {
-    private static Logger log = LogManager.getLogger(ModuleContext.class);
+     // no logger 
     
     public ModuleContext() throws IOException {
         super();

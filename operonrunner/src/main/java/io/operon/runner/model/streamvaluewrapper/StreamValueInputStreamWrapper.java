@@ -35,7 +35,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 public class StreamValueInputStreamWrapper implements StreamValueWrapper {
-    private static Logger log = LogManager.getLogger(StreamValueInputStreamWrapper.class);
+     // no logger 
     
     private boolean supportsJson = false;
     
@@ -88,7 +88,7 @@ public class StreamValueInputStreamWrapper implements StreamValueWrapper {
                         return JsonUtil.lwOperonValueFromString(line);
                     }
                     else {
-                        log.debug("streamvaluewrapper :: read empty line");
+                        //:OFF:log.debug("streamvaluewrapper :: read empty line");
                         i += 1;
                         OperonContext jsonContext = new OperonContext();
                         Statement stmt = new DefaultStatement(jsonContext);
@@ -98,7 +98,7 @@ public class StreamValueInputStreamWrapper implements StreamValueWrapper {
                 }
                 else {
                     if (i % 5 == 0) {
-                        log.debug("streamvaluewrapper :: waiting for stream to be ready.");
+                        //:OFF:log.debug("streamvaluewrapper :: waiting for stream to be ready.");
                     }
                     Thread.sleep(50);
                     i += 1;

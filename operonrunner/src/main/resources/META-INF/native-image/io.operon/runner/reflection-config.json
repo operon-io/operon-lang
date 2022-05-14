@@ -1,0 +1,6 @@
+[
+  {
+    "name": "sun.awt.X11GraphicsEnvironment",
+    "methods": [{"name":"<init>","parameterTypes":[] }]
+  }
+]

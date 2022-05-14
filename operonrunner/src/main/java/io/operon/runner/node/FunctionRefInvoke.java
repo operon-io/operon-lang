@@ -44,7 +44,7 @@ import org.apache.logging.log4j.LogManager;
 // => $b() # NOTE: Could later be also: "=> b()" (the standard function-call -syntax).
 //
 public class FunctionRefInvoke extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(FunctionRefInvoke.class);
+     // no logger 
     
     // Expression which refers to FunctionRef (FR) or LambdaFunctionRef (LFR).
     // May also be an Array, which contains FR or LFR, in which case
@@ -60,7 +60,7 @@ public class FunctionRefInvoke extends AbstractNode implements Node {
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER FunctionRefInvoke.evaluate()");
+        //:OFF:log.debug("ENTER FunctionRefInvoke.evaluate()");
         OperonValue currentValue = this.getStatement().getCurrentValue();
         
         OperonValue ref = (OperonValue) this.getRefExpr().evaluate(); // evaluate is required for: LambdaFunctionRefTests.lambdaFunctionRef5Test:
@@ -71,15 +71,15 @@ public class FunctionRefInvoke extends AbstractNode implements Node {
 
         final OperonValue currentValueForInvoke = currentValue;
         
-        //log.debug("!!! CURRENT VALUE COPY :: " + currentValueCopy);
+        ////:OFF:log.debug("!!! CURRENT VALUE COPY :: " + currentValueCopy);
         //System.out.println("FunctionRefInvoke :: CV Copy=" + currentValueCopy + /*", prototype=" + this.getStatement().isPrototype() +*/ ", stmt=" + this.getStatement().getClass().getName());
         //System.out.println("FunctionRefInvoke evaluate()");
         //System.out.println("  Configs: " + this.getConfigs());
         
-        log.debug("  >> FunctionRefInvoke :: evaluate the valueRef (stmt=" + this.getStatement().getId() + ")");
+        //:OFF:log.debug("  >> FunctionRefInvoke :: evaluate the valueRef (stmt=" + this.getStatement().getId() + ")");
 
         // DEBUG: test if ref is lfr before evaluating it.
-        log.debug("  >> FunctionRefInvoke :: ref = " + this.getRefExpr().getClass().getName());
+        //:OFF:log.debug("  >> FunctionRefInvoke :: ref = " + this.getRefExpr().getClass().getName());
 
         Info info = this.resolveConfigs(this.getStatement());
 
@@ -147,7 +147,7 @@ public class FunctionRefInvoke extends AbstractNode implements Node {
         Statement stmt = currentValue.getStatement();
         
         stmt.setCurrentValue(currentValue);
-        log.debug("  >> FunctionRefInvoke :: done evaluating the valueRef");
+        //:OFF:log.debug("  >> FunctionRefInvoke :: done evaluating the valueRef");
         //System.out.println("  invoke CV copy=" + currentValueCopy);
 
         //System.out.println("doInvoke 0. ref: " + ref.getClass().getName());
@@ -209,7 +209,7 @@ public class FunctionRefInvoke extends AbstractNode implements Node {
     }
     
     private OperonValue handleArray(Node ref, OperonValue currentValue, Info info) throws OperonGenericException {
-        log.debug("FunctionRefInvoke :: handleArray");
+        //:OFF:log.debug("FunctionRefInvoke :: handleArray");
         ArrayType arr = (ArrayType) ref;
         // TODO: the result might depend on invoke-configuration, i.e.
         //  => [f(), g()] () {invoke configs here, e.g. "passResultValueForNextFunctionAsArgument": true}
@@ -230,7 +230,7 @@ public class FunctionRefInvoke extends AbstractNode implements Node {
             // only invoke them, and ignore others.
             // I might want to change this, after thinking this through. It certainly is trivial to add this kind of support,
             // if wanted... NOTE: this could be configurable property of invocation as well! {"recursive": true}
-            //log.debug(">>>>>>>>>>>>>>> VALUE ::: " + value.getClass().getName());
+            ////:OFF:log.debug(">>>>>>>>>>>>>>> VALUE ::: " + value.getClass().getName());
             
             value = value.evaluate();
             //System.out.println("evaluated value :: " + value);
@@ -245,7 +245,7 @@ public class FunctionRefInvoke extends AbstractNode implements Node {
                 resultArray.addValue((OperonValue) valueResult);
             }
             else if (value instanceof ArrayType) {
-                log.debug("ArrayType found, recursive: " + info.recursive);
+                //:OFF:log.debug("ArrayType found, recursive: " + info.recursive);
                 //System.out.println("ArrayType found, recursive: " + info.recursive);
                 
                 // Recursive-option is problematic when done like this: "=> arguments json_obj?",
@@ -254,7 +254,7 @@ public class FunctionRefInvoke extends AbstractNode implements Node {
                 // Invoke ({"recursive": true}) [a(), b(), [c(), d()]] End
                 
                 if (info.recursive) {
-                    log.debug("Recursive array handling");
+                    //:OFF:log.debug("Recursive array handling");
                     OperonValue resultSubArray = this.handleArray(value, currentValue, info);
                     resultArray.addValue(resultSubArray);
                 }

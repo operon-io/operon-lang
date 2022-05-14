@@ -32,6 +32,7 @@ public class OperonConfigs {
     private boolean printDuration = false; // print duration at the end of the query?
     private boolean prettyPrint = false;
     private boolean outputResult = true;
+    private boolean indexRoot = true;
     private Map<String, OperonValue> namedValues;
     
     // Redis-related:
@@ -102,6 +103,14 @@ public class OperonConfigs {
         return this.timezone;
     }
 
+    public void setIndexRoot(boolean ir) {
+        this.indexRoot = ir;
+    }
+    
+    public boolean getIndexRoot() {
+        return this.indexRoot;
+    }
+
     public Map<String, OperonValue> getNamedValues() {
         return this.namedValues;
     }
@@ -148,5 +157,21 @@ public class OperonConfigs {
 
     public void setRedisPrefix(String rprefix) {
         this.redisPrefix = rprefix;
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("OperonConfigs\n");
+        sb.append(" - timezone: " + this.getTimezone() + "\n");
+        sb.append(" - supportPos: " + this.getSupportPos() + "\n");
+        sb.append(" - supportParent: " + this.getSupportParent() + "\n");
+        sb.append(" - printDuration: " + this.getPrintDuration() + "\n");
+        sb.append(" - prettyPrint: " + this.getPrettyPrint() + "\n");
+        sb.append(" - outputResult: " + this.getOutputResult() + "\n");
+        sb.append(" - indexRoot: " + this.getIndexRoot() + "\n");
+        sb.append(" - disabledComponents: " + this.getDisabledComponents() + "\n");
+        sb.append(" - namedValues: " + this.getNamedValues() + "\n");
+        return sb.toString();
     }
 }

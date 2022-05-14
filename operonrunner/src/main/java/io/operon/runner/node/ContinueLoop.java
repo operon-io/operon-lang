@@ -33,14 +33,14 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class ContinueLoop extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(ContinueLoop.class);
+     // no logger 
 
     public ContinueLoop(Statement stmnt) {
         super(stmnt);
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER ContinueLoop.evaluate()");
+        //:OFF:log.debug("ENTER ContinueLoop.evaluate()");
         throw new ContinueLoopException();
     }
 

@@ -153,4 +153,30 @@ public class ErrorValue extends OperonValue implements Node, AtomicOperonValue {
         return sb.toString();
     }
 
+    @Override
+    public String toTomlString(OutputFormatter ofmt) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Error(");
+        
+        sb.append("\"code\": \"");
+        sb.append(this.getCode());
+        sb.append("\", ");
+    
+        sb.append("\"type\": \"");
+        sb.append(this.getType());
+        sb.append("\", ");
+    
+        sb.append("\"message\": \"");
+        sb.append(this.getMessage());
+        sb.append("\"");
+        
+        if (this.getErrorJson() != null && (this.getErrorJson() instanceof EmptyType) == false) {
+            sb.append(", ");
+            sb.append("\"json\": ");
+            sb.append(this.getErrorJson());
+        }
+        sb.append(")");
+        return sb.toString();
+    }
+
 }

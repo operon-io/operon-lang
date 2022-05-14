@@ -40,11 +40,11 @@ import io.operon.runner.model.exception.OperonGenericException;
  *
  */
 public class CastNumber extends BaseArity1 implements Node, Arity1 {
-    
+
     public CastNumber(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
         this.setParam1AsOptional(true);
-        this.setParams(params, "number", "precision");
+        this.setParams(params, "number", "options");
     }
 
     public NumberType evaluate() throws OperonGenericException {        
@@ -55,15 +55,39 @@ public class CastNumber extends BaseArity1 implements Node, Arity1 {
             try {
                 NumberType result = new NumberType(this.getStatement());
                 String stringValue = ((StringType) currentValue).getJavaStringValue();
-                result.setDoubleValue(Double.parseDouble(stringValue));
                 byte precision = -1;
                 
                 if (this.getParam1() != null) {
-                    precision = (byte) ((NumberType) this.getParam1().evaluate()).getDoubleValue();
+                    OperonValue options = this.getParam1().evaluate();
+                    if (options instanceof NumberType) {
+                        precision = (byte) ((NumberType) this.getParam1().evaluate()).getDoubleValue();
+                    }
+                    else {
+                        if (((ObjectType) options).hasKey("\"precision\"")) {
+                            NumberType precisionNum = (NumberType) ((ObjectType) options).getByKey("precision").evaluate();
+                            precision = (byte) precisionNum.getDoubleValue();
+                        }
+                        if (((ObjectType) options).hasKey("\"decimalSeparator\"")) {
+                            StringType separatorStr = (StringType) ((ObjectType) options).getByKey("decimalSeparator").evaluate();
+                            stringValue = stringValue.replaceAll(separatorStr.getJavaStringValue(), ".");
+                        }
+                        // groupSeparator:
+                        //   E.g. 1,000,000.00 -> "," or 1 000 000,00 -> " "
+                        //
+                        if (((ObjectType) options).hasKey("\"groupSeparator\"")) {
+                            StringType separatorStr = (StringType) ((ObjectType) options).getByKey("groupSeparator").evaluate();
+                            stringValue = stringValue.replaceAll(separatorStr.getJavaStringValue(), "");
+                        }
+                    }
                 }
                 else {
+                    System.out.println("GOT HERE 1");
                     precision = NumberType.getPrecisionFromStr(stringValue);
+                    System.out.println("GOT HERE 2");
                 }
+                System.out.println("GOT HERE 3");
+                result.setDoubleValue(Double.parseDouble(stringValue));
+                System.out.println("GOT HERE 4");
                 result.setPrecision( precision );
                 return result;
             } catch(Exception e) {
@@ -74,8 +98,19 @@ public class CastNumber extends BaseArity1 implements Node, Arity1 {
         
         else if (currentValue instanceof NumberType) {
             if (this.getParam1() != null) {
-                byte precision = (byte) ((NumberType) this.getParam1().evaluate()).getDoubleValue();
-                ((NumberType) currentValue).setPrecision(precision);
+                OperonValue options = this.getParam1().evaluate();
+                if (options instanceof NumberType) {
+                    byte precision = (byte) ((NumberType) this.getParam1().evaluate()).getDoubleValue();
+                    ((NumberType) currentValue).setPrecision(precision);
+                }
+                else {
+                    if (((ObjectType) options).hasKey("\"precision\"")) {
+                        NumberType precisionNum = (NumberType) ((ObjectType) options).getByKey("precision").evaluate();
+                        byte precision = (byte) precisionNum.getDoubleValue();
+                        ((NumberType) currentValue).setPrecision(precision);
+                    }
+                    // Separator or trim are not applicable here!
+                }
             }
             return (NumberType) currentValue;
         }

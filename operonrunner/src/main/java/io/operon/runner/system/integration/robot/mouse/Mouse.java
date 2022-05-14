@@ -70,7 +70,7 @@ import org.apache.logging.log4j.LogManager;
 
 
 public class Mouse {
-    private static Logger log = LogManager.getLogger(Mouse.class);
+     // no logger 
 
     private Robot r;
 

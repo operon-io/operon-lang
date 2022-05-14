@@ -34,7 +34,7 @@ import org.apache.logging.log4j.LogManager;
 // Range -node may only be used inside ArrayType.
 //
 public class Range extends OperonValue implements Node {
-    private static Logger log = LogManager.getLogger(Range.class);
+     // no logger 
     
     private Node lhs;
     private Node rhs;
@@ -50,7 +50,7 @@ public class Range extends OperonValue implements Node {
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER Range.evaluate(). Stmt: " + this.getStatement().getId());
+        //:OFF:log.debug("ENTER Range.evaluate(). Stmt: " + this.getStatement().getId());
         
         if (this.isEvaluated()) {
             return this;
@@ -84,8 +84,8 @@ public class Range extends OperonValue implements Node {
         int lhsInt = (int) ((NumberType) lhsOperonValue).getDoubleValue();
         int rhsInt = (int) ((NumberType) rhsOperonValue).getDoubleValue();
         
-        log.debug("LHS INT :: " + lhsInt);
-        log.debug("RHS INT :: " + rhsInt);
+        //:OFF:log.debug("LHS INT :: " + lhsInt);
+        //:OFF:log.debug("RHS INT :: " + rhsInt);
         
         this.setEvaluatedLhs(lhsInt);
         this.setEvaluatedRhs(rhsInt);

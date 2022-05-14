@@ -41,7 +41,7 @@ import org.apache.logging.log4j.LogManager;
 // Single expressiong in the FilterList.
 //
 public class FilterListExpr extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(FilterList.class);
+     // no logger 
     
     private OperonValue valueToApplyAgainst; // TODO: check if required
     
@@ -68,7 +68,7 @@ public class FilterListExpr extends AbstractNode implements Node {
     }
     
     public void setValueToApplyAgainst(OperonValue value) {
-        log.debug("  FilterList :: setting value to apply against :: " + value);
+        //:OFF:log.debug("  FilterList :: setting value to apply against :: " + value);
         this.valueToApplyAgainst = value;
     }
     

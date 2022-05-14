@@ -51,7 +51,8 @@ public class Negate extends BaseUnaryNodeProcessor implements UnaryNodeProcessor
         }
         
         else {
-            return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "NEGATE", "Not a number: " + nodeResult.getClass().getName());
+            return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "NEGATE", "Not a number: " + 
+                nodeResult.getClass().getName() + ", at line #" + this.getSourceCodeLineNumber());
         }
         
     }

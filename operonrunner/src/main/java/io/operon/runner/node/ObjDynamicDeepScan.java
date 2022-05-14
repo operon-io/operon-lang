@@ -31,7 +31,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class ObjDynamicDeepScan extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(ObjDynamicDeepScan.class);
+     // no logger 
     
     private Node keyExpr;
     private Path currentPath;
@@ -46,12 +46,12 @@ public class ObjDynamicDeepScan extends AbstractNode implements Node {
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER ObjDynamicDeepScan.evaluate(). Stmt: " + this.getStatement().getId());
+        //:OFF:log.debug("ENTER ObjDynamicDeepScan.evaluate(). Stmt: " + this.getStatement().getId());
         
         // get currentValue from the statement
         OperonValue value = this.getStatement().getCurrentValue();
         this.setRootValue(value);
-        log.debug("    >> @: " + value.toString());
+        //:OFF:log.debug("    >> @: " + value.toString());
 
         Info info = this.resolveConfigs(this.getStatement());
 
@@ -62,17 +62,17 @@ public class ObjDynamicDeepScan extends AbstractNode implements Node {
     private OperonValue evaluateSelector(OperonValue value, Info info) throws OperonGenericException {
         OperonValue evaluatedValue = value.evaluate();
         if (evaluatedValue instanceof ObjectType) {
-            log.debug("EXIT ObjDynamicDeepScan.evaluate() obj");
+            //:OFF:log.debug("EXIT ObjDynamicDeepScan.evaluate() obj");
             return evaluateObj( (ObjectType) evaluatedValue, info );
         }
         
         else if (evaluatedValue instanceof ArrayType) {
-            log.debug("EXIT ObjDynamicDeepScan.evaluate() array");
+            //:OFF:log.debug("EXIT ObjDynamicDeepScan.evaluate() array");
             return evaluateArray( (ArrayType) evaluatedValue, info );
         }
         
-        log.debug("ObjDynamicDeepScan: cannot scan object. Wrong type: " + evaluatedValue);
-        return ErrorUtil.createErrorValueAndThrow(this.getStatement(), "OBJECT_DYNAMIC_DEEP_SCAN", "TYPE", "Cannot scan object. Wrong type.");
+        //:OFF:log.debug("ObjDynamicDeepScan: cannot scan object. Wrong type: " + evaluatedValue);
+        return ErrorUtil.createErrorValueAndThrow(this.getStatement(), "OBJECT_DYNAMIC_DEEP_SCAN", "TYPE", "Cannot scan object. Wrong type. Line #" + this.getSourceCodeLineNumber());
     }
     
     //
@@ -94,7 +94,7 @@ public class ObjDynamicDeepScan extends AbstractNode implements Node {
         //
         for (int i = 0; i < obj.getPairs().size(); i ++) {
             PairType pair = obj.getPairs().get(i);
-            log.debug("    Obj key :: " + pair.getKey());
+            //:OFF:log.debug("    Obj key :: " + pair.getKey());
 
             PathPart pp = new KeyPathPart(pair.getKey().substring(1, pair.getKey().length() - 1));
             this.currentPath.setValueLink(pair.getValue());
@@ -201,7 +201,7 @@ public class ObjDynamicDeepScan extends AbstractNode implements Node {
     // CurrentValue is Array
     //
     private OperonValue evaluateArray(ArrayType array, Info info) throws OperonGenericException {
-        log.debug("Accessing array of objects");
+        //:OFF:log.debug("Accessing array of objects");
         //System.out.println("Accessing array, currentDepth = " + currentDepth);
         
         ArrayType resultArray = new ArrayType(this.getStatement());
@@ -209,7 +209,7 @@ public class ObjDynamicDeepScan extends AbstractNode implements Node {
         
         for (int i = 0; i < arrayValues.size(); i ++) {
             Node arrayNode = arrayValues.get(i);
-            log.debug("    >> Looping: " + i);
+            //:OFF:log.debug("    >> Looping: " + i);
             //System.out.println("Array Looping i=" + i);
 
             PathPart pp = new PosPathPart(i + 1);
@@ -312,7 +312,7 @@ public class ObjDynamicDeepScan extends AbstractNode implements Node {
         }
         
         else {
-            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "OBJECT_DYNAMIC_DEEP_SCAN", "TYPE", "Cannot scan object. Wrong key type: " + dynamicKeyExprResult.getClass().getName());
+            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "OBJECT_DYNAMIC_DEEP_SCAN", "TYPE", "Cannot scan object. Wrong key type: " + dynamicKeyExprResult.getClass().getName() + ", line #" + this.getSourceCodeLineNumber());
         }
         return result;
     }

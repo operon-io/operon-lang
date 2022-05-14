@@ -39,7 +39,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class ArraySum extends BaseArity0 implements Node, Arity0 {
-    private static Logger log = LogManager.getLogger(ArraySum.class);
+     // no logger 
     
     public ArraySum(Statement statement) {
         super(statement);
@@ -53,7 +53,7 @@ public class ArraySum extends BaseArity0 implements Node, Arity0 {
     public NumberType evaluate() throws OperonGenericException {        
         try {
             OperonValue currentValue = this.getStatement().getCurrentValue();
-            //log.debug("Sum() :: currentValue :: " + currentValue.getClass().getName());
+            ////:OFF:log.debug("Sum() :: currentValue :: " + currentValue.getClass().getName());
             ArrayType array = (ArrayType) currentValue.evaluate();
             List<Node> arrayValues = array.getValues();
             

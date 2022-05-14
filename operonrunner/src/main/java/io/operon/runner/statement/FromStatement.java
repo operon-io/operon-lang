@@ -30,7 +30,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class FromStatement extends BaseStatement implements Statement {
-    private static Logger log = LogManager.getLogger(FromStatement.class);
+     // no logger 
     
     private InputSource inputSource;
 

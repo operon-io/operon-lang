@@ -44,7 +44,7 @@ import org.apache.logging.log4j.LogManager;
 // Attributes: pos, parent
 //
 public class ArrayGet extends BaseArity1 implements Node, Arity1, SupportsAttributes {
-    private static Logger log = LogManager.getLogger(ArrayGet.class);
+     // no logger 
     
     public ArrayGet(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);

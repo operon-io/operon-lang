@@ -41,7 +41,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class FlowBreak extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(FlowBreak.class);
+     // no logger 
 
     private Node exprNode;
 
@@ -50,7 +50,7 @@ public class FlowBreak extends AbstractNode implements Node {
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("ENTER FlowBreak.evaluate()");
+        //:OFF:log.debug("ENTER FlowBreak.evaluate()");
         OperonValue currentValue = this.getStatement().getCurrentValue();
         this.getExprNode().getStatement().setCurrentValue(currentValue);
         OperonValue result = this.getExprNode().evaluate();

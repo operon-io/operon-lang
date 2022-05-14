@@ -59,6 +59,7 @@ import io.operon.runner.statement.FromStatement;
 import io.operon.runner.processor.function.core.date.DateNow;
 import io.operon.runner.processor.function.core.raw.RawToStringType;
 import io.operon.runner.Main;
+import io.operon.runner.compiler.CompilerFlags;
 
 import org.apache.logging.log4j.Logger;
 import io.operon.runner.model.exception.OperonGenericException;
@@ -66,7 +67,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class FileSystem implements InputSourceDriver {
-    private static Logger log = LogManager.getLogger(FileSystem.class);
+     // no logger 
 
     private ObjectType jsonConfiguration; // optional: json-configuration for the component
     private boolean isRunning;
@@ -97,12 +98,12 @@ public class FileSystem implements InputSourceDriver {
     
     public void start(OperonContextManager o) {
         OperonContext ctx = null;
-        log.debug("FileSystem.start");
+        //:OFF:log.debug("FileSystem.start");
         try {
             Info info = this.resolve();
             this.isRunning = true;
             if (this.getOperonContextManager() == null && o != null) {
-                log.debug("FileSystem.start 1");
+                //:OFF:log.debug("FileSystem.start 1");
                 ocm = o;
                 if (info.contextManagement != null) {
                     ocm.setContextStrategy(info.contextManagement);
@@ -110,7 +111,7 @@ public class FileSystem implements InputSourceDriver {
                 ctx = ocm.resolveContext("correlationId");
             }
             else if (o == null) {
-                log.debug("FileSystem.start 2");
+                //:OFF:log.debug("FileSystem.start 2");
                 ctx = new OperonContext();
                 ocm = new OperonContextManager(ctx, info.contextManagement);
             }
@@ -118,7 +119,7 @@ public class FileSystem implements InputSourceDriver {
             Path folder = Paths.get(info.path);
             // If path does not exist, then create it if createPaths -options was set. Do not follow symbolic links
             if (info.createPaths && !Files.exists(folder, LinkOption.NOFOLLOW_LINKS)) {
-                log.debug("FileSystem.start create dir: " + folder);
+                //:OFF:log.debug("FileSystem.start create dir: " + folder);
                 try {
                     Files.createDirectories(folder);
                 } catch (UnsupportedOperationException e) {
@@ -134,10 +135,10 @@ public class FileSystem implements InputSourceDriver {
                     System.err.println("IOException :: " + e.getMessage());
                     throw e;
                 }
-                log.debug("FileSystem.start dir created");
+                //:OFF:log.debug("FileSystem.start dir created");
             }
             
-            log.debug("FileSystem.start enter while");
+            //:OFF:log.debug("FileSystem.start enter while");
             while (this.isRunning) {
                 if (info.pollTimes != null 
                         && info.pollTimes > 0 
@@ -152,7 +153,7 @@ public class FileSystem implements InputSourceDriver {
                 }
                 
                 if (info.fileName != null && info.fileName.length() > 0) {
-                    log.debug("FileSystem.start try readlock");
+                    //:OFF:log.debug("FileSystem.start try readlock");
                     Path path = Paths.get(info.path + File.separator + info.fileName);
                     //System.out.println("Initial file-path: " + path.toFile().getPath());
                     if (readLockFile(path.toFile().getPath(), info) != null) {
@@ -179,7 +180,7 @@ public class FileSystem implements InputSourceDriver {
                 }
                 
                 if (info.stopWhenFolderEmpty) {
-                    log.debug("FileSystem.start stopWhenFolderEmpty");
+                    //:OFF:log.debug("FileSystem.start stopWhenFolderEmpty");
                     if (folderCheck != null && folderCheck.isDirectory()) {
                         try (Stream<Path> entries = Files.list(Paths.get(info.path))) {
                             
@@ -233,7 +234,7 @@ public class FileSystem implements InputSourceDriver {
                 this.sendEndSignal(ocm);
             }
         } catch (OperonGenericException e) {
-            log.error("Exception :: " + e.toString());
+            //:OFF:log.error("Exception :: " + e.toString());
             ctx.setException(e);
         } catch (Exception ex) {
             OperonGenericException oge = new OperonGenericException(ex.getMessage());
@@ -452,7 +453,13 @@ public class FileSystem implements InputSourceDriver {
                             initValue = JsonUtil.lwOperonValueFromString(line);
                         }
                         else {
-                            initValue = JsonUtil.operonValueFromString(line);
+                            if (info.index) {
+                                CompilerFlags[] flags = {CompilerFlags.INDEX_ROOT};
+                                initValue = JsonUtil.operonValueFromString(line, flags);
+                            }
+                            else {
+                                initValue = JsonUtil.operonValueFromString(line);
+                            }
                         }
                         
                         if (info.streamLinesWrapper) {
@@ -568,7 +575,13 @@ public class FileSystem implements InputSourceDriver {
                         initValue = JsonUtil.lwOperonValueFromString(fileContent);
                     }
                     else {
-                        initValue = JsonUtil.operonValueFromString(fileContent);
+                        if (info.index) {
+                            CompilerFlags[] flags = {CompilerFlags.INDEX_ROOT};
+                            initValue = JsonUtil.operonValueFromString(fileContent, flags);
+                        }
+                        else {
+                            initValue = JsonUtil.operonValueFromString(fileContent);
+                        }
                     }
                     
                     PairType pair = new PairType(stmt);
@@ -652,7 +665,7 @@ public class FileSystem implements InputSourceDriver {
     
     public void stop() {
         this.isRunning = false;
-        log.info("Stopped");
+        //:OFF:log.info("Stopped");
     }
     
     public void setJsonConfiguration(ObjectType jsonConfig) { this.jsonConfiguration = jsonConfig; }
@@ -798,6 +811,15 @@ public class FileSystem implements InputSourceDriver {
                         info.lwParser = true;
                     }
                     break;
+                case "\"index\"":
+                    Node indexValue = pair.getValue().evaluate();
+                    if (indexValue instanceof FalseType) {
+                        info.index = false;
+                    }
+                    else {
+                        info.index = true;
+                    }
+                    break;
                 case "\"movedonepath\"":
                     String moveDonePath = ((StringType) pair.getValue().evaluate()).getJavaStringValue();
                     info.moveDonePath = moveDonePath;
@@ -916,6 +938,7 @@ public class FileSystem implements InputSourceDriver {
         private boolean streamLines = false; // sends each line for processing.
         private boolean streamLinesWrapper = false; // decide if add headers and body when streaming lines
         private boolean lwParser = false;
+        private boolean index = false; // Build index of the value. This could speed up the query when accessing the same object multiple times.
         private String moveDonePath = ".done";
         private String moveFailedPath = ".failed";
         private String readLockStrategy = "changed"; // changed = check changed timestamp, markerfile = create markerfile where filename is told, prefix = prefix file which is being read

@@ -38,7 +38,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class FunctionStatement extends BaseStatement implements Statement {
-    private static Logger log = LogManager.getLogger(FunctionStatement.class);
+     // no logger 
     
     private List<FunctionStatementParam> params; // used to check the param order and their names
     
@@ -88,7 +88,7 @@ public class FunctionStatement extends BaseStatement implements Statement {
                 result = eh.evaluate(e);
             }
             else {
-                log.debug("FunctionStatement :: exceptionHandler missing, throw to upper-level");
+                //:OFF:log.debug("FunctionStatement :: exceptionHandler missing, throw to upper-level");
                 //
                 // Throw the exception to upper-level, since no ExceptionHandler was found:
                 //

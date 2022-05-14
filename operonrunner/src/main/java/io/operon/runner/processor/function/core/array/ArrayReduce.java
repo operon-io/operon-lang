@@ -45,7 +45,7 @@ import org.apache.logging.log4j.LogManager;
 //    NOTE: if LambdaFunctionRef is used, then the params must be named as "$a" and "$b" (also in this order).
 // 
 public class ArrayReduce extends BaseArity2 implements Node, Arity2, SupportsAttributes {
-    private static Logger log = LogManager.getLogger(ArrayReduce.class);
+     // no logger 
     
     private Node configs;
     
@@ -56,7 +56,7 @@ public class ArrayReduce extends BaseArity2 implements Node, Arity2, SupportsAtt
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("Reduce :: evaluate()");
+        //:OFF:log.debug("Reduce :: evaluate()");
         try {
             OperonValue currentValue = this.getStatement().getCurrentValue();
             
@@ -82,7 +82,7 @@ public class ArrayReduce extends BaseArity2 implements Node, Arity2, SupportsAtt
             // Must copy to ensure not to modify the underlying currentValue from stmt.
             //
             OperonValue result = this.doReduce(arrayToReduceCopy, fromLeft, info.initialValue);
-            log.debug("Reduce :: loop done");
+            //:OFF:log.debug("Reduce :: loop done");
             return result;
         } catch (Exception e) {
             return ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION", "array:" + this.getFunctionName(), e.getMessage());
@@ -117,7 +117,7 @@ public class ArrayReduce extends BaseArity2 implements Node, Arity2, SupportsAtt
                 offsetGet = 0;
             }
         }
-        log.debug("Reduce :: start loop");
+        //:OFF:log.debug("Reduce :: start loop");
         
         Path currentPath = arrayToReduce.getStatement().getCurrentPath();
         OperonValue objLink = currentPath.getObjLink();

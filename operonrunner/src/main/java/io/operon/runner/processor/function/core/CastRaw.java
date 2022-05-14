@@ -43,7 +43,7 @@ import org.apache.logging.log4j.LogManager;
  *
  */
 public class CastRaw extends BaseArity1 implements Node, Arity1 {
-    private static Logger log = LogManager.getLogger(CastRaw.class);
+     // no logger 
     
     public CastRaw(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
@@ -59,7 +59,36 @@ public class CastRaw extends BaseArity1 implements Node, Arity1 {
             return (RawValue) currentValue;
         }
 
-        else if (currentValue instanceof StringType) {
+        //
+        // Check if serialize as YAML
+        //
+        if (this.getParam1() != null) {
+            ObjectType options = ((ObjectType) this.getParam1().evaluate());
+
+            if (options.hasKey("\"yaml\"")) {
+                OperonValue yamlValue = (OperonValue) options.getByKey("yaml").evaluate();
+                if (yamlValue instanceof TrueType) {
+                    String yamlStr = OperonContext.serializeAsYaml(currentValue);
+                    RawValue result = new RawValue(this.getStatement());
+                    boolean unescape = false;
+                    result.setValue(StringToRaw.stringToBytes(yamlStr, unescape));
+                    return result;
+                }
+            }
+            
+            else if (options.hasKey("\"toml\"")) {
+                OperonValue tomlValue = (OperonValue) options.getByKey("toml").evaluate();
+                if (tomlValue instanceof TrueType) {
+                    String tomlStr = OperonContext.serializeAsToml(currentValue);
+                    RawValue result = new RawValue(this.getStatement());
+                    boolean unescape = false;
+                    result.setValue(StringToRaw.stringToBytes(tomlStr, unescape));
+                    return result;
+                }
+            }
+        }
+
+        if (currentValue instanceof StringType) {
             StringType str = (StringType) currentValue;
             String strValue = str.getJavaStringValue();
             RawValue result = new RawValue(this.getStatement());
@@ -84,11 +113,31 @@ public class CastRaw extends BaseArity1 implements Node, Arity1 {
             StringBuilder sb = new StringBuilder();
             ObjectType options = null;
             String separator = "";
+            boolean unescape = true;
+            boolean unescapeSeparator = true;
             
+            //
+            // Check options
+            //
             if (this.getParam1() != null) {
                 options = ((ObjectType) this.getParam1().evaluate());
-                if (options.hasKey("\"separator\"")) {
-                    separator = ((StringType) options.getByKey("separator")).getJavaStringValue();
+                for (int i = 0; i < options.getPairs().size(); i ++) {
+                    PairType pair = options.getPairs().get(i);
+                    if (pair.getKey().toLowerCase().equals("\"separator\"")) {
+                        separator = ((StringType) options.getByKey("separator")).getJavaStringValue();
+                    }
+                    else if (pair.getKey().toLowerCase().equals("\"unescape\"")) {
+                        OperonValue unescValue = (OperonValue) pair.getValue().evaluate();
+                        if (unescValue instanceof FalseType) {
+                            unescape = false;
+                        }
+                    }
+                    else if (pair.getKey().toLowerCase().equals("\"unescapeseparator\"")) {
+                        OperonValue unescSepValue = (OperonValue) pair.getValue().evaluate();
+                        if (unescSepValue instanceof FalseType) {
+                            unescapeSeparator = false;
+                        }
+                    }
                 }
             }
 
@@ -96,7 +145,8 @@ public class CastRaw extends BaseArity1 implements Node, Arity1 {
                 OperonValue jv = (OperonValue) values.get(i).evaluate();
                 if (jv instanceof StringType) {
                     StringType s = (StringType) jv;
-                    sb.append(s.getJavaStringValue());
+                    byte[] b = StringToRaw.stringToBytes(s.getJavaStringValue(), unescape);
+                    sb.append(new String(b));
                 }
                 else if (jv instanceof RawValue) {
                     RawValue raw = (RawValue) jv;
@@ -112,7 +162,12 @@ public class CastRaw extends BaseArity1 implements Node, Arity1 {
                 }
                 if (i < values.size() - 1) {
                     if (this.getParam1() != null) {
-                        sb.append(separator);
+                        if (unescapeSeparator) {
+                            sb.append(StringToRaw.unescapeString(separator));
+                        }
+                        else {
+                            sb.append(separator);
+                        }
                     }
                     else {
                         sb.append(",");

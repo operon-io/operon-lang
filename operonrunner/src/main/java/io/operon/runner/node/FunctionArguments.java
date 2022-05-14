@@ -28,7 +28,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class FunctionArguments extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(FunctionArguments.class);
+     // no logger 
 
     //
     // FunctionRegularArgument | FunctionNamedArgument

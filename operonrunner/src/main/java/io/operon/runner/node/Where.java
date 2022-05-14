@@ -51,7 +51,7 @@ import org.apache.logging.log4j.LogManager;
         End:Where
 */
 public class Where extends AbstractNode implements Node, java.io.Serializable {
-    private static Logger log = LogManager.getLogger(Where.class);
+     // no logger 
     
     private Node whereExpr;
     private PathMatches pathMatches;
@@ -87,7 +87,7 @@ public class Where extends AbstractNode implements Node, java.io.Serializable {
     }
 
     public ArrayType evaluate() throws OperonGenericException {
-        log.debug("ENTER Where.evaluate()");
+        //:OFF:log.debug("ENTER Where.evaluate()");
         //debug("Where.evaluate()");
         OperonValue currentValue = this.getStatement().getCurrentValue();
         //debug("Where.evaluate() :: cv");
@@ -95,7 +95,7 @@ public class Where extends AbstractNode implements Node, java.io.Serializable {
         //debug("Where.evaluate() stmt");
         
         this.setRootValue(currentValue);
-        //log.debug("    >> @: " + value.toString());
+        ////:OFF:log.debug("    >> @: " + value.toString());
 
         Info info = this.resolveConfigs(this.getStatement());
 
@@ -118,16 +118,16 @@ public class Where extends AbstractNode implements Node, java.io.Serializable {
     private ArrayType evaluateSelector(OperonValue value, Info info) throws OperonGenericException {
         OperonValue evaluatedValue = value.evaluate();
         if (evaluatedValue instanceof ObjectType) {
-            //log.debug("EXIT Where.evaluate() obj");
+            ////:OFF:log.debug("EXIT Where.evaluate() obj");
             return evaluateObj( (ObjectType) evaluatedValue, info );
         }
         
         else if (evaluatedValue instanceof ArrayType) {
-            //log.debug("EXIT Where.evaluate() array");
+            ////:OFF:log.debug("EXIT Where.evaluate() array");
             return evaluateArray( (ArrayType) evaluatedValue, info );
         }
         
-        //log.debug("Where: cannot apply. Wrong type: " + evaluatedValue);
+        ////:OFF:log.debug("Where: cannot apply. Wrong type: " + evaluatedValue);
         ErrorUtil.createErrorValueAndThrow(this.getStatement(), "WHERE", "TYPE", "Cannot apply. Wrong type.");
         return null;
     }
@@ -148,7 +148,7 @@ public class Where extends AbstractNode implements Node, java.io.Serializable {
         //
         for (int i = 0; i < obj.getPairs().size(); i ++) {
             PairType pair = obj.getPairs().get(i);
-            //log.debug("    Obj key :: " + pair.getKey());
+            ////:OFF:log.debug("    Obj key :: " + pair.getKey());
 
             PathPart pp = new KeyPathPart(pair.getKey().substring(1, pair.getKey().length() - 1));
             //this.currentPath.setValueLink(pair.getValue());
@@ -255,7 +255,7 @@ public class Where extends AbstractNode implements Node, java.io.Serializable {
     // CurrentValue is Array
     //
     private ArrayType evaluateArray(ArrayType array, Info info) throws OperonGenericException {
-        //log.debug("Accessing array of objects");
+        ////:OFF:log.debug("Accessing array of objects");
         //debug("Accessing array");
         
         ArrayType resultArray = new ArrayType(this.getStatement());
@@ -263,7 +263,7 @@ public class Where extends AbstractNode implements Node, java.io.Serializable {
         
         for (int i = 0; i < arrayValues.size(); i ++) {
             Node arrayNode = arrayValues.get(i);
-            //log.debug("    >> Looping: " + i);
+            ////:OFF:log.debug("    >> Looping: " + i);
             //debug("Array Looping i=" + i);
             
             OperonValue arrayNodeEvaluated = arrayNode.evaluate();

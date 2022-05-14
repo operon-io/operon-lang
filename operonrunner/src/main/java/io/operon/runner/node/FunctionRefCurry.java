@@ -33,7 +33,7 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 public class FunctionRefCurry extends AbstractNode implements Node {
-    private static Logger log = LogManager.getLogger(FunctionRefCurry.class);
+     // no logger 
 
     private List<Node> args;
     
@@ -43,21 +43,21 @@ public class FunctionRefCurry extends AbstractNode implements Node {
     }
 
     public OperonValue evaluate() throws OperonGenericException {
-        log.debug("FunctionRefCurry :: evaluate");
+        //:OFF:log.debug("FunctionRefCurry :: evaluate");
         //System.out.println("CURRY: args: " + this.getArguments());
         OperonValue currentValue = this.getStatement().getCurrentValue();
         
         if ( currentValue instanceof FunctionRef ) {
-            log.debug("FunctionRefCurry :: currentValue :: Function ref detected!");
+            //:OFF:log.debug("FunctionRefCurry :: currentValue :: Function ref detected!");
             // Add the args for the functionRef
             FunctionRef fref = (FunctionRef) currentValue;
             for (Node arg : this.getArguments()) {
                 if (arg instanceof FunctionRegularArgument) {
-                    log.debug("DEBUG :: FunctionRegularArgument Detected.");
+                    //:OFF:log.debug("DEBUG :: FunctionRegularArgument Detected.");
                     FunctionRegularArgument regArg = (FunctionRegularArgument) arg;
                     Node argNode = regArg.getArgument();
 
-                    log.debug("DEBUG :: " + argNode.getClass().getName());
+                    //:OFF:log.debug("DEBUG :: " + argNode.getClass().getName());
                     
                     while (argNode instanceof OperonValue == false) {
                         argNode = argNode.evaluate();
@@ -70,7 +70,7 @@ public class FunctionRefCurry extends AbstractNode implements Node {
         }
         
         else if ( currentValue instanceof LambdaFunctionRef ) {
-            log.debug("FunctionRefCurry :: currentValue :: LambdaFunctionRef detected!");
+            //:OFF:log.debug("FunctionRefCurry :: currentValue :: LambdaFunctionRef detected!");
             //currentValueCopy = currentValue/*.copy()*/;
             LambdaFunctionRef lfref = (LambdaFunctionRef) currentValue;
             FunctionArguments fArgs = new FunctionArguments(this.getStatement());
@@ -80,18 +80,18 @@ public class FunctionRefCurry extends AbstractNode implements Node {
             //
             for (Node arg : this.getArguments()) {
                 if (arg instanceof FunctionRegularArgument) {
-                    log.debug("DEBUG :: FunctionRegularArgument Detected.");
+                    //:OFF:log.debug("DEBUG :: FunctionRegularArgument Detected.");
                     FunctionRegularArgument regArg = (FunctionRegularArgument) arg;
                     fArgs.getArguments().add(regArg);
                 }
                 else if (arg instanceof FunctionNamedArgument) {
-                    log.debug("DEBUG :: FunctionNamedArgument Detected.");
+                    //:OFF:log.debug("DEBUG :: FunctionNamedArgument Detected.");
                     FunctionNamedArgument namedArg = (FunctionNamedArgument) arg;
                     //System.out.println("Curry: add namedArg: " + namedArg.getArgumentName());
                     fArgs.getArguments().add(namedArg);
                 }
                 else if (arg instanceof FunctionRefNamedArgument) {
-                    log.debug("DEBUG :: FunctionRefNamedArgument Detected.");
+                    //:OFF:log.debug("DEBUG :: FunctionRefNamedArgument Detected.");
                     FunctionRefNamedArgument namedArg = (FunctionRefNamedArgument) arg;
                     //System.out.println("Curry: add namedRefArg: " + namedArg.getArgumentName());
                     fArgs.getArguments().add(namedArg);
@@ -111,7 +111,7 @@ public class FunctionRefCurry extends AbstractNode implements Node {
         }
         
         else {
-            log.debug("FunctionRefCurry :: currentValue type :: " + currentValue.getClass().getName());
+            //:OFF:log.debug("FunctionRefCurry :: currentValue type :: " + currentValue.getClass().getName());
         }
         return currentValue;
     }
