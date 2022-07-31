@@ -116,7 +116,7 @@ public class PairType extends OperonValue implements Node {
     }
 
     // Returns key with double-quotes
-    public String getKey() { 
+    public String getKey() {
         return this.key; 
     }
 

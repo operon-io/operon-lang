@@ -139,7 +139,7 @@ public class ValueRef extends AbstractNode implements Node {
             //System.out.println("ValueRef :: statement :: " + this.getStatement().getId() + ", getKey=" + getKey);
             //System.out.println("ValueRef, get from runtimeValues");
             //System.out.println("RT size=" + this.getStatement().getRuntimeValues().size());
-            //System.out.println(" >> runtimeValues :: " + this.getStatement().getRuntimeValues());
+            //System.out.println(" >> runtimeValues :: " + this.getStatement().getRuntimeValues()); // NOTE: printing this line may cause crash!
             value = this.resolveFromStatementOwnRuntimeValues(getKey);
             
             //
@@ -264,7 +264,12 @@ public class ValueRef extends AbstractNode implements Node {
     
     private OperonValue resolveFromLetStatement(String getKey) throws OperonGenericException {
         //:OFF:log.debug("    >> Value not resolved, checking from Context's Let-statements.");
-        LetStatement letStatement = (LetStatement) this.getStatement().getOperonContext().getLetStatements().get(getKey);
+        Map<String, LetStatement> letStatements = this.getStatement().getOperonContext().getLetStatements();
+        if (letStatements == null) {
+            //:OFF:log.debug("    >> ValueRef :: Context's Let-statements were null.");
+            return null;
+        }
+        LetStatement letStatement = (LetStatement) letStatements.get(getKey);
         OperonValue result = getValueFromLetStatement(letStatement, getKey);
         if (result != null) {
             this.valueLocation = ValueLocationType.LET_STAMENT;

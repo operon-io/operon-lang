@@ -126,6 +126,7 @@ public class Choice extends AbstractNode implements Node {
             }
             
             else if (this.getEvaluatedValue() == null && this.getOtherwise() == null) {
+                // NOTE: returns current-value to allow better chaining choices.
                 this.setEvaluatedValue(currentValueCopy);
                 result = currentValueCopy;
             }

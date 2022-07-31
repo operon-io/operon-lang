@@ -402,7 +402,6 @@ computed_value_ref
 value_ref
     : CURRENT_VALUE // @
     | OBJ_SELF_REFERENCE // _
-    | OBJ_ROOT_REFERENCE // _$
     | ROOT_VALUE // $
     | (ID ':')* CONST_ID // $ba or local:$wa or mylib:local:$sa
     ;
@@ -478,14 +477,18 @@ json_array
 // "Path" cannot be lowercase, since would be confused with function-name.
 // - Path(...)
 //    - with parentheses, so we can use e.g. Filter-expr. Empty path can be given as Path().
+//   Examples:
+//    - Path($foo.names[1]) --> resolve root-value from named Value.
+//    - Path(foo().names[1]) --> resolve root-value from function foo.
+//    - Path(.names[1]) --> no root-value, it must be set manually.
 // - ~...
 //    - Concise expr for path. Does not support empty path.
 // - ~(...)
 //      Allow using Filter-expr after Path. Empty path can be given as ~().
 //
 path_value
-   : ('Path' | '~') '(' CONST_ID? (('.' ID) | ('[' NUMBER ']'))* ')'
-   | '~' (('.' ID) | ('[' NUMBER ']'))+
+   : ('Path' | '~') '(' (CONST_ID | (ID ':')* ID '(' ')')? (('.' ID) | ('[' NUMBER ']'))* ')'
+   | '~' (CONST_ID | (ID ':')* ID '(' ')')? (('.' ID) | ('[' NUMBER ']'))+
    | '~' '(' (('.' ID) | ('[' NUMBER ']'))* ')'
    ;
 

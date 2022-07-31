@@ -53,7 +53,13 @@ public class DateFromMillis extends BaseArity0 implements Node, Arity0 {
 
     public ObjectType evaluate() throws OperonGenericException {        
         OperonValue currentValue = this.getStatement().getCurrentValue();
-        NumberType currentDateTime = (NumberType) currentValue.evaluate();
+        
+        NumberType currentDateTime = null;
+        try {
+            currentDateTime = (NumberType) currentValue.evaluate();
+        } catch (ClassCastException cce) {
+            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "CAST", "Number", "Could not cast to Number, function date:fromMillis. Line #" + this.getSourceCodeLineNumber());
+        }
         long millis = (long) currentDateTime.getDoubleValue();
         
         if (DateFromMillis.timeZone == null) {

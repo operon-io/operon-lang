@@ -145,6 +145,7 @@ public class CoreFunctionResolver {
             || fqFunctionName.equals("core:object:random:0") || fqFunctionName.equals("core:object:random:1") || fqFunctionName.equals("object:random:0") || fqFunctionName.equals("object:random:1")
             || fqFunctionName.equals("core:object:remove:1") || fqFunctionName.equals("object:remove:1")
             || fqFunctionName.equals("core:object:rename:2") || fqFunctionName.equals("object:rename:2") || fqFunctionName.equals(":rename:2")
+                || fqFunctionName.equals("core:object:rename:1") || fqFunctionName.equals("object:rename:1") || fqFunctionName.equals(":rename:1")
             || fqFunctionName.equals("core:object:update:1") || fqFunctionName.equals("object:update:1") || fqFunctionName.equals("core:object:update:2") || fqFunctionName.equals("object:update:2")
             || fqFunctionName.equals("core:object:upsert:2") || fqFunctionName.equals("object:upsert:2")
             || fqFunctionName.equals("core:object:createPair:2") || fqFunctionName.equals("object:createPair:2") || fqFunctionName.equals(":createPair:2")

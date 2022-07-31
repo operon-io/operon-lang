@@ -58,6 +58,9 @@ public class DateToMillis extends BaseArity0 implements Node, Arity0 {
             result.setDoubleValue((double) d.getTime());
             result.setPrecision((byte) 0);
             return result;
+        } catch (ClassCastException cce) {
+            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION_INPUT", "date:" + this.getFunctionName(), cce.getMessage() + ". Line #" + this.getSourceCodeLineNumber());
+            return null;
         } catch (Exception e) {
             ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION", "date:" + this.getFunctionName(), e.getMessage());
             return null;

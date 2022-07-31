@@ -67,8 +67,11 @@ public class DateToString extends BaseArity1 implements Node, Arity1 {
             StringType result = new StringType(currentValue.getStatement());
             result.setFromJavaString(strDate);
             return result;
+        } catch (ClassCastException cce) {
+            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION_INPUT", "date:" + this.getFunctionName(), cce.getMessage() + ". Line #" + this.getSourceCodeLineNumber());
+            return null;
         } catch (Exception e) {
-            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION", "date:" + this.getFunctionName(), e.getMessage());
+            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION", "date:" + this.getFunctionName(), e.getMessage() + "Line #" + this.getSourceCodeLineNumber());
             return null;
         }
     }

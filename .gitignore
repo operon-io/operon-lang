@@ -1,0 +1,15 @@
+target/
+operonparser/target
+jsonparser/target
+operonparser/doc
+operonrunner/target
+operonrunner/log4j
+operonrunner/.done
+server/target
+components/inputsourcedriver/file/target
+components/inputsourcedriver/amqp/target
+components/integration/file/target
+components/integration-tests/target
+components/inputsourcedriver/httpserver/target
+components/inputsourcedriver/timer/target
+

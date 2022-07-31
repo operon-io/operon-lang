@@ -65,6 +65,8 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 // 127.0.0.1:6379> RPUSH foo 111 222 333
 // RPUSH '"bar"'
 // 
+// Note: when using the responseChannel, the value must be serializable into Java-String.
+//
 public class QueueSystem implements InputSourceDriver {
      // no logger 
 
@@ -203,17 +205,17 @@ public class QueueSystem implements InputSourceDriver {
         return poolConfig;
     }
     
-    public static void sendResponse(JedisPool jedisPool, Info info, String responseChannel, OperonValue currentValue) throws InterruptedException {
+    public static void sendResponse(JedisPool jedisPool, Info info, String responseChannel, String value) throws InterruptedException {
         boolean connected = false;
         long reConnectionAttempt = 1;
         
         while (connected == false) {
             try (Jedis jedis = jedisPool.getResource()) {
                 connected = true;
-                jedis.rpush(responseChannel, currentValue.toString());
+                jedis.rpush(responseChannel, value);
             } catch (JedisConnectionException jce) {
                 if (reConnectionAttempt == 1 || reConnectionAttempt % 10 == 0) {
-                    System.err.println("Subscribe response: could not connect to Redis. Trying to reconnect: " + reConnectionAttempt);
+                    System.err.println("Queue-response: could not connect to Redis. Trying to reconnect: " + reConnectionAttempt);
                 }
                 reConnectionAttempt += 1;
                 connected = false;
@@ -229,6 +231,8 @@ public class QueueSystem implements InputSourceDriver {
         throws OperonGenericException, IOException, InterruptedException {
         //System.out.println("2. MESSAGE :: " + data);
         String responseChannel = info.responseChannel;
+        String deadletterChannel = info.deadletterChannel;
+        
         //
         // Index 0 = key-name. The rest are the values.
         //
@@ -241,7 +245,8 @@ public class QueueSystem implements InputSourceDriver {
                 ObjectType initialValue = new ObjectType(stmt);
                 
                 //System.out.println("Handle data: " + data.get(i));
-                OperonValue parsedData = JsonUtil.lwOperonValueFromString(data.get(i)).evaluate();
+                String dataItem = data.get(i);
+                OperonValue parsedData = JsonUtil.operonValueFromString(dataItem, null, ctx).evaluate();
                 //System.out.println("parsedData: " + parsedData);
                 if (parsedData instanceof ObjectType) {
                     //System.out.println("parsedData was ObjectType");
@@ -261,18 +266,26 @@ public class QueueSystem implements InputSourceDriver {
                 bodyPair.setPair("\"body\"", parsedData);
                 initialValue.addPair(bodyPair);
         
-                // Set the initial value into OperonContext:
-                ctx.setInitialValue(initialValue);
-                
-                // Evaluate the query against the intial value:
-                OperonValue result = ctx.evaluateSelectStatement();
-                
-                if (responseChannel != null) {
-                    sendResponse(jedisPool, info, responseChannel, result);
-                }
-                
-                else {
-                    ctx.outputResult(result);
+                try {
+                    // Set the initial value into OperonContext:
+                    ctx.setInitialValue(initialValue);
+                    
+                    // Evaluate the query against the intial value:
+                    OperonValue result = ctx.evaluateSelectStatement();
+                    
+                    if (result instanceof ErrorValue && info.sendErrorValueToDeadletterChannel && deadletterChannel != null) {
+                        sendResponse(jedisPool, info, deadletterChannel, dataItem);
+                    }
+                    
+                    else if (responseChannel != null) {
+                        sendResponse(jedisPool, info, responseChannel, result.toString());
+                    }
+                    
+                    else {
+                        ctx.outputResult(result);
+                    }
+                } catch (Exception e) {
+                    sendResponse(jedisPool, info, deadletterChannel, dataItem);
                 }
             }
         }
@@ -286,7 +299,7 @@ public class QueueSystem implements InputSourceDriver {
             ArrayType bodyArray = new ArrayType(stmt);
             for (int i = 1; i < data.size(); i ++) {
                 //System.out.println("Handle data: " + data.get(i));
-                OperonValue parsedData = JsonUtil.lwOperonValueFromString(data.get(i));
+                OperonValue parsedData = JsonUtil.operonValueFromString(data.get(i), null, ctx);
                 bodyArray.addValue(parsedData);
             }
             PairType bodyPair = new PairType(stmt);
@@ -296,11 +309,13 @@ public class QueueSystem implements InputSourceDriver {
             // Set the initial value into OperonContext:
             ctx.setInitialValue(initialValue);
             
+            // TODO: deadletter-handling
+            
             // Evaluate the query against the intial value:
             OperonValue result = ctx.evaluateSelectStatement();
             
             if (responseChannel != null) {
-                sendResponse(jedisPool, info, responseChannel, result);
+                sendResponse(jedisPool, info, responseChannel, result.toString());
             }
             
             else {
@@ -390,6 +405,10 @@ public class QueueSystem implements InputSourceDriver {
                     String rkey = ((StringType) pair.getValue().evaluate()).getJavaStringValue();
                     info.responseChannel = rkey;
                     break;
+                case "\"deadletterchannel\"":
+                    String dlkey = ((StringType) pair.getValue().evaluate()).getJavaStringValue();
+                    info.deadletterChannel = dlkey;
+                    break;
                 case "\"timeout\"":
                     Node timeoutNode = pair.getValue().evaluate();
                     int timeoutInt = (int)((NumberType) pair.getValue().evaluate()).getDoubleValue();
@@ -402,6 +421,15 @@ public class QueueSystem implements InputSourceDriver {
                     }
                     else {
                         info.debug = true;
+                    }
+                    break;
+                case "\"senderrorvaluetodeadletterchannel\"":
+                    Node errorToDeadletterChannelValue = pair.getValue().evaluate();
+                    if (errorToDeadletterChannelValue instanceof FalseType) {
+                        info.sendErrorValueToDeadletterChannel = false;
+                    }
+                    else {
+                        info.sendErrorValueToDeadletterChannel = true;
                     }
                     break;
                 case "\"contextstrategy\"":
@@ -430,6 +458,8 @@ public class QueueSystem implements InputSourceDriver {
         private int timeout = 10000;
         private String key = null;
         private String responseChannel = null;
+        private String deadletterChannel = "deadletter";
+        private boolean sendErrorValueToDeadletterChannel = true;
         private boolean debug = false;
         private String host = "localhost";
         private int port = 6379;

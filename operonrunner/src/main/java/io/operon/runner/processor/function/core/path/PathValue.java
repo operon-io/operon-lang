@@ -64,7 +64,7 @@ public class PathValue extends BaseArity0 implements Node, Arity0 {
             }
             else {
                 //System.out.println("Value was not linked, linking root-obj");
-                OperonValue linkedObj = path.getObjLink();
+                OperonValue linkedObj = path.getObjLink(this.getStatement());
                 //System.out.println("Linked root :: " + linkedObj);
                 if (linkedObj != null) {
                     if (path.getPathParts().size() > 0) {

@@ -1,3 +1,4 @@
-# operon-lang
+# operon.io-core
+Core of the Operon.IO -language
 
-https://operon.io
+Check out https://operon.io for more information!

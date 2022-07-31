@@ -104,6 +104,7 @@ public class ObjectType extends OperonValue implements Node {
     }
 
     //
+    // @param key as non-quoted.
     // @Throws an error if key is not found.
     //
     public void updatePairByKey(String key, OperonValue newValue) throws OperonGenericException {
@@ -124,6 +125,9 @@ public class ObjectType extends OperonValue implements Node {
         }
     }
     
+    //
+    // @param key as non-quoted.
+    //
     public void removePairByKey(String key) throws OperonGenericException {
         int removeIndex = -1;
         for (int i = 0; i < this.getPairs().size(); i ++) {
@@ -140,6 +144,8 @@ public class ObjectType extends OperonValue implements Node {
         }
     }
  
+    // @param fromKey as non-quoted.
+    // @param toKey as non-quoted.
     public void renameKey(String fromKey, String toKey) throws OperonGenericException {
         for (int i = 0; i < this.getPairs().size(); i ++) {
             if (this.getPairs().get(i).getKey().equals("\"" + fromKey + "\"")) {
@@ -150,6 +156,7 @@ public class ObjectType extends OperonValue implements Node {
         ErrorUtil.createErrorValueAndThrow(this.getStatement(), "OBJECT", "ERROR", "rename: field not found: " + fromKey);
     }
 
+    // @param toKey as non-quoted.
     public void renameByIndex(int fromIndex, String toKey) throws OperonGenericException {
         if (fromIndex < 0) {
             fromIndex = this.getPairs().size() + fromIndex + 1;
@@ -160,6 +167,7 @@ public class ObjectType extends OperonValue implements Node {
         this.getPairs().get(fromIndex).setKey("\"" + toKey + "\"");
     }
 
+    // @param toKey as a list of non-quoted keys.
     public void renameKeyList(List<String> fromKey, List<String> toKey) throws OperonGenericException {
         for (int i = 0; i < this.getPairs().size(); i ++) {
             for (int li = 0; li < fromKey.size(); li ++) {
@@ -173,7 +181,8 @@ public class ObjectType extends OperonValue implements Node {
 
     //
     // This is used to "normalize" the input object, e.g. in period isd.
-    //  @fromCaseInsensitive: true --> converts fromKey to lowerCase
+    // @param toKey as a list of non-quoted keys.
+    // @fromCaseInsensitive: true --> converts fromKey to lowerCase
     //  
     public void renameKeyStartsWith(List<String> fromKeyStartsWith, List<String> toKey, boolean fromCaseInsensitive) throws OperonGenericException {
         for (int i = 0; i < this.getPairs().size(); i ++) {
@@ -208,6 +217,7 @@ public class ObjectType extends OperonValue implements Node {
     // Usage: "keyname"
     // I.e. no extra double-quotes.
     //
+    // @param getKey as non-quoted.
     public OperonValue getByKey(String getKey) throws OperonGenericException {
         return ObjectValue.getValueByKey(this, getKey);
     }
@@ -219,6 +229,10 @@ public class ObjectType extends OperonValue implements Node {
     //
     // Usage: "\"keyname\""
     // NOTE: the extra double-quotes!
+    // TODO: refactor this to add the quotes, i.e. do not require double-quotes.
+    //       The quotes stem from the PairType, which records the key with the
+    //       double-quotes.
+    // @param jStrKey as quoted.
     //
     public boolean hasKey(String jStrKey) {
         List<PairType> pairs = this.getPairs();

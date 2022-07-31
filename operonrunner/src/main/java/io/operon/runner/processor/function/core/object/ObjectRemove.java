@@ -49,12 +49,66 @@ public class ObjectRemove extends BaseArity1 implements Node, Arity1 {
             StringType rmKey = (StringType) rmKeyValue;
             obj.removePairByKey(rmKey.getJavaStringValue());
         }
+        
         else if (rmKeyValue instanceof NumberType) {
             NumberType rmKey = (NumberType) rmKeyValue;
             int index = (int) (rmKey.getDoubleValue() - 1);
             String rmKeyStr = obj.getKeyByIndex(index);
             rmKeyStr = rmKeyStr.substring(1, rmKeyStr.length() - 1);
             obj.removePairByKey(rmKeyStr);
+        }
+        
+        else if (rmKeyValue instanceof ArrayType) {
+            List<Node> arrayValues = ((ArrayType) rmKeyValue.evaluate()).getValues();
+            
+            //
+            // To remove by index-number, we must first collect the associated
+            // key-names, then use these for removal, otherwise we would remove
+            // prior keys and index-number would make no sense anymore.
+            //
+            List<String> rmKeyList = new ArrayList<String>();
+            
+            for (int i = 0; i < arrayValues.size(); i ++) {
+                OperonValue value = (OperonValue) arrayValues.get(i);
+                if (value instanceof StringType) {
+                    StringType rmKey = (StringType) value;
+                    rmKeyList.add(rmKey.getJavaStringValue());
+                }
+                
+                else if (value instanceof NumberType) {
+                    NumberType rmKey = (NumberType) value;
+                    int index = (int) (rmKey.getDoubleValue() - 1);
+                    String rmKeyStr = obj.getKeyByIndex(index);
+                    rmKeyStr = rmKeyStr.substring(1, rmKeyStr.length() - 1);
+                    rmKeyList.add(rmKeyStr);
+                }
+                
+                else {
+                    // No support e.g. for sub-arrays
+                }
+            }
+            
+            for (int i = 0; i < rmKeyList.size(); i ++) {
+                obj.removePairByKey(rmKeyList.get(i));
+            }
+        }
+        
+        else if (rmKeyValue instanceof ObjectType) {
+            List<PairType> pairs = ((ObjectType) rmKeyValue.evaluate()).getPairs();
+            
+            for (int i = 0; i < pairs.size(); i ++) {
+                PairType pair = pairs.get(i);
+                OperonValue pairValue = pair.getValue().evaluate();
+                if (pairValue instanceof TrueType) {
+                    String rmKey = pair.getKey();
+                    rmKey = rmKey.substring(1, rmKey.length() - 1); // rm double-quotes
+                    obj.removePairByKey(rmKey);
+                }
+                
+                else {
+                    // Do not remove key.
+                }
+            }
         }
         
         return obj;

@@ -19,11 +19,13 @@ package io.operon.runner.node.type;
 import java.util.List;
 import java.util.ArrayList;
 
-import io.operon.runner.statement.Statement; 
+import io.operon.runner.statement.Statement;
 import io.operon.runner.model.path.*;
-import io.operon.runner.node.Node; 
+import io.operon.runner.node.FunctionCall;
+import io.operon.runner.node.Node;
+import io.operon.runner.node.ValueRef;
 import io.operon.runner.node.type.*;
-import io.operon.runner.node.AbstractNode; 
+import io.operon.runner.node.AbstractNode;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.util.OutputFormatter;
 import io.operon.runner.util.YamlFormatter;
@@ -47,6 +49,15 @@ public class Path extends OperonValue implements Node, AtomicOperonValue {
     //
     private OperonValue objLink;
     
+    // 
+    // This can be part of the Path, e.g. Path($foo.bin[1]), here the $foo
+    // is the Value from which the Path gets its root-value.
+    // 
+    // It can also be a Function, e.g. Path(foo().bin[1]), calls foo()
+    // to get the root-value for the Path.
+    // 
+    private String resolveTarget;
+    
     //
     // This is the value of the Path. This may be any Operon-value.
     //
@@ -69,8 +80,43 @@ public class Path extends OperonValue implements Node, AtomicOperonValue {
         this.objLink = ol;
     }
 
+    // From the currect-scope
     public OperonValue getObjLink() { 
-        return this.objLink; 
+        return this.getObjLink(this.getStatement());
+    }
+
+    // From the custom-scope
+    public OperonValue getObjLink(Statement scope) { 
+        if (this.objLink == null && this.getResolveTarget() != null) {
+            //
+            // Resolve from named Value
+            //
+            if (this.getResolveTarget().startsWith("$")) {
+                try {
+                    //ValueRef vref = new ValueRef(this.getStatement());
+                    ValueRef vref = new ValueRef(scope);
+                    vref.setValueRef(this.getResolveTarget());
+                    this.objLink = vref.evaluate();
+                } catch (OperonGenericException oge) {
+                    // Could not resolve root-value from named Value-link.
+                }
+            }
+            //
+            // Resolve from user-defined Function:
+            //
+            else {
+                try {
+                    // Expects resolveTarget to be fully qualified function name
+                    FunctionCall fnCall = new FunctionCall(this.getStatement(), this.getResolveTarget());
+                    OperonValue v = fnCall.evaluate(); 
+                    this.objLink = v;
+                } catch (OperonGenericException oge) {
+                    // Could not resolve root-value from Function-call
+                }
+            }
+        }
+        
+        return this.objLink;
     }
 
     public void setValueLink(OperonValue vl) {
@@ -79,6 +125,14 @@ public class Path extends OperonValue implements Node, AtomicOperonValue {
 
     public OperonValue getValueLink() { 
         return this.valueLink; 
+    }
+
+    public void setResolveTarget(String rt) {
+        this.resolveTarget = rt;
+    }
+    
+    public String getResolveTarget() {
+        return this.resolveTarget;
     }
 
     public int length() {

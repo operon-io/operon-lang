@@ -51,14 +51,18 @@ public class DateFromString extends BaseArity1 implements Node, Arity1 {
     }
 
     public ObjectType evaluate() throws OperonGenericException {        
-        OperonValue currentValue = this.getStatement().getCurrentValue();
-        StringType currentDateString = (StringType) currentValue.evaluate();
-        
-        Node datePatternNode = this.getParam1().evaluate();
-        String datePattern = ((StringType) datePatternNode).getJavaStringValue();
-        
-        ObjectType result = DateFromString.createDateFromString(this.getStatement(), currentDateString.getJavaStringValue(), datePattern);
-        return result;
+        try {
+            OperonValue currentValue = this.getStatement().getCurrentValue();
+            StringType currentDateString = (StringType) currentValue.evaluate();
+            Node datePatternNode = this.getParam1().evaluate();
+            String datePattern = ((StringType) datePatternNode).getJavaStringValue();
+            
+            ObjectType result = DateFromString.createDateFromString(this.getStatement(), currentDateString.getJavaStringValue(), datePattern);
+            return result;
+        } catch (ClassCastException cce) {
+            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION_INPUT", "date:" + this.getFunctionName(), cce.getMessage() + ". Line #" + this.getSourceCodeLineNumber());
+            return null;
+        }
     }
 
     public static ObjectType createDateFromString(Statement stmt, String dateStr, String datePattern) throws OperonGenericException {

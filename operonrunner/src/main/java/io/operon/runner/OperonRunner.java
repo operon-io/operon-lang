@@ -545,6 +545,27 @@ public class OperonRunner implements Runnable {
         }
     }
 
+    public static OperonValue doQueryWithInitialValue(String query, OperonValue initialValue, OperonConfigs configs, Map<String, OperonValue> bindings) throws OperonGenericException {
+        try {
+            OperonContext ctx = OperonRunner.createNewOperonContext(query, "dynamic", null);
+            ctx.setConfigs(configs);
+            Main.setInitialValueForJsonSystem(ctx, initialValue);
+
+            for (Map.Entry<String, OperonValue> binding : bindings.entrySet()) {
+                bindValue(ctx, binding.getKey(), binding.getValue());
+            }
+            
+            ctx.start(OperonContextManager.ContextStrategy.SINGLETON);
+            OperonValue selectResult = ctx.getOutputOperonValue();
+            ctx.shutdown();
+            return selectResult;
+        } catch (Exception e) {
+            //:OFF:log.debug("OperonRunner :: doQueryWithInitialValue :: Exception");
+            //:OFF:log.debug("    OperonRunner :: doQueryWithInitialValue :: Exception :: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
     public static OperonValue doQueryWithInitialValueAndModules(String query, OperonValue initialValue, OperonConfigs configs, List<ModuleDefinition> modules) throws OperonGenericException {
         try {
             OperonContext ctx = OperonRunner.createNewOperonContext(query, "dynamic", null);

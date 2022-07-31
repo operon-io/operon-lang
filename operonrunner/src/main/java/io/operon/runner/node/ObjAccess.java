@@ -69,7 +69,6 @@ public class ObjAccess extends AbstractNode implements Node, SupportsAttributes 
             return evaluateArray( (ArrayType) currentValue ); 
         } 
         //:OFF:log.debug("ObjAccess: cannot access object. Wrong type: " + currentValue); 
-        
         return ErrorUtil.createErrorValueAndThrow(this.getStatement(), "OBJACCESS", "TYPE", "Cannot access object. Wrong type. Key: " + this.getObjAccessKey() + ", line #" + this.getSourceCodeLineNumber());
     } 
      

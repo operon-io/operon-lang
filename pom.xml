@@ -5,7 +5,7 @@
  
     <groupId>io.operon</groupId>
     <artifactId>operon-core-parent</artifactId>
-    <version>0.9.5-RELEASE</version>
+    <version>0.9.6-RELEASE</version>
     <packaging>pom</packaging>
  
     <name>Operon.IO Parent</name>
@@ -46,45 +46,47 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <junit.version>3.8.1</junit.version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <maven.source-plugin.version>3.2.1</maven.source-plugin.version>
+        <maven.compiler-plugin.version>3.10.1</maven.compiler-plugin.version>
+        <maven.javadoc-plugin.version>3.4.0</maven.javadoc-plugin.version>
+        <maven.gpg-plugin.version>3.0.1</maven.gpg-plugin.version>
+        <maven.nexus-staging-plugin.version>1.6.13</maven.nexus-staging-plugin.version>
+        <maven.shade-plugin.version>3.3.0</maven.shade-plugin.version>
+        <maven.jar-plugin.version>3.2.2</maven.jar-plugin.version>
+        <maven.versions-plugin.version>2.11.0</maven.versions-plugin.version>
+        <maven.surefire-plugin.version>2.22.2</maven.surefire-plugin.version>
+        <java.version>11</java.version>
+        <gpg.keyname>6B1E244F</gpg.keyname>
         <antlr4.visitor>true</antlr4.visitor>
         <antlr4.listener>true</antlr4.listener>
         <antlr.version>4.9.3</antlr.version>
         <graalvm.version>21.0.0.2</graalvm.version>
-        <java.version>11</java.version>
-        <gpg.keyname>6A2BE74C</gpg.keyname>
+        <redisson.version>3.17.5</redisson.version>
+        <jedis.version>4.2.3</jedis.version>
+        <commons-exec.version>1.3</commons-exec.version>
+        <junit.version>5.8.2</junit.version>
+        <log4j.version>2.18.0</log4j.version>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-    
   <build>
     <plugins>
-
-      <!-- For Java 11 
-          https://winterbe.com/posts/2018/08/29/migrate-maven-projects-to-java-11-jigsaw/
-      -->
       <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.8.1</version>
+          <version>${maven.compiler-plugin.version}</version>
           <configuration>
-              <source>1.8</source>
-              <target>1.8</target>
-              <release>11</release>
+              <source>11</source>
+              <target>11</target>
+              <!--release>11</release-->
           </configuration>
       </plugin>
       
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
-        <version>1.5</version>
+        <version>${maven.gpg-plugin.version}</version>
         <executions>
           <execution>
             <id>sign-artifacts</id>
@@ -103,7 +105,7 @@
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.7</version>
+        <version>${maven.nexus-staging-plugin.version}</version>
         <extensions>true</extensions>
         <configuration>
            <serverId>ossrh</serverId>
@@ -115,7 +117,10 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.2.0</version>
+        <version>${maven.javadoc-plugin.version}</version>
+        <configuration>
+          <destDir>LATEST</destDir>
+        </configuration>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -129,7 +134,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>3.2.0</version>
+        <version>${maven.source-plugin.version}</version>
         <executions>
           <execution>
             <id>attach-sources</id>
@@ -143,7 +148,6 @@
   </build>
   
   <profiles>
-    
     <profile>
       <id>main</id>
       <activation>
@@ -155,14 +159,12 @@
         <module>operonrunner</module>
       </modules>
     </profile>
-    
-    <profile>
-      <id>dev</id>
-      <modules>
-        <module>jsonparser</module>
-        <module>operonparser</module>
-      </modules>
-    </profile>
   </profiles>
-
+  
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
 </project>

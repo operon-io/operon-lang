@@ -727,10 +727,19 @@ public class JsonUtil {
     }
 
     public static OperonValue operonValueFromString(String json) throws OperonGenericException {
-        return JsonUtil.operonValueFromString(json, null);   
+        return JsonUtil.operonValueFromString(json, null, new EmptyContext());   
     }
 
     public static OperonValue operonValueFromString(String json, CompilerFlags[] compilerFlags) throws OperonGenericException {
+        return operonValueFromString(json, compilerFlags, new EmptyContext());
+    }
+
+    //
+    // @param json :: the JSON-value as Java-string
+    // @param compilerFlags :: not used
+    // @param ctx :: used to link the possible OperonContext with the parsed JSON-value. Used with Path-values, which may have named-value ref or function-ref.
+    //
+    public static OperonValue operonValueFromString(String json, CompilerFlags[] compilerFlags, Context ctx) throws OperonGenericException {
         try {
             InputStream is = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
             
@@ -768,7 +777,7 @@ public class JsonUtil {
             // Walk the tree created during the parse, trigger callbacks
             JSONCompiler compiler = new JSONCompiler(compilerFlags);
             
-            Context jsonContext = new EmptyContext();
+            Context jsonContext = ctx;
             Statement jsonStatement = new DefaultStatement(jsonContext);
             jsonStatement.setId("jsonStmt");
             compiler.setCurrentStatement(jsonStatement);

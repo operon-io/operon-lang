@@ -27,6 +27,7 @@ import io.operon.runner.processor.function.core.*;
 import io.operon.runner.processor.function.core.array.*;
 import io.operon.runner.processor.function.core.object.*;
 import io.operon.runner.processor.function.core.string.*;
+import io.operon.runner.processor.function.core.raw.*;
 import io.operon.runner.processor.function.core.module.*;
 import io.operon.runner.processor.function.core.date.*;
 import io.operon.runner.processor.function.core.env.*;
@@ -1731,7 +1732,7 @@ public class OperonCompiler extends OperonBaseListener {
             if (value == null) {
                 //:OFF:log.error("WARNING:: POPPED NULL VALUE!!!");
             }
-            jsonValue.setValue(value); // set PathValue from stack   
+            jsonValue.setValue(value);
         }
 
         else if (subNodes.size() > 0 && subNodes.get(0) instanceof TerminalNode) {
@@ -2581,10 +2582,48 @@ public class OperonCompiler extends OperonBaseListener {
         StringBuilder pathStr = new StringBuilder();
         
         String symbolText = nodes.get(0).getText();
+        String resolveTarget = null; // from where to resolve the possible root-value for the Path (optional)
         
-        // Path(...)
+        // This is used later to gather the possible ID-function from inside the function.
+        boolean resovelTargetIsFunction = false;
+        boolean functionEndEncountered = false;
+        
         if (symbolText.charAt(0) == 'P') {
             for (int i = startPos; i < nodes.size() - 1; i ++) {
+                //
+                // Path($foo.bin[1])
+                // - resolveTarget is a named Value
+                //
+                if (nodes.get(i).toString().startsWith("$")) {
+                    resolveTarget = nodes.get(i).toString();
+                    continue;
+                }
+                //
+                // Path(foo().bin[1])
+                // - resolveTarget is a Function
+                //
+                else if (i == startPos
+                        && nodes.get(i).toString().startsWith(".") == false
+                        && nodes.get(i).toString().startsWith("[") == false) {
+                    resolveTarget = nodes.get(i).toString();
+                    resovelTargetIsFunction = true;
+                    continue;
+                }
+                
+                else if (resovelTargetIsFunction && functionEndEncountered == false) {
+                    if (nodes.get(i).toString().startsWith(")")) {
+                        functionEndEncountered = true;
+                        continue;
+                    }
+                    else {
+                        continue;
+                    }
+                }
+                
+                //
+                // Path(.bin[1])
+                // - no resolveTarget was given
+                //
                 pathStr.append(nodes.get(i).toString());
             }
         }
@@ -2593,20 +2632,95 @@ public class OperonCompiler extends OperonBaseListener {
             if (nodes.get(1).getText().charAt(0) == '(') {
                 startPos = 2; // parentheses
                 for (int i = startPos; i < nodes.size() - 1; i ++) {
+                    //
+                    // Path($foo.bin[1])
+                    // - resolveTarget is a named Value
+                    //
+                    if (nodes.get(i).toString().startsWith("$")) {
+                        resolveTarget = nodes.get(i).toString();
+                        continue;
+                    }
+                    //
+                    // Path(foo().bin[1])
+                    // - resolveTarget is a Function
+                    //
+                    else if (i == startPos
+                            && nodes.get(i).toString().startsWith(".") == false
+                            && nodes.get(i).toString().startsWith("[") == false) {
+                        resolveTarget = nodes.get(i).toString();
+                        resovelTargetIsFunction = true;
+                        continue;
+                    }
+                    
+                    else if (resovelTargetIsFunction && functionEndEncountered == false) {
+                        if (nodes.get(i).toString().startsWith(")")) {
+                            functionEndEncountered = true;
+                            continue;
+                        }
+                        else {
+                            continue;
+                        }
+                    }
+                    
+                    //
+                    // Path(.bin[1])
+                    // - no resolveTarget was given
+                    //
                     pathStr.append(nodes.get(i).toString());
                 }
             }
             else {
                 startPos = 1; // no parentheses
                 for (int i = startPos; i < nodes.size(); i ++) {
+                    //
+                    // Path($foo.bin[1])
+                    // - resolveTarget is a named Value
+                    //
+                    if (nodes.get(i).toString().startsWith("$")) {
+                        resolveTarget = nodes.get(i).toString();
+                        continue;
+                    }
+                    //
+                    // Path(foo().bin[1])
+                    // - resolveTarget is a Function
+                    //
+                    else if (i == startPos
+                            && nodes.get(i).toString().startsWith(".") == false
+                            && nodes.get(i).toString().startsWith("[") == false) {
+                        resolveTarget = nodes.get(i).toString();
+                        resovelTargetIsFunction = true;
+                        continue;
+                    }
+                    
+                    else if (resovelTargetIsFunction && functionEndEncountered == false) {
+                        if (nodes.get(i).toString().startsWith(")")) {
+                            functionEndEncountered = true;
+                            continue;
+                        }
+                        else {
+                            continue;
+                        }
+                    }
+                    
+                    //
+                    // Path(.bin[1])
+                    // - no resolveTarget was given
+                    //
                     pathStr.append(nodes.get(i).toString());
                 }
             }
         }
-        
+        //System.out.println("PATH :: " + pathStr.toString());
+        //System.out.println("RESOLVE TARGET :: " + resolveTarget);
         List<PathPart> pathParts = PathCreate.constructPathParts(pathStr.toString());
         path.setPathParts(pathParts);
-        
+        if (resolveTarget != null && resovelTargetIsFunction == true) {
+            if (resolveTarget.contains(":") == false) {
+                resolveTarget = ":" + resolveTarget;
+            }
+            resolveTarget = resolveTarget + ":0";
+        }
+        path.setResolveTarget(resolveTarget);
         this.stack.push(path);
     }
     
@@ -3324,6 +3438,7 @@ public class OperonCompiler extends OperonBaseListener {
                 // NOTE: core-functions expect the params as List<Node>
                 //System.out.println("Getting core-function");
                 Node function = CoreFunctionResolver.getCoreFunction(functionNamespace, functionName, functionParams, this.currentStatement);
+                function.setSourceCodeLineNumber(ctx.start.getLine());
                 //System.out.println("Getting core-function done");
                 this.stack.push(function);
             } catch (Exception e) {
@@ -3336,6 +3451,7 @@ public class OperonCompiler extends OperonBaseListener {
             //System.out.println("WAS USER-DEFINED: " + fqName);
             try {
                 FunctionCall fnCall = new FunctionCall(this.currentStatement, fqName);
+                fnCall.setSourceCodeLineNumber(ctx.start.getLine());
                 Collections.reverse(functionParams);
                 fnCall.getArguments().addAll(functionParams);
                 this.stack.push(fnCall);

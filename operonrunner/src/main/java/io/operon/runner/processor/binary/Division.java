@@ -124,15 +124,13 @@ public class Division extends BaseBinaryNodeProcessor implements BinaryNodeProce
         // rhs may be any value (other than ArrayType)
         else if (lhsResult instanceof ArrayType) {
             ArrayType lhsArray = (ArrayType) lhsResult;
-            OperonValue rhsValue = (OperonValue) rhs.evaluate();
-            
             List<Node> lhsValues = lhsArray.getValues();
             List<Node> resultArray = new ArrayList<Node>();
             
             for (int i = 0; i < lhsValues.size(); i ++) {
                 Eq eqOp = new Eq();
                 try {
-                    Node eqOpResult = eqOp.process(statement, lhsValues.get(i), rhsValue);
+                    Node eqOpResult = eqOp.process(statement, lhsValues.get(i), rhsResult);
                     if (eqOpResult instanceof TrueType) {
                         resultArray.add(lhsValues.get(i));
                     }
@@ -150,7 +148,7 @@ public class Division extends BaseBinaryNodeProcessor implements BinaryNodeProce
         // in this case semantically same as checking if
         // the value exists in rhs-array
         else if (rhsResult instanceof ArrayType) {
-            OperonValue lhsValue = (OperonValue) lhs.evaluate();
+            OperonValue lhsValue = (OperonValue) lhsResult;
             ArrayType rhsArray = (ArrayType) rhsResult;
             
             List<Node> rhsValues = rhsArray.getValues();

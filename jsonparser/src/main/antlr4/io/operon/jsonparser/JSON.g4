@@ -23,6 +23,25 @@ array
    | '[' ']'
    ;
 
+//
+// "Path" cannot be lowercase, since would be confused with function-name.
+// - Path(...)
+//    - with parentheses, so we can use e.g. Filter-expr. Empty path can be given as Path().
+//   Examples:
+//    - Path($foo.names[1]) --> resolve root-value from named Value.
+//    - Path(foo().names[1]) --> resolve root-value from function foo.
+//    - Path(.names[1]) --> no root-value, it must be set manually.
+// - ~...
+//    - Concise expr for path. Does not support empty path.
+// - ~(...)
+//      Allow using Filter-expr after Path. Empty path can be given as ~().
+//
+path_value
+   : ('Path' | '~') '(' (CONST_ID | (ID ':')* ID '(' ')')? (('.' ID) | ('[' NUMBER ']'))* ')'
+   | '~' (CONST_ID | (ID ':')* ID '(' ')')? (('.' ID) | ('[' NUMBER ']'))+
+   | '~' '(' (('.' ID) | ('[' NUMBER ']'))* ')'
+   ;
+
 value
    : STRING
    | NUMBER
@@ -37,6 +56,7 @@ value
    | MULTILINE_STRIPPED_STRING
    | MULTILINE_PADDED_LINES_STRING
    | MULTILINE_STRING
+   | path_value
    ;
 
 FALSE
@@ -154,6 +174,10 @@ fragment EXP
 WS
    : [ \t\n\r] + -> skip
    ;
+
+CONST_ID
+    : [\\$][a-zA-Z]+[a-zA-Z_0-9]*
+    ;
 
 ID
     : [a-zA-Z_][a-zA-Z0-9_\-]*

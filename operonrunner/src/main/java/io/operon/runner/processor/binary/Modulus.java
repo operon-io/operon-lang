@@ -184,8 +184,6 @@ public class Modulus extends BaseBinaryNodeProcessor implements BinaryNodeProces
         // rhs may be any value (other than ArrayType)
         else if (lhsResult instanceof ArrayType) {
             ArrayType lhsArray = (ArrayType) lhsResult;
-            OperonValue rhsValue = (OperonValue) rhs.evaluate();
-            
             List<Node> lhsValues = lhsArray.getValues();
             List<Node> resultArray = new ArrayList<Node>();
             
@@ -193,7 +191,7 @@ public class Modulus extends BaseBinaryNodeProcessor implements BinaryNodeProces
                 Eq eqOp = new Eq();
                 boolean found = false;
                 try {
-                    Node eqOpResult = eqOp.process(statement, lhsValues.get(i), rhsValue);
+                    Node eqOpResult = eqOp.process(statement, lhsValues.get(i), rhsResult);
                     if (eqOpResult instanceof TrueType) {
                         found = true;
                     }

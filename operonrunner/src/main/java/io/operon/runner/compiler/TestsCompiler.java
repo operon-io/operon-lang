@@ -1132,12 +1132,6 @@ public class TestsCompiler extends OperonTestsBaseListener {
             this.getOperonTestsContext().getConfigs().setSupportParent(true);
         }
         
-        else if (ctx.OBJ_ROOT_REFERENCE() != null) {
-            symbol = ctx.OBJ_ROOT_REFERENCE().toString();
-            this.getOperonTestsContext().getConfigs().setSupportPos(true);
-            this.getOperonTestsContext().getConfigs().setSupportParent(true);
-        }
-        
         else if (ctx.ROOT_VALUE() != null) {
             symbol = ctx.ROOT_VALUE().toString();
         }
@@ -1341,7 +1335,7 @@ public class TestsCompiler extends OperonTestsBaseListener {
             if (value == null) {
                 //:OFF:log.error("WARNING:: POPPED NULL VALUE!!!");
             }
-            jsonValue.setValue(value); // set PathValue from stack   
+            jsonValue.setValue(value);
         }
 
         else if (subNodes.size() > 0 && subNodes.get(0) instanceof TerminalNode) {
@@ -2146,10 +2140,48 @@ public class TestsCompiler extends OperonTestsBaseListener {
         StringBuilder pathStr = new StringBuilder();
         
         String symbolText = nodes.get(0).getText();
+        String resolveTarget = null; // from where to resolve the possible root-value for the Path (optional)
         
-        // Path(...)
+        // This is used later to gather the possible ID-function from inside the function.
+        boolean resovelTargetIsFunction = false;
+        boolean functionEndEncountered = false;
+        
         if (symbolText.charAt(0) == 'P') {
             for (int i = startPos; i < nodes.size() - 1; i ++) {
+                //
+                // Path($foo.bin[1])
+                // - resolveTarget is a named Value
+                //
+                if (nodes.get(i).toString().startsWith("$")) {
+                    resolveTarget = nodes.get(i).toString();
+                    continue;
+                }
+                //
+                // Path(foo().bin[1])
+                // - resolveTarget is a Function
+                //
+                else if (i == startPos
+                        && nodes.get(i).toString().startsWith(".") == false
+                        && nodes.get(i).toString().startsWith("[") == false) {
+                    resolveTarget = nodes.get(i).toString();
+                    resovelTargetIsFunction = true;
+                    continue;
+                }
+                
+                else if (resovelTargetIsFunction && functionEndEncountered == false) {
+                    if (nodes.get(i).toString().startsWith(")")) {
+                        functionEndEncountered = true;
+                        continue;
+                    }
+                    else {
+                        continue;
+                    }
+                }
+                
+                //
+                // Path(.bin[1])
+                // - no resolveTarget was given
+                //
                 pathStr.append(nodes.get(i).toString());
             }
         }
@@ -2158,20 +2190,95 @@ public class TestsCompiler extends OperonTestsBaseListener {
             if (nodes.get(1).getText().charAt(0) == '(') {
                 startPos = 2; // parentheses
                 for (int i = startPos; i < nodes.size() - 1; i ++) {
+                    //
+                    // Path($foo.bin[1])
+                    // - resolveTarget is a named Value
+                    //
+                    if (nodes.get(i).toString().startsWith("$")) {
+                        resolveTarget = nodes.get(i).toString();
+                        continue;
+                    }
+                    //
+                    // Path(foo().bin[1])
+                    // - resolveTarget is a Function
+                    //
+                    else if (i == startPos
+                            && nodes.get(i).toString().startsWith(".") == false
+                            && nodes.get(i).toString().startsWith("[") == false) {
+                        resolveTarget = nodes.get(i).toString();
+                        resovelTargetIsFunction = true;
+                        continue;
+                    }
+                    
+                    else if (resovelTargetIsFunction && functionEndEncountered == false) {
+                        if (nodes.get(i).toString().startsWith(")")) {
+                            functionEndEncountered = true;
+                            continue;
+                        }
+                        else {
+                            continue;
+                        }
+                    }
+                    
+                    //
+                    // Path(.bin[1])
+                    // - no resolveTarget was given
+                    //
                     pathStr.append(nodes.get(i).toString());
                 }
             }
             else {
                 startPos = 1; // no parentheses
                 for (int i = startPos; i < nodes.size(); i ++) {
+                    //
+                    // Path($foo.bin[1])
+                    // - resolveTarget is a named Value
+                    //
+                    if (nodes.get(i).toString().startsWith("$")) {
+                        resolveTarget = nodes.get(i).toString();
+                        continue;
+                    }
+                    //
+                    // Path(foo().bin[1])
+                    // - resolveTarget is a Function
+                    //
+                    else if (i == startPos
+                            && nodes.get(i).toString().startsWith(".") == false
+                            && nodes.get(i).toString().startsWith("[") == false) {
+                        resolveTarget = nodes.get(i).toString();
+                        resovelTargetIsFunction = true;
+                        continue;
+                    }
+                    
+                    else if (resovelTargetIsFunction && functionEndEncountered == false) {
+                        if (nodes.get(i).toString().startsWith(")")) {
+                            functionEndEncountered = true;
+                            continue;
+                        }
+                        else {
+                            continue;
+                        }
+                    }
+                    
+                    //
+                    // Path(.bin[1])
+                    // - no resolveTarget was given
+                    //
                     pathStr.append(nodes.get(i).toString());
                 }
             }
         }
-        
+        //System.out.println("PATH :: " + pathStr.toString());
+        //System.out.println("RESOLVE TARGET :: " + resolveTarget);
         List<PathPart> pathParts = PathCreate.constructPathParts(pathStr.toString());
         path.setPathParts(pathParts);
-        
+        if (resolveTarget != null && resovelTargetIsFunction == true) {
+            if (resolveTarget.contains(":") == false) {
+                resolveTarget = ":" + resolveTarget;
+            }
+            resolveTarget = resolveTarget + ":0";
+        }
+        path.setResolveTarget(resolveTarget);
         this.stack.push(path);
     }
 

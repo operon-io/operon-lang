@@ -38,6 +38,7 @@ public class ObjectRename extends BaseArity2 implements Node, Arity2 {
     
     public ObjectRename(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
+        this.setParam2AsOptional(true);
         this.setParams(params, "rename", "key", "to");
     }
 
@@ -48,9 +49,14 @@ public class ObjectRename extends BaseArity2 implements Node, Arity2 {
         
         if (rnKeyValue instanceof StringType) {
             StringType rnKey = (StringType) rnKeyValue;
-            this.getStatement().setCurrentValue(rnKey);
+            
+            //
+            // This is not needed because rnKey _is_ the current-value aswell:
+            //
+            //this.getStatement().setCurrentValue(rnKey);
             StringType rnTo = (StringType) this.getParam2().evaluate();
-            this.getStatement().setCurrentValue(currentValue);
+            //this.getStatement().setCurrentValue(currentValue);
+            
             //
             // Must create a copy so that the following would work:
             //   $: {"src": 1, "trgt": 2} Select: {"bin": $ => rename("src", "trgt"), "bai": $}
@@ -81,6 +87,30 @@ public class ObjectRename extends BaseArity2 implements Node, Arity2 {
             objCopy.renameByIndex(index, rnTo.getJavaStringValue());
             return objCopy;
         }
+        
+        // {"bin": "binToBaa"}
+        if (rnKeyValue instanceof ObjectType) {
+            ObjectType rnObj = (ObjectType) rnKeyValue;
+            List<PairType> rnObjPairs = rnObj.getPairs();
+            ObjectType objCopy = ((ObjectType) obj.copy());
+            
+            for (int i = 0; i < rnObjPairs.size(); i ++) {
+                String rnKey = rnObjPairs.get(i).getKey();
+                rnKey = rnKey.substring(1, rnKey.length() - 1); // rm quotes
+                
+                // This is to set the rnKey as current-value when evaluating
+                // the rnTo -value.
+                StringType rnKeyJsStr = StringType.create(this.getStatement(), rnKey);
+                OperonValue rnToValue = rnObjPairs.get(i).getValue();
+                rnToValue.getStatement().setCurrentValue(rnKeyJsStr);
+                StringType rnTo = (StringType) rnToValue.evaluate();
+                this.getStatement().setCurrentValue(currentValue);
+                
+                objCopy.renameKey(rnKey, rnTo.getJavaStringValue());
+            }
+            return objCopy;
+        }
+        
         else {
             ErrorUtil.createErrorValueAndThrow(currentValue.getStatement(), "FUNCTION", "PARAM", "object:" + this.getFunctionName() + ": key type not valid");
             return null;
