@@ -20,6 +20,7 @@ import io.operon.runner.OperonContext;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 import io.operon.runner.node.AbstractNode;
 import io.operon.runner.node.Node;
@@ -105,8 +106,18 @@ public class ArrayForEach extends BaseArity1 implements Node, Arity1, SupportsAt
                     
                     valueToTransform = ArrayGet.baseGet(this.getStatement(), arrayToLoop, i + 1);
                     LambdaFunctionRef foreachLfnRef = (LambdaFunctionRef) evaluatedNode;
+                    
+                    Map<String, Node> lfrParams = foreachLfnRef.getParams();
+                    
+                    // Take the first param to find the param name
+                    String paramName = null;
+                    for (Map.Entry<String, Node> lfrParam : lfrParams.entrySet()) {
+                        paramName = lfrParam.getKey();
+                        break;
+                    }
+                    
                     foreachLfnRef.getParams().clear();
-                    foreachLfnRef.getParams().put("$a", valueToTransform);
+                    foreachLfnRef.getParams().put(paramName, valueToTransform);
                     foreachLfnRef.setCurrentValueForFunction(arrayToLoop); // ops. took out currentValue
                     OperonValue transformValueResult = foreachLfnRef.invoke();
                     result.getValues().add(transformValueResult);

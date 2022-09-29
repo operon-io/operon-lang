@@ -81,13 +81,9 @@ public class CastNumber extends BaseArity1 implements Node, Arity1 {
                     }
                 }
                 else {
-                    System.out.println("GOT HERE 1");
                     precision = NumberType.getPrecisionFromStr(stringValue);
-                    System.out.println("GOT HERE 2");
                 }
-                System.out.println("GOT HERE 3");
                 result.setDoubleValue(Double.parseDouble(stringValue));
-                System.out.println("GOT HERE 4");
                 result.setPrecision( precision );
                 return result;
             } catch(Exception e) {

@@ -100,6 +100,7 @@ public class PublishComponent extends BaseComponent implements IntegrationCompon
                     connected = true;
                     // do operations with jedis resource
                     jedis.publish(info.channel, currentValue.toString());
+                    jedis.close();
                 } catch (JedisConnectionException jce) {
                     System.err.println("Publish: could not connect to Redis. Trying to reconnect: " + reConnectionAttempt);
                     reConnectionAttempt += 1;

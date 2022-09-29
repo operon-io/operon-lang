@@ -20,6 +20,7 @@ import io.operon.runner.OperonContext;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 import io.operon.runner.node.AbstractNode;
 import io.operon.runner.node.Node;
@@ -113,15 +114,38 @@ public class ArrayForEachPair extends BaseArity2 implements Node, Arity2, Suppor
                     this.setCurrentPathWithPos(this.getStatement(), i + 1, arrayA);
                     
                     LambdaFunctionRef foreachLfnRef = (LambdaFunctionRef) evaluatedNode;
+                    
+                    Map<String, Node> lfrParams = foreachLfnRef.getParams();
+                    
+                    // Find the param names
+                    String param1Name = null;
+                    String param2Name = null;
+                    short counter = 0;
+                    for (String lfrParamKey : lfrParams.keySet()) {
+                        if (counter == 0) {
+                            param1Name = lfrParamKey;
+                        }
+                        else if (counter == 1) {
+                            param2Name = lfrParamKey;
+                        }
+                        else {
+                            break;
+                        }
+                        counter += 1;
+                    }
+                    
                     foreachLfnRef.getParams().clear();
-                    foreachLfnRef.getParams().put("$a", valueA);
-                    foreachLfnRef.getParams().put("$b", valueB);
+                    foreachLfnRef.getParams().put(param1Name, valueA);
+                    foreachLfnRef.getParams().put(param2Name, valueB);
                     foreachLfnRef.setCurrentValueForFunction(arrayA); // ops. took out currentValue
                     OperonValue transformValueResult = foreachLfnRef.invoke();
                     result.getValues().add(transformValueResult);
                 }
             }
             else {
+                // Pure expression.
+                // NOTE: requires params to be named as $a and $b.
+                //
                 // Observe: the first item was already evaluated above, so we add it into results
                 //          here and we continue evaluating from the _second_ value.
                 //          This is because we don't know when evaluating the first time what

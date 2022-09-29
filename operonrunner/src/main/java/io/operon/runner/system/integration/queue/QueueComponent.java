@@ -147,6 +147,9 @@ public class QueueComponent extends BaseComponent implements IntegrationComponen
                         jedis.del(autoResponseChannelStr);
                         return parsedResponse;
                     }
+                    
+                    jedis.close();
+                    
                 } catch (JedisConnectionException jce) {
                     if (reConnectionAttempt == 1 || reConnectionAttempt % 10 == 0) {
                         System.err.println("Subscribe: could not connect to Redis. Trying to reconnect: " + reConnectionAttempt);

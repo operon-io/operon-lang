@@ -20,6 +20,7 @@ import io.operon.runner.OperonContext;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 import io.operon.runner.node.AbstractNode;
 import io.operon.runner.node.Node;
@@ -158,6 +159,7 @@ public class ArrayReduce extends BaseArity2 implements Node, Arity2, SupportsAtt
             
             Node paramNode = this.getParam1();
 
+            // For possible Pure expression we require named params $a and $b.
             paramNode.getStatement().getRuntimeValues().put("$a", value1);
             paramNode.getStatement().getRuntimeValues().put("$b", value2);
             Node reduceFunctionRefNode = paramNode.evaluate();
@@ -173,11 +175,29 @@ public class ArrayReduce extends BaseArity2 implements Node, Arity2, SupportsAtt
             } 
             else if (reduceFunctionRefNode instanceof LambdaFunctionRef) {
                 LambdaFunctionRef reduceLfnRef = (LambdaFunctionRef) reduceFunctionRefNode;
+                
+                Map<String, Node> lfrParams = reduceLfnRef.getParams();
+                
+                // Find the param names
+                String param1Name = null;
+                String param2Name = null;
+                short counter = 0;
+                for (String lfrParamKey : lfrParams.keySet()) {
+                    if (counter == 0) {
+                        param1Name = lfrParamKey;
+                    }
+                    else if (counter == 1) {
+                        param2Name = lfrParamKey;
+                    }
+                    else {
+                        break;
+                    }
+                    counter += 1;
+                }
                 reduceLfnRef.getParams().clear();
-                // NOTE: we cannot guarantee the order of keys that Map.keySet() returns,
-                //       therefore we must assume that the keys are named in certain manner.
-                reduceLfnRef.getParams().put("$a", value1);
-                reduceLfnRef.getParams().put("$b", value2);
+
+                reduceLfnRef.getParams().put(param1Name, value1);
+                reduceLfnRef.getParams().put(param2Name, value2);
                 reduceLfnRef.setCurrentValueForFunction(arrayToReduce);
                 reducedValue = reduceLfnRef.invoke();
             }

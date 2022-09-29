@@ -216,8 +216,21 @@ public class ArrayGroupBy extends BaseArity1 implements Node, Arity1 {
                 //:OFF:log.debug("loop, i == " + i);
                 valueToGroup = (OperonValue) arrayToGroup.getValues().get(i);
                 LambdaFunctionRef groupFnRef = (LambdaFunctionRef) groupByExpr;
-                groupFnRef.getParams().clear();
-                groupFnRef.getParams().put("$a", valueToGroup);
+                
+                Map<String, Node> lfrParams = groupFnRef.getParams();
+                
+                // Take the first param to find the param name
+                String paramName = null;
+                for (Map.Entry<String, Node> lfrParam : lfrParams.entrySet()) {
+                    paramName = lfrParam.getKey();
+                    break;
+                }
+                
+                // Clear previous params that were set
+                lfrParams.clear();
+                
+                // Set the new param
+                lfrParams.put(paramName, valueToGroup);
                 groupFnRef.setCurrentValueForFunction(arrayToGroup);
                 StringType groupKeyResult = (StringType) groupFnRef.invoke();
                 String keyString = groupKeyResult.getJavaStringValue();

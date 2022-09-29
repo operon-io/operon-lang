@@ -182,6 +182,7 @@ public class CoreFunctionResolver {
             || fqFunctionName.equals("core:string:lowerCase:0") || fqFunctionName.equals(":lowerCase:0") || fqFunctionName.equals("string:lowerCase:0")
             || fqFunctionName.equals("core:string:substring:2") || fqFunctionName.equals(":substring:2") || fqFunctionName.equals("string:substring:2")
             || fqFunctionName.equals("core:string:collect:1") || fqFunctionName.equals("string:collect:1")
+            || fqFunctionName.equals("core:string:split:1") || fqFunctionName.equals(":split:1") || fqFunctionName.equals("string:split:1")
             || fqFunctionName.equals("core:string:splitBy:1") || fqFunctionName.equals(":splitBy:1") || fqFunctionName.equals("string:splitBy:1")
             || fqFunctionName.equals("core:string:startsWith:1") || fqFunctionName.equals(":startsWith:1") || fqFunctionName.equals("string:startsWith:1")
             || fqFunctionName.equals("core:string:endsWith:1") || fqFunctionName.equals(":endsWith:1") || fqFunctionName.equals("string:endsWith:1")
@@ -422,6 +423,7 @@ public class CoreFunctionResolver {
         else if (fqFunctionName.equals("core:string:lowerCase") || fqFunctionName.equals(":lowerCase") || fqFunctionName.equals("string:lowerCase")) { return new StringLowerCase(currentStatement); }
         else if (fqFunctionName.equals("core:string:substring") || fqFunctionName.equals(":substring") || fqFunctionName.equals("string:substring")) { return new StringSubstring(currentStatement, functionParams); }
         else if (fqFunctionName.equals("core:string:collect") || fqFunctionName.equals("string:collect")) { return new StringCollect(currentStatement, functionParams); }
+        else if (fqFunctionName.equals("core:string:split") || fqFunctionName.equals(":split") || fqFunctionName.equals("string:split")) { return new StringSplit(currentStatement, functionParams); }
         else if (fqFunctionName.equals("core:string:splitBy") || fqFunctionName.equals(":splitBy") || fqFunctionName.equals("string:splitBy")) { return new StringSplitBy(currentStatement, functionParams); }
         else if (fqFunctionName.equals("core:string:startsWith") || fqFunctionName.equals(":startsWith") || fqFunctionName.equals("string:startsWith")) { return new StringStartsWith(currentStatement, functionParams); }
         else if (fqFunctionName.equals("core:string:endsWith") || fqFunctionName.equals(":endsWith") || fqFunctionName.equals("string:endsWith")) { return new StringEndsWith(currentStatement, functionParams); }

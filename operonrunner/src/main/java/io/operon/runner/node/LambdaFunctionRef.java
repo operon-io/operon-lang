@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.io.IOException;
 
 import io.operon.runner.statement.Statement;
@@ -56,8 +57,11 @@ public class LambdaFunctionRef extends OperonValue implements Node {
     
     public LambdaFunctionRef(Statement stmnt) {
         super(stmnt);
-        this.params = new HashMap<String, Node>();
-        this.paramConstraints = new HashMap<String, OperonValueConstraint>();
+        //
+        // LinkedHashMap, so the params could be retrieved in correct order
+        //
+        this.params = new LinkedHashMap<String, Node>();
+        this.paramConstraints = new LinkedHashMap<String, OperonValueConstraint>();
     }
 
     public OperonValue evaluate() throws OperonGenericException {

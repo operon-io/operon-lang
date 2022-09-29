@@ -20,6 +20,7 @@ import io.operon.runner.OperonContext;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 import io.operon.runner.node.AbstractNode;
 import io.operon.runner.node.Node;
@@ -97,13 +98,24 @@ public class ArrayContains extends BaseArity1 implements Node, Arity1, SupportsA
                 }
                 
                 else if (forAtLeastFunctionRefNode instanceof LambdaFunctionRef) {
-                    LambdaFunctionRef forallFnRef = (LambdaFunctionRef) forAtLeastFunctionRefNode;
-                    forallFnRef.getParams().clear();
-                    // NOTE: we cannot guarantee the order of keys that Map.keySet() returns,
-                    //       therefore we must assume that the keys are named in certain manner.
-                    forallFnRef.getParams().put("$a", valueToTest);
-                    forallFnRef.setCurrentValueForFunction(arrayToTest);
-                    testValueResult = (OperonValue) forallFnRef.invoke();
+                    LambdaFunctionRef testLfnRef = (LambdaFunctionRef) forAtLeastFunctionRefNode;
+
+                    Map<String, Node> lfrParams = testLfnRef.getParams();
+                    
+                    // Take the first param to find the param name
+                    String paramName = null;
+                    for (Map.Entry<String, Node> lfrParam : lfrParams.entrySet()) {
+                        paramName = lfrParam.getKey();
+                        break;
+                    }
+                    
+                    // Clear previous params that were set
+                    testLfnRef.getParams().clear();
+                    
+                    // Set the new param
+                    lfrParams.put(paramName, valueToTest);
+                    testLfnRef.setCurrentValueForFunction(arrayToTest);
+                    testValueResult = (OperonValue) testLfnRef.invoke();
                 }
                 
                 else {

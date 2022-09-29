@@ -57,6 +57,8 @@ public class State {
     private OperonContext operonContext;
     private OperonConfigs configs;
     
+    private final JedisPoolConfig poolConfig = buildPoolConfig();
+    
     public State(OperonContext ctx) {
         this.operonContext = ctx;
         this.configs = ctx.getConfigs();
@@ -71,8 +73,8 @@ public class State {
         }
     }
 
-    // TODO: jedis.close();
-
+    private JedisPool jedisPool;
+    
     private JedisPoolConfig buildPoolConfig() {
         final JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMaxTotal(128);
@@ -89,17 +91,19 @@ public class State {
     }
 
     public void setStateKeyAndValue(String key, OperonValue value) throws OperonGenericException, InterruptedException {
-        final JedisPoolConfig poolConfig = buildPoolConfig();
-        if (this.configs.getRedisHost() != null) {
-            JedisPool jedisPool = null;
-            
+        if (jedisPool == null && this.configs.getRedisHost() != null) {
             if (configs.getRedisPassword() == null) {
                 jedisPool = new JedisPool(poolConfig, configs.getRedisHost(), configs.getRedisPort());
             }
             else {
                 jedisPool = new JedisPool(poolConfig, configs.getRedisHost(), configs.getRedisPort(), configs.getRedisUser(), configs.getRedisPassword());
             }
-            
+        }
+        
+        //
+        // Set value into Redis
+        //
+        if (jedisPool != null) {
             boolean connected = false;
             long reConnectionAttempt = 1;
             
@@ -115,12 +119,17 @@ public class State {
                     else {
                         valueToSet = value.toString();
                     }
+                    
                     if (this.configs.getRedisPrefix() == null) {
                         jedis.set(key, valueToSet);
                     }
+                    
                     else {
                         jedis.set(this.configs.getRedisPrefix() + key, valueToSet);
                     }
+                    
+                    jedis.close();
+                    
                 } catch (JedisConnectionException jce) {
                     if (reConnectionAttempt == 1 || reConnectionAttempt % 10 == 0) {
                         System.err.println("State: could not connect to Redis. Trying to reconnect: " + reConnectionAttempt);
@@ -132,19 +141,34 @@ public class State {
             }
         }
         
+        //
+        // Set value into Map
+        //
         else {
             this.state.put(key, value.toString());
         }
     }
 
+    //
+    // @param param2Value is set if the key from Jedis is not found. Optional, leave null if not used.
+    //
     public OperonValue getStateValueByKey(String key, OperonValue param2Value) throws OperonGenericException, InterruptedException {
         String resultStr = null;
         OperonValue result = null;
         
-        final JedisPoolConfig poolConfig = buildPoolConfig();
-        if (this.configs.getRedisHost() != null) {
-            JedisPool jedisPool = new JedisPool(poolConfig, configs.getRedisHost(), configs.getRedisPort());
-            
+        if (jedisPool == null && this.configs.getRedisHost() != null) {
+            if (configs.getRedisPassword() == null) {
+                jedisPool = new JedisPool(poolConfig, configs.getRedisHost(), configs.getRedisPort());
+            }
+            else {
+                jedisPool = new JedisPool(poolConfig, configs.getRedisHost(), configs.getRedisPort(), configs.getRedisUser(), configs.getRedisPassword());
+            }
+        }
+        
+        //
+        // Get value from Redis
+        //
+        if (jedisPool != null) {
             boolean connected = false;
             long reConnectionAttempt = 1;
             
@@ -194,6 +218,8 @@ public class State {
                         //System.out.println("get resultStr exists 2: " + result);
                     }
                     
+                    jedis.close();
+                    
                 } catch (JedisConnectionException jce) {
                     if (reConnectionAttempt == 1 || reConnectionAttempt % 10 == 0) {
                         System.err.println("State: could not connect to Redis. Trying to reconnect: " + reConnectionAttempt);
@@ -205,6 +231,9 @@ public class State {
             }
         }
         
+        //
+        // Get value from Map
+        //
         else {
             resultStr = this.state.get(key);
             

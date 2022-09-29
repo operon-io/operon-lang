@@ -20,6 +20,7 @@ import io.operon.runner.OperonContext;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 import io.operon.runner.node.AbstractNode;
 import io.operon.runner.node.Node;
@@ -95,10 +96,18 @@ public class ArraySearch extends BaseArity1 implements Node, Arity1, SupportsAtt
                 
                 else if (testFunctionRefNode instanceof LambdaFunctionRef) {
                     LambdaFunctionRef testFnRef = (LambdaFunctionRef) testFunctionRefNode;
+                    
+                    Map<String, Node> lfrParams = testFnRef.getParams();
+                    
+                    // Take the first param to find the param name
+                    String paramName = null;
+                    for (Map.Entry<String, Node> lfrParam : lfrParams.entrySet()) {
+                        paramName = lfrParam.getKey();
+                        break;
+                    }
+                    
                     testFnRef.getParams().clear();
-                    // NOTE: we cannot guarantee the order of keys that Map.keySet() returns,
-                    //       therefore we must assume that the keys are named in certain manner.
-                    testFnRef.getParams().put("$a", valueToTest);
+                    testFnRef.getParams().put(paramName, valueToTest);
                     testFnRef.setCurrentValueForFunction(valueToTest);
                     testValueResult = testFnRef.invoke();
                 }

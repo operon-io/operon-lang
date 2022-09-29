@@ -20,6 +20,7 @@ import io.operon.runner.OperonContext;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 import io.operon.runner.node.AbstractNode;
 import io.operon.runner.node.Node;
@@ -98,10 +99,20 @@ public class ArrayForAll extends BaseArity1 implements Node, Arity1, SupportsAtt
                 
                 else if (forallFunctionRefNode instanceof LambdaFunctionRef) {
                     LambdaFunctionRef forallFnRef = (LambdaFunctionRef) forallFunctionRefNode;
+                    
+                    Map<String, Node> lfrParams = forallFnRef.getParams();
+                    
+                    // Take the first param to find the param name
+                    String paramName = null;
+                    for (Map.Entry<String, Node> lfrParam : lfrParams.entrySet()) {
+                        paramName = lfrParam.getKey();
+                        break;
+                    }
+                    
+                    // Clear previous params that were set
                     forallFnRef.getParams().clear();
-                    // NOTE: we cannot guarantee the order of keys that Map.keySet() returns,
-                    //       therefore we must assume that the keys are named in certain manner.
-                    forallFnRef.getParams().put("$a", valueToTest);
+                    
+                    forallFnRef.getParams().put(paramName, valueToTest);
                     forallFnRef.setCurrentValueForFunction(arrayToTest);
                     testValueResult = (OperonValue) forallFnRef.invoke();
                 }
