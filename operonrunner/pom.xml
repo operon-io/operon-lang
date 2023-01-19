@@ -5,7 +5,7 @@
   <parent>
     <groupId>io.operon</groupId>
     <artifactId>operon-core-parent</artifactId>
-    <version>0.9.7-RELEASE</version>
+    <version>0.9.9-RELEASE</version>
   </parent>
 
   <groupId>io.operon</groupId>
@@ -22,6 +22,14 @@
   </licenses>
 
   <dependencies>
+    
+    <!-- for serializing POJO to/from JSON -->
+  	<dependency>
+  		<groupId>com.google.code.gson</groupId>
+  		<artifactId>gson</artifactId>
+  		<version>${gson.version}</version>
+  	</dependency>
+  	
     <dependency>
       <groupId>org.antlr</groupId>
       <artifactId>antlr4-runtime</artifactId>

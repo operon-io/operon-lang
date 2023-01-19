@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,8 @@ import io.operon.runner.model.exception.*;
 
 import org.apache.logging.log4j.LogManager;
 
+import com.google.gson.annotations.Expose;
+
 /**
  * 
  * Context -class acts as a container for the query elements.
@@ -63,7 +65,7 @@ public class OperonContext extends BaseContext implements Context, java.io.Seria
      // no logger 
 
     private FromStatement fromStatement;
-    private SelectStatement selectStatement;
+    @Expose private SelectStatement selectStatement;
     
     private volatile boolean shutdown = false;
 
@@ -472,7 +474,7 @@ public class OperonContext extends BaseContext implements Context, java.io.Seria
                     
                     //
                     // NOTE: we have two kinds of configs here, which do overlap:
-                    //  1) configs given for the Select.
+                    //  1) configs given for the Select, such as "Select {prettyPrint}"
                     //  2) configs given by API (OperonConfigs)
                     //
                     //  If selectConfigs are not given, but operonConfigs are,

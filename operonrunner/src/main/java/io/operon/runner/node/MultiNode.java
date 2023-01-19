@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,11 @@ import io.operon.runner.model.exception.OperonGenericException;
 
 import org.apache.logging.log4j.LogManager;
 
+import com.google.gson.annotations.Expose;
+
 public class MultiNode extends AbstractNode implements Node {
      // no logger 
-    private List<Node> nodes;
+    @Expose private List<Node> nodes;
     
     public MultiNode(Statement stmnt) {
         super(stmnt);
@@ -42,7 +44,7 @@ public class MultiNode extends AbstractNode implements Node {
         //:OFF:log.debug("ENTER MULTINODE EVALUATE");
         // Evaluate in reverse order
         ////:OFF:log.debug("MultiNode :: Runtimevalues :: " + this.getStatement().getRuntimeValues());
-        for (int i = this.nodes.size() - 1; i >= 0; i --) {
+        for (int i = 0; i < this.nodes.size(); i ++) {
             Node node = this.nodes.get(i);
             Context ctx = this.getStatement().getOperonContext();
             ctx.addStackTraceElement(node);

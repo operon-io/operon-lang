@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,23 @@ import io.operon.runner.node.FunctionNamedArgument;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
 
+import io.operon.runner.IrTypes;
+import com.google.gson.annotations.Expose;
+
 public abstract class BaseArity0 extends AbstractNode implements Arity0 {
-    private String functionName;
+    @Expose private byte t = IrTypes.FUNCTION_0;
+    
+    @Expose private String fn;
+    @Expose private byte ns;
     
     public BaseArity0(Statement statement) {
         super(statement);
     }
     
-    public void setFunctionName(String fn) {this.functionName = fn;}
-    public String getFunctionName() {return this.functionName;}
+    public void setFunctionName(String fn) {this.fn = fn;}
+    public String getFunctionName() {return this.fn;}
+    
+    public void setNs(byte fns) {this.ns = fns;}
+    public byte getNs() {return this.ns;}
    
 }

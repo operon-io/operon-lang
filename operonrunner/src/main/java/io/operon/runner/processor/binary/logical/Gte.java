@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ import io.operon.runner.statement.Statement;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
 
+import com.google.gson.annotations.Expose;
+
 /**
  * 
  * 
@@ -39,10 +41,10 @@ import io.operon.runner.model.exception.OperonGenericException;
  */
 public class Gte extends BaseBinaryNodeProcessor implements BinaryNodeProcessor {
 
+    @Expose private String binaryOperator = ">=";
+
     public OperonValue process(Statement statement, Node lhs, Node rhs) throws OperonGenericException {
         this.preprocess(statement, lhs, rhs);
-        
-        String binaryOperator = ">=";
         
         if ( customBindingCheck(lhs, rhs, binaryOperator) ) {
             return doCustomBinding(statement, lhs, rhs, binaryOperator);

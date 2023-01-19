@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,12 +36,18 @@ import io.operon.runner.model.exception.OperonGenericException;
 
 import org.apache.logging.log4j.LogManager;
 
+import io.operon.runner.IrTypes;
+import com.google.gson.annotations.Expose;
+
 //
 // OperonValueConstraint (PairType, Let -statement, FunctionCalls)
 //
 public class OperonValueConstraint extends AbstractNode implements Node {
      // no logger 
-    private Node constraintExpr;
+    
+    @Expose private byte t = IrTypes.VALUE_CONSTRAINT; // Type-name in the IR-serialized output
+    
+    @Expose private Node constraintExpr;
     private String constraintAsString;
     private OperonValue valueToEvaluateAgainst;
     private OperonValue evaluatedValue; // Evaluates to TrueType or FalseType

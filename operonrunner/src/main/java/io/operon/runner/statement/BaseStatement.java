@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,15 +32,16 @@ import io.operon.runner.model.exception.OperonGenericException;
 
 import org.apache.logging.log4j.LogManager;
 
+import com.google.gson.annotations.Expose;
+
 public abstract class BaseStatement {
      // no logger 
-    private String id;
+    @Expose private String id;
     private Map<String, OperonValue> runtimeValues;
     private Statement previousStatement;
-    private Map<String, LetStatement> letStatements;
+    @Expose private Map<String, LetStatement> letStatements;
     private ExceptionHandler exceptionHandler;
     private boolean errorHandled;
-    
     private OperonValue evaluatedValue;
     private OperonValueConstraint constraint;
     
@@ -52,7 +53,7 @@ public abstract class BaseStatement {
     private Context operonContext;
     
     // The expr for the statement
-    private Node node;
+    @Expose private Node node;
     
     //
     // This is required for specified new way how attributes should work:

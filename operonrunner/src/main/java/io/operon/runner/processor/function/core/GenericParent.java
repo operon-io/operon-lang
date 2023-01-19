@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class GenericParent extends BaseArity0 implements Node, Arity0 {
         this.setFunctionName("parent");
     }
 
-    public OperonValue evaluate() throws OperonGenericException {        
+    public OperonValue evaluate() throws OperonGenericException {
         try {
             Path currentPath = this.getStatement().getCurrentPath();
             //System.out.println("Current path :: " + currentPath);

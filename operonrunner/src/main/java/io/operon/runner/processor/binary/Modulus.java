@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ import io.operon.runner.statement.Statement;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
 
+import com.google.gson.annotations.Expose;
+
 /**
  * 
  * 
@@ -40,7 +42,7 @@ import io.operon.runner.model.exception.OperonGenericException;
  */
 public class Modulus extends BaseBinaryNodeProcessor implements BinaryNodeProcessor {
 
-    private String binaryOperator = "%";
+    @Expose private String binaryOperator = "%";
 
     public OperonValue process(Statement statement, Node lhs, Node rhs) throws OperonGenericException {
         this.preprocess(statement, lhs, rhs);
@@ -171,7 +173,7 @@ public class Modulus extends BaseBinaryNodeProcessor implements BinaryNodeProces
                 Path p0 = (Path) pathsArray.getValues().get(0);
                 p0.setObjLink(obj);
                 statement.setCurrentValue(pathsArray);
-                PathReclude pathReclude = new PathReclude(statement);
+                PathReclude pathReclude = new PathReclude(statement, new ArrayList<Node>());
                 OperonValue result = pathReclude.evaluate();
                 return result;
             }

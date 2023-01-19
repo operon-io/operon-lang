@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,10 +53,9 @@ public class ObjAccess extends AbstractNode implements Node, SupportsAttributes 
         // get currentValue from the statement 
         OperonValue currentValue = this.getStatement().getCurrentValue();
         //OperonValue evaluatedValue = currentValue; 
-         
         if (currentValue instanceof ObjectType == false && currentValue instanceof ArrayType == false) { 
             currentValue = currentValue.evaluate();
-        } 
+        }
  
         if (currentValue instanceof ObjectType) { 
             //:OFF:log.debug("EXIT ObjAccess.evaluate() obj");
@@ -65,7 +64,7 @@ public class ObjAccess extends AbstractNode implements Node, SupportsAttributes 
         } 
          
         else if (currentValue instanceof ArrayType) { 
-            //:OFF:log.debug("EXIT ObjAccess.evaluate() array"); 
+            //:OFF:log.debug("EXIT ObjAccess.evaluate() array");
             return evaluateArray( (ArrayType) currentValue ); 
         } 
         //:OFF:log.debug("ObjAccess: cannot access object. Wrong type: " + currentValue); 

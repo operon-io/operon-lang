@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import io.operon.runner.model.path.*;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity0;
 import io.operon.runner.processor.function.Arity0;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.processor.function.core.path.PathCreate;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.util.ErrorUtil;
@@ -38,6 +39,7 @@ public class ArrayToPath extends BaseArity0 implements Node, Arity0 {
     public ArrayToPath(Statement statement) {
         super(statement);
         this.setFunctionName("toPath");
+        this.setNs(Namespaces.ARRAY);
     }
 
     public Path evaluate() throws OperonGenericException {        

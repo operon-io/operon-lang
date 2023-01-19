@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,11 +40,17 @@ import io.operon.runner.model.exception.OperonGenericException;
 
 import org.apache.logging.log4j.LogManager;
 
+import com.google.gson.annotations.Expose;
+import io.operon.runner.IrTypes;
+
 public class ValueRef extends AbstractNode implements Node {
      // no logger 
+    
+    @Expose private byte t = IrTypes.VALUE_REF;
+    
     private Node computedValueRef; // $(expr), which after evaluated will set the this.valueRef
-    private String valueRef; // this is the symbol we are looking for (@, $, _$, $foo, etc.)
-    private List<String> namespaces;
+    @Expose private String valueRef; // this is the symbol we are looking for (@, $, _$, $foo, etc.)
+    @Expose private List<String> namespaces;
     private boolean valueBoundToOperator = false;
     private ValueLocationType valueLocation = ValueLocationType.UNKNOWN;
     

@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,22 +30,30 @@ import io.operon.runner.node.FunctionRegularArgument;
 import io.operon.runner.node.type.*;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.Arity3;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.StringUtil;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
 
+import io.operon.runner.IrTypes;
+import com.google.gson.annotations.Expose;
+
 public class DateAdd extends AbstractNode implements Node, Arity3 {
     
-    private Node param1; // amount to add
-    private Node param2; // field to add
-    private Node param3; // date-obj
+    @Expose private Node param1; // amount to add
+    @Expose private Node param2; // field to add
+    @Expose private Node param3; // date-obj
     
-    private String functionName = "add";
+    @Expose private String fn = "add";
+    @Expose private byte ns;
     
     private ObjectType dateObj = null;
     private int amountToAdd = 0;
     private String fieldToUpdate = "Day"; // Possible fields: "Year", "Month", "Day", "Hour", "Minute", "Second", "Millisecond"
+    
+    public void setNs(byte ns) {this.ns = ns;}
+    public byte getNs() {return Namespaces.DATE;}
     
     public DateAdd(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
@@ -312,7 +320,7 @@ public class DateAdd extends AbstractNode implements Node, Arity3 {
     public Node getParam1() {return this.param1;}
     public Node getParam2() {return this.param2;}
     public Node getParam3() {return this.param3;}
-    public String getFunctionName() {return this.functionName;}
+    public String getFunctionName() {return this.fn;}
     public String getParam1Name() {return "amount";}
     public String getParam2Name() {return "field";}
     public String getParam3Name() {return "date";}

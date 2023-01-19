@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,10 +53,7 @@ public class DateToMillis extends BaseArity0 implements Node, Arity0 {
         try {
             OperonValue currentValue = this.getStatement().getCurrentValue();
             ObjectType dateObj = (ObjectType) currentValue.evaluate();
-            NumberType result = new NumberType(this.getStatement());
-            Date d = DateNow.getDateFromDateObj(dateObj);
-            result.setDoubleValue((double) d.getTime());
-            result.setPrecision((byte) 0);
+            NumberType result = dateObjToMillis(dateObj);
             return result;
         } catch (ClassCastException cce) {
             ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION_INPUT", "date:" + this.getFunctionName(), cce.getMessage() + ". Line #" + this.getSourceCodeLineNumber());
@@ -67,4 +64,11 @@ public class DateToMillis extends BaseArity0 implements Node, Arity0 {
         }
     }
 
+    public static NumberType dateObjToMillis(ObjectType dateObj) throws OperonGenericException {
+        NumberType result = new NumberType(dateObj.getStatement());
+        Date d = DateNow.getDateFromDateObj(dateObj);
+        result.setDoubleValue((double) d.getTime());
+        result.setPrecision((byte) 0);
+        return result;
+    }
 }

@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import io.operon.runner.node.type.ObjectType;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity1;
 import io.operon.runner.processor.function.Arity1;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.processor.function.SupportsAttributes;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.util.ErrorUtil;
@@ -46,6 +47,7 @@ public class ArrayLast extends BaseArity1 implements Node, Arity1, SupportsAttri
         super(statement);
         this.setParam1AsOptional(true);
         this.setParams(params, "last", "count");
+        this.setNs(Namespaces.ARRAY);
     }
 
     public OperonValue evaluate() throws OperonGenericException {        

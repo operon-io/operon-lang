@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import io.operon.runner.model.path.*;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity2;
 import io.operon.runner.processor.function.Arity2;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.processor.function.SupportsAttributes;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.util.ErrorUtil;
@@ -43,6 +44,7 @@ public class ArrayUpdate extends BaseArity2 implements Node, Arity2, SupportsAtt
         super(statement);
         this.setParam2AsOptional(true);
         this.setParams(params, "update", "value", "target");
+        this.setNs(Namespaces.ARRAY);
     }
 
     public ArrayType evaluate() throws OperonGenericException {

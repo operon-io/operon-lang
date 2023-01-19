@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,4 +30,8 @@ public interface Arity1 {
     public boolean isParam1Optional();
     public void setFunctionName(String fn);
     public String getFunctionName();
+    
+    // Function namespace (see io.operon.runner.processor.function.Namespaces)
+    public void setNs(byte fns);
+    public byte getNs();
 }

@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import io.operon.runner.node.type.ObjectType;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity0;
 import io.operon.runner.processor.function.Arity0;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
@@ -39,6 +40,7 @@ public class ArrayCount extends BaseArity0 implements Node, Arity0 {
     public ArrayCount(Statement statement) {
         super(statement);
         this.setFunctionName("count");
+        this.setNs(Namespaces.ARRAY);
     }
 
     public OperonValue evaluate() throws OperonGenericException {        

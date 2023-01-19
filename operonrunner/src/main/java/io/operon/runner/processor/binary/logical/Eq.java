@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ import io.operon.runner.model.exception.OperonGenericException;
 
 import org.apache.logging.log4j.LogManager;
 
+import com.google.gson.annotations.Expose;
+
 /**
  * 
  * 
@@ -40,6 +42,9 @@ import org.apache.logging.log4j.LogManager;
  */
 public class Eq extends BaseBinaryNodeProcessor implements BinaryNodeProcessor {
      // no logger 
+    
+    @Expose private String binaryOperator = "=";
+    
     public OperonValue process(Statement statement, Node lhs, Node rhs) throws OperonGenericException {
         this.preprocess(statement, lhs, rhs);
         
@@ -47,8 +52,6 @@ public class Eq extends BaseBinaryNodeProcessor implements BinaryNodeProcessor {
         //:OFF:log.debug(" EQ :: LHS-pp bindings size :: " + lhsResult.getBindings().size());
         //:OFF:log.debug(" EQ :: RHS-pp bindings size :: " + rhsResult.getBindings().size());
         //:OFF:log.debug(">>>> LHS-binding-mode :: " + lhs.getDoBindings());
-        
-        String binaryOperator = "=";
         
         if ( customBindingCheck(lhs, rhs, binaryOperator) ) {
             return doCustomBinding(statement, lhs, rhs, binaryOperator);

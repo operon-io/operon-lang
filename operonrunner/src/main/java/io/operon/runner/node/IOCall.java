@@ -3,7 +3,7 @@
  *
  */
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,8 +86,8 @@ public class IOCall extends AbstractNode implements Node {
     private String componentsFilePath; // path from where the "components.json" -file is loaded from
     
     // If the component is a .jar, then the following apply:
-    private IntegrationComponent componentInstance = null; // The dynamically loaded component -instance. This has to be transient if expr is deep-copied by serialization.
-    private Class componentClass = null; // This has to be transient if expr is deep-copied by serialization.
+    private transient IntegrationComponent componentInstance = null; // The dynamically loaded component -instance. This has to be transient if expr is deep-copied by serialization.
+    private transient Class componentClass = null; // This has to be transient if expr is deep-copied by serialization.
     
     private Boolean disabledComponent = null;
     
@@ -102,6 +102,7 @@ public class IOCall extends AbstractNode implements Node {
     //       of multiple modules... Each module might have own components.json -definition file.
     //
     public OperonValue evaluate() throws OperonGenericException {
+        //System.out.println("IOCall evaluate()");
         OperonValue currentValue = this.getStatement().getCurrentValue();
         //:OFF:log.debug("IOCall :: Sending cv to component");
         //:OFF:log.debug("IOCall :: cv :: " + currentValue);
@@ -110,8 +111,6 @@ public class IOCall extends AbstractNode implements Node {
         //:OFF:log.debug("Sending " + currentValue.toString() + " to >> " + this.getComponentName() + ":" + this.getComponentId());
         
         OperonValue result = null;
-        
-        //System.out.println("IOCall evaluate()");
         
         if (this.disabledComponent == null) {
             Context rootContext = BaseContext.getRootContextByStatement(this.getStatement());
@@ -314,7 +313,6 @@ public class IOCall extends AbstractNode implements Node {
         
         else {
             //System.out.println("IOCall evaluate() --> ELSE :: " + this.getComponentName());
-            
             Info info = this.resolveConfigs();
             
             //System.out.println("--> set configuration obj for the component");
@@ -380,9 +378,8 @@ public class IOCall extends AbstractNode implements Node {
                 }
             }
             
-            else if (this.getComponentInstance() == null 
-                || this.getComponentClass() == null) {
-
+            else if (this.getComponentClass() == null
+                    || this.getComponentInstance() == null) {
                 // Load the component from .jar -file:
                 //System.out.println("Component is a jar");
                 this.loadJarComponent();
@@ -390,7 +387,18 @@ public class IOCall extends AbstractNode implements Node {
                     // Get the main method from the loaded class and invoke it
                     Method method = this.getComponentClass().getMethod("produce", OperonValue.class);
                     //System.out.println("Invoking...");
-                    result = (OperonValue) method.invoke(componentInstance, (Object) currentValue); // Convert Object to OperonValue
+                    result = (OperonValue) method.invoke(this.getComponentInstance(), (Object) currentValue); // Convert Object to OperonValue
+                    //System.out.println("Invoke DONE, return result :: " + result);
+                } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+                    ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", this.getComponentName(), e.getMessage() + ". Line #" + this.getSourceCodeLineNumber());
+                }
+            }
+            else if (this.getComponentInstance() != null) {
+                try {
+                    // Get the main method from the loaded class and invoke it
+                    Method method = this.getComponentClass().getMethod("produce", OperonValue.class);
+                    //System.out.println("Invoking...");
+                    result = (OperonValue) method.invoke(this.getComponentInstance(), (Object) currentValue); // Convert Object to OperonValue
                     //System.out.println("Invoke DONE, return result :: " + result);
                 } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
                     ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", this.getComponentName(), e.getMessage() + ". Line #" + this.getSourceCodeLineNumber());
@@ -399,27 +407,36 @@ public class IOCall extends AbstractNode implements Node {
         }
         // update the currentValue from the statement
         this.getStatement().setCurrentValue(result);
-        
-        //:OFF:log.debug("IOCall result :: " + result);
+        ////:OFF:log.debug("IOCall result :: " + result);
         return result;
     }
 
     public void loadJarComponent() throws OperonGenericException {
         Info info = this.resolveConfigs();
-        String JAR_URL = "jar:" + info.componentLink + "!/";
-        Class loadedComponentClass = ComponentSystemUtil.loadComponent(JAR_URL, info.componentLink);
-        this.setComponentClass(loadedComponentClass);
+        if (this.getComponentClass() == null) {
+            String JAR_URL = "jar:" + info.componentLink + "!/";
+            //System.out.println("LOAD :: " + JAR_URL);
+            Class loadedComponentClass = ComponentSystemUtil.loadComponent(JAR_URL, info.componentLink);
+            //System.out.println("LOADED CLASS :: " + loadedComponentClass.toString());
+            this.setComponentClass(loadedComponentClass);
+        }
 
-        try {
-            this.setComponentInstance( (IntegrationComponent) componentClass.getDeclaredConstructor().newInstance() );
-        } catch (NoSuchMethodException | java.lang.reflect.InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", this.getComponentName(), e.getMessage());
+        if (this.getComponentInstance() == null) {
+            this.loadJarCreateComponentInstance();
         }
 
         this.setConfigurationForJarComponent(info);
         
         this.getComponentInstance().setComponentName(this.getComponentName());
         this.getComponentInstance().setComponentId(this.getComponentId());
+    }
+    
+    private void loadJarCreateComponentInstance() throws OperonGenericException {
+        try {
+            this.setComponentInstance( (IntegrationComponent) this.getComponentClass().getDeclaredConstructor().newInstance() );
+        } catch (NoSuchMethodException | java.lang.reflect.InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            ErrorUtil.createErrorValueAndThrow(this.getStatement(), "INTEGRATION", this.getComponentName(), e.getMessage());
+        }
     }
     
     //

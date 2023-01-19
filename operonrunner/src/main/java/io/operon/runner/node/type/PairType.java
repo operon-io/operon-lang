@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,15 +27,22 @@ import org.apache.logging.log4j.Logger;
 import io.operon.runner.model.exception.OperonGenericException;
  
 import org.apache.logging.log4j.LogManager; 
- 
+
+import io.operon.runner.IrTypes;
+import com.google.gson.annotations.Expose;
+
 public class PairType extends OperonValue implements Node { 
-     // no logger  
-    private String key; 
-    private OperonValue value; 
+     // no logger 
+    
+    @Expose private byte t = IrTypes.PAIR_TYPE; // Type-name in the IR-serialized output
+    
+    @Expose private String key;
+    
+    @Expose private OperonValue value;
     private OperonValue evaluatedValue; 
     private OperonValueConstraint constraint; 
     private int position; // Required in Filter
-    private Node configs; // for "hidden" -option
+    @Expose private Node configs; // for "hidden" -option
     
     private ObjectType parentObj;
     

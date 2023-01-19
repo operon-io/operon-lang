@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ import io.operon.runner.statement.Statement;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
 
+import com.google.gson.annotations.Expose;
+
 /**
  * 
  * 
@@ -41,7 +43,7 @@ import io.operon.runner.model.exception.OperonGenericException;
  */
 public class And extends BaseBinaryNodeProcessor implements BinaryNodeProcessor {
 
-    private String binaryOperator = "And";
+    @Expose private String binaryOperator = "And";
 
     public OperonValue process(Statement statement, Node lhs, Node rhs) throws OperonGenericException {
         this.preprocessLhs(statement, lhs); // Only evaluate LHS. For logical And RHS must be evaluated only is LHS is true.

@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,11 @@ public class DateNow extends BaseArity0 implements Node, Arity0 {
             c.setTimeInMillis(millis);
         }
         return c;
+    }
+
+    public static NumberType getDateNowNumberType(Statement stmt, Calendar c) {
+        NumberType result = NumberType.create(stmt, Double.valueOf(c.getTime().getTime()), (byte) 0);
+        return result;
     }
 
     //

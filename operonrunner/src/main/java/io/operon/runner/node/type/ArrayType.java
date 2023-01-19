@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,15 @@ import io.operon.runner.model.exception.OperonGenericException;
 
 import org.apache.logging.log4j.LogManager;
 
+import io.operon.runner.IrTypes;
+import com.google.gson.annotations.Expose;
+
 public class ArrayType extends OperonValue implements Node {
      // no logger 
     
-    private List<Node> values; // Refactor to use OperonValue
+    @Expose private byte t = IrTypes.ARRAY_TYPE; // Type-name in the IR-serialized output
+    
+    @Expose private List<Node> values; // Refactor to use OperonValue
     private int arrayId;
     
     public ArrayType(Statement stmt) {

@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,13 @@ import io.operon.runner.model.exception.OperonGenericException;
 import io.operon.runner.util.OutputFormatter;
 import io.operon.runner.util.YamlFormatter;
 
+import io.operon.runner.IrTypes;
+import com.google.gson.annotations.Expose;
+
 public class NumberType extends OperonValue implements Node, AtomicOperonValue, Comparable {
 
+    @Expose private byte t = IrTypes.NUMBER_TYPE; // Type-name in the IR-serialized output
+    
 	public static Locale defaultLocale = Locale.US;
 	private static DecimalFormatSymbols dfs = new DecimalFormatSymbols(defaultLocale);
 	private static NumberFormat DF_1 =       new DecimalFormat("0", dfs);
@@ -52,9 +57,9 @@ public class NumberType extends OperonValue implements Node, AtomicOperonValue, 
 	private static NumberFormat DF_PREC_17 = new DecimalFormat("0.00000000000000000", dfs);
 	private static NumberFormat DF_PREC_18 = new DecimalFormat("0.000000000000000000", dfs);
 
-    private byte precision; // -1 = undefined, 0 = 0 decimals, 1 = 1 decimal, etc.
-    
-    private double value;
+    @Expose private byte precision; // -1 = undefined, 0 = 0 decimals, 1 = 1 decimal, etc.
+
+    @Expose private double value;
     
     public NumberType(Statement stmnt) {
         super(stmnt);

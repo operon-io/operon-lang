@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,14 @@ public class CoreFunctionResolver {
             || fqFunctionName.equals("core:wait:1") || fqFunctionName.equals(":wait:1")
             || fqFunctionName.equals("core:stop:0") || fqFunctionName.equals(":stop:0")
             || fqFunctionName.equals("core:type:0") || fqFunctionName.equals(":type:0")
+            || fqFunctionName.equals("core:isString:0") || fqFunctionName.equals(":isString:0")
+            || fqFunctionName.equals("core:isArray:0") || fqFunctionName.equals(":isArray:0")
+            || fqFunctionName.equals("core:isObject:0") || fqFunctionName.equals(":isObject:0")
+            || fqFunctionName.equals("core:isNull:0") || fqFunctionName.equals(":isNull:0")
+            || fqFunctionName.equals("core:isEmpty:0") || fqFunctionName.equals(":isEmpty:0")
+            || fqFunctionName.equals("core:isEmptyString:0") || fqFunctionName.equals(":isEmptyString:0")
+            || fqFunctionName.equals("core:isEmptyArray:0") || fqFunctionName.equals(":isEmptyArray:0")
+            || fqFunctionName.equals("core:isEmptyObject:0") || fqFunctionName.equals(":isEmptyObject:0")
             || fqFunctionName.equals("core:mappableTo:1") || fqFunctionName.equals(":mappableTo:1") || fqFunctionName.equals(":fullyMappableTo:1")
             || fqFunctionName.equals("core:uuid:0") || fqFunctionName.equals(":uuid:0")
             || fqFunctionName.equals("core:update:2") || fqFunctionName.equals(":update:2")
@@ -164,8 +172,8 @@ public class CoreFunctionResolver {
             || fqFunctionName.equals("core:path:subPath:1") || fqFunctionName.equals("path:subPath:1")
             || fqFunctionName.equals("core:path:commonSubPath:1") || fqFunctionName.equals("path:commonSubPath:1")
             || fqFunctionName.equals("core:path:parts:0") || fqFunctionName.equals("path:parts:0")
-            || fqFunctionName.equals("core:path:retain:0") || fqFunctionName.equals("path:retain:0")
-            || fqFunctionName.equals("core:path:reclude:0") || fqFunctionName.equals("path:reclude:0")
+            || fqFunctionName.equals("core:path:retain:0") || fqFunctionName.equals("path:retain:0") || fqFunctionName.equals("core:path:retain:1") || fqFunctionName.equals("path:retain:1")
+            || fqFunctionName.equals("core:path:reclude:0") || fqFunctionName.equals("path:reclude:0") || fqFunctionName.equals("core:path:reclude:1") || fqFunctionName.equals("path:reclude:1")
             || fqFunctionName.equals("core:path:setCurrent:0") || fqFunctionName.equals("path:setCurrent:0") || fqFunctionName.equals("core:path:setCurrent:1") || fqFunctionName.equals("path:setCurrent:1")
             || fqFunctionName.equals("core:path:diff:1") || fqFunctionName.equals("path:diff:1") || fqFunctionName.equals("core:path:diff:2") || fqFunctionName.equals("path:diff:2")
             || fqFunctionName.equals("core:path:same:1") || fqFunctionName.equals("path:same:1") || fqFunctionName.equals("core:path:same:2") || fqFunctionName.equals("path:same:2")
@@ -321,7 +329,15 @@ public class CoreFunctionResolver {
         else if (fqFunctionName.equals("core:merge") || fqFunctionName.equals(":merge")) { return new Merge(currentStatement, functionParams); }
         else if (fqFunctionName.equals("core:wait") || fqFunctionName.equals(":wait")) { return new Wait(currentStatement, functionParams); }
         else if (fqFunctionName.equals("core:stop") || fqFunctionName.equals(":stop")) { return new Stop(currentStatement); }
-        else if (fqFunctionName.equals("core:type") || fqFunctionName.equals(":type")) { return new JsonType(currentStatement); }
+        else if (fqFunctionName.equals("core:type") || fqFunctionName.equals(":type")) { return new OperonType(currentStatement); }
+        else if (fqFunctionName.equals("core:isString") || fqFunctionName.equals(":isString")) { return new IsString(currentStatement); }
+        else if (fqFunctionName.equals("core:isArray") || fqFunctionName.equals(":isArray")) { return new IsArray(currentStatement); }
+        else if (fqFunctionName.equals("core:isObject") || fqFunctionName.equals(":isObject")) { return new IsObject(currentStatement); }
+        else if (fqFunctionName.equals("core:isNull") || fqFunctionName.equals(":isNull")) { return new IsNull(currentStatement); }
+        else if (fqFunctionName.equals("core:isEmpty") || fqFunctionName.equals(":isEmpty")) { return new IsEmpty(currentStatement); }
+        else if (fqFunctionName.equals("core:isEmptyString") || fqFunctionName.equals(":isEmptyString")) { return new IsEmptyString(currentStatement); }
+        else if (fqFunctionName.equals("core:isEmptyArray") || fqFunctionName.equals(":isEmptyArray")) { return new IsEmptyArray(currentStatement); }
+        else if (fqFunctionName.equals("core:isEmptyObject") || fqFunctionName.equals(":isEmptyObject")) { return new IsEmptyObject(currentStatement); }
         else if (fqFunctionName.equals("core:uuid") || fqFunctionName.equals(":uuid")) { return new Uuid(currentStatement); }
         else if (fqFunctionName.equals("core:mappableTo") || fqFunctionName.equals(":mappableTo") || fqFunctionName.equals(":fullyMappableTo")) { return new MappableTo(currentStatement, functionParams); }
         else if (fqFunctionName.equals("core:update") || fqFunctionName.equals(":update")) { return new GenericUpdate(currentStatement, functionParams); }
@@ -405,8 +421,8 @@ public class CoreFunctionResolver {
         else if (fqFunctionName.equals("core:path:subPath") || fqFunctionName.equals("path:subPath")) { return new PathSubPath(currentStatement, functionParams); }
         else if (fqFunctionName.equals("core:path:commonSubPath") || fqFunctionName.equals("path:commonSubPath")) { return new PathCommonSubPath(currentStatement, functionParams); }
         else if (fqFunctionName.equals("core:path:parts") || fqFunctionName.equals("path:parts")) { return new PathParts(currentStatement); }
-        else if (fqFunctionName.equals("core:path:retain") || fqFunctionName.equals("path:retain")) { return new PathRetain(currentStatement); }
-        else if (fqFunctionName.equals("core:path:reclude") || fqFunctionName.equals("path:reclude")) { return new PathReclude(currentStatement); }
+        else if (fqFunctionName.equals("core:path:retain") || fqFunctionName.equals("path:retain")) { return new PathRetain(currentStatement, functionParams); }
+        else if (fqFunctionName.equals("core:path:reclude") || fqFunctionName.equals("path:reclude")) { return new PathReclude(currentStatement, functionParams); }
         else if (fqFunctionName.equals("core:path:setCurrent") || fqFunctionName.equals("path:setCurrent")) { return new PathSetCurrent(currentStatement, functionParams); }
         else if (fqFunctionName.equals("core:path:diff") || fqFunctionName.equals("path:diff")) { return new PathDiff(currentStatement, functionParams); }
         else if (fqFunctionName.equals("core:path:same") || fqFunctionName.equals("path:same")) { return new PathSame(currentStatement, functionParams); }

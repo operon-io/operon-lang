@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,13 @@ import io.operon.runner.model.exception.OperonGenericException;
 
 import org.apache.logging.log4j.LogManager;
 
+import com.google.gson.annotations.Expose;
+
 public class UnaryNode extends AbstractNode implements Node {
      // no logger 
     
-    private Node node;
-    private UnaryNodeProcessor proc;
+    @Expose private Node node;
+    @Expose private UnaryNodeProcessor proc;
     
     public UnaryNode(Statement stmnt) {
         super(stmnt);

@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,6 @@ public class Not extends BaseUnaryNodeProcessor implements UnaryNodeProcessor {
     public OperonValue process(Statement statement, Node node) throws OperonGenericException {
         //:OFF:log.debug("Not :: enter process");
         this.preprocess(statement, node); // unbox and copy bindings
-        
         String unaryOperator = "Not";
         
         if ( customBindingCheck(nodeResult, unaryOperator) ) {
@@ -65,7 +64,6 @@ public class Not extends BaseUnaryNodeProcessor implements UnaryNodeProcessor {
             return ErrorUtil.createErrorValueAndThrow(statement, "OPERATOR", "NEGATE", "Not a boolean-value: " + 
                 nodeResult.getClass().getName() + ", at line #" + this.getSourceCodeLineNumber());
         }
-        
     }
 
 }

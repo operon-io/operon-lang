@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,14 +38,18 @@ import java.util.Map;
 import org.apache.logging.log4j.Logger;
 import io.operon.runner.model.exception.OperonGenericException;
 
+import io.operon.runner.IrTypes;
+import com.google.gson.annotations.Expose;
+
 import org.apache.logging.log4j.LogManager;
 
 public class Assign extends AbstractNode implements Node {
      // no logger 
-    private String valueRef;
-    private List<String> namespaces;
-    private boolean valueBoundToOperator = false;
-    private Node assignExpr;
+    @Expose private byte t = IrTypes.ASSIGN;
+    
+    @Expose private String valueRef;
+    @Expose private List<String> namespaces;
+    @Expose private Node assignExpr;
     
     public Assign(Statement stmnt) {
         super(stmnt);

@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,9 @@ import org.apache.logging.log4j.Logger;
 import io.operon.runner.model.exception.OperonGenericException;
 import io.operon.runner.model.exception.BreakSelect;
 
+import io.operon.runner.IrTypes;
+import com.google.gson.annotations.Expose;
+
 import org.apache.logging.log4j.LogManager;
 
 //
@@ -59,10 +62,10 @@ import org.apache.logging.log4j.LogManager;
 //
 public class Aggregate extends AbstractNode implements Node {
      // no logger 
-
-    private ObjectType configs;
-
-    private String id;
+    @Expose private byte t = IrTypes.AGGREGATE;
+    
+    @Expose private ObjectType configs;
+    @Expose private String id;
 
     //
     // This may be computable expr.
@@ -73,12 +76,12 @@ public class Aggregate extends AbstractNode implements Node {
     //       ONLY when firePredicate triggers, otherwise the result 
     //       does not have correlationId.
     //
-    private Node correlationIdExpr;
+    @Expose private Node correlationIdExpr;
 
     // The evaluated correlationId.
     // TODO: could be optimized, if we detect that correlationId is actually constant (i.e. the correlationIdExpr is of type StringType, boolean etc.)
     //       That would mean that we don't have to calculate this at each round.
-    private String correlationId; // NOTE: if not given then do not put it in the header. Otherwise: [{"correlationId": "...", "values": [...]}]
+    @Expose private String correlationId; // NOTE: if not given then do not put it in the header. Otherwise: [{"correlationId": "...", "values": [...]}]
 
     // Inline predicate-expression, e.g. "$.Second % 2 = 0"
     // Or FunctionRef (fr), or LambdaFunctionRef (lfr).
@@ -87,7 +90,7 @@ public class Aggregate extends AbstractNode implements Node {
     //   0 params: evaluate based on whatever condition
     //   1 param: the $new message
     //   2 params: the $old (already aggregated values) and the $new message
-    private Node firePredicate;
+    @Expose private Node firePredicate;
     
     // FunctionRef can be used as an aggregation-method.
     //
@@ -97,12 +100,12 @@ public class Aggregate extends AbstractNode implements Node {
     //
     // NOTE: the result of this is the aggregated-value, which could e.g.
     //       reduced to single-value.
-    private Node aggregateFunction;
+    @Expose private Node aggregateFunction;
     
-    private boolean hasTimeout = false;
-    public Long timeoutMillis;
-    private Node timeoutContinuation; // After timeout this node will be evaluated. Should be next node from AST after aggregate.
-    private long defaultHeartbeatDuration = 1000L;
+    @Expose private boolean hasTimeout = false;
+    @Expose public Long timeoutMillis;
+    @Expose private Node timeoutContinuation; // After timeout this node will be evaluated. Should be next node from AST after aggregate.
+    @Expose private long defaultHeartbeatDuration = 1000L;
     
     private static Map<String, AggregateState> aggregateStates;
 

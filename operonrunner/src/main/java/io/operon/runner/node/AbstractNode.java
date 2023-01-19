@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,11 +41,15 @@ import io.operon.runner.model.exception.OperonGenericException;
 
 import org.apache.logging.log4j.LogManager;
 
+import com.google.gson.annotations.Expose;
+
 public abstract class AbstractNode implements Node, java.io.Serializable {
      // no logger 
     
     private Statement statement;
-    protected int sourceCodeLineNumber = -1;
+    
+    // Not exposed atm because clutters the IR-output
+    /*@Expose*/ protected int sourceCodeLineNumber = -1;
     
     private boolean isEmpty = false; // compiler sets this if value is EmptyType
     
@@ -64,7 +68,8 @@ public abstract class AbstractNode implements Node, java.io.Serializable {
     protected boolean preventReEvaluation = false;
     
     // String: the operator-name, e.g. "="
-    private Map<String, Operator> bindings;
+    // Not exposed atm because clutters the IR-output
+    /*@Expose*/ private Map<String, Operator> bindings;
     
     public AbstractNode(Statement statement) {
         this.statement = statement;

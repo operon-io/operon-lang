@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,9 @@ import io.operon.runner.node.FunctionStatementParam;
 import org.apache.logging.log4j.Logger;
 import io.operon.runner.model.exception.OperonGenericException;
 
+import io.operon.runner.IrTypes;
+import com.google.gson.annotations.Expose;
+
 import org.apache.logging.log4j.LogManager;
 
 //
@@ -46,12 +49,14 @@ import org.apache.logging.log4j.LogManager;
 //
 public class FunctionRef extends OperonValue /*AbstractNode*/ implements Node {
      // no logger 
-    private String functionName; // name without namespace
-    private String functionFQName;
+    @Expose private byte t = IrTypes.FUNCTION_REF;
+    
+    @Expose private String functionName; // name without namespace
+    @Expose private String functionFQName;
 
-    private FunctionStatement functionStatement; // function execution context
-    private Node coreFunction; // core-function
-    private List<Node> coreFunctionArgs; // this contains the args that are set in the setArgument for the coreFunction
+    @Expose private FunctionStatement functionStatement; // function execution context
+    @Expose private Node coreFunction; // core-function
+    @Expose private List<Node> coreFunctionArgs; // this contains the args that are set in the setArgument for the coreFunction
     // 
     // NOTE: params are either:
     //       FunctionNamedArgument, FunctionRegularArgument, FunctionRefArgumentPlaceholder
@@ -59,7 +64,7 @@ public class FunctionRef extends OperonValue /*AbstractNode*/ implements Node {
     // NOTE: These params are populated with the actual values,
     //       and set as the arguments for the function to be called.
     //
-    private List<Node> params;
+    @Expose private List<Node> params;
     private OperonValue currentValueForFunction;
     
     public FunctionRef(Statement stmnt) {

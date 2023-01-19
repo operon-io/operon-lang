@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import io.operon.runner.node.type.ObjectType;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity2;
 import io.operon.runner.processor.function.Arity2;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.processor.function.SupportsAttributes;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.util.ErrorUtil;
@@ -51,6 +52,7 @@ public class ArraySwap extends BaseArity2 implements Node, Arity2, SupportsAttri
     public ArraySwap(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
         this.setParams(params, "swap", "a", "b");
+        this.setNs(Namespaces.ARRAY);
     }
 
     public ArrayType evaluate() throws OperonGenericException {

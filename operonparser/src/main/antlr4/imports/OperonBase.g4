@@ -45,6 +45,10 @@ expr
     | assign_expr                   continuation_with_curry*
     | computed_value_ref            continuation_with_curry*
     | value_ref                     continuation_with_curry*
+    | obj_access                    continuation*
+    | obj_dynamic_access            continuation*
+    | obj_deep_scan                 continuation*
+    | obj_dynamic_deep_scan         continuation*
     | lambda_function_call          continuation*
     | lambda_function_ref
     | auto_invoke_ref
@@ -52,7 +56,7 @@ expr
     | function_ref
     | function_ref_invoke           continuation*
     | function_ref_invoke_full      continuation*
-    | json_type_function_shortcut   continuation*
+    | operon_type_function_shortcut   continuation*
     | io_call              continuation*
     | choice                        continuation*
     | map_expr                      continuation*
@@ -79,6 +83,7 @@ expr
     //
     | (MINUS | NEGATE) expr
     | NOT expr
+    | expr NOT expr
     | <assoc=right> expr POW expr
     | expr MULT expr
     | expr DIV expr
@@ -365,8 +370,8 @@ function_ref_invoke_full
     ;
 
 // NOTE: there's also 'End', but not listed here because would confuse parser.
-json_type_function_shortcut
-    : 'Object' | 'Array' | 'String' | 'Number' | 'True' | 'False' | 'Boolean' 
+operon_type_function_shortcut
+    : 'Object' | 'Array' | 'String' | 'EmptyObject' | 'EmptyArray' | 'EmptyString' | 'Number' | 'True' | 'False' | 'Boolean' 
     | 'Empty' | 'Null' | 'Binary' | 'Stream' | 'Lambda' | 'Function' | 'Path'
     | 'Error'
     ;

@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,9 @@ import io.operon.runner.model.exception.OperonGenericException;
  
 import org.apache.logging.log4j.LogManager; 
 
+import io.operon.runner.IrTypes;
+import com.google.gson.annotations.Expose;
+
 //
 // Path is definitive: there are no expressions to
 // be calculated.
@@ -43,6 +46,8 @@ import org.apache.logging.log4j.LogManager;
 //
 public class Path extends OperonValue implements Node, AtomicOperonValue { 
      // no logger  
+    
+    @Expose private byte t = IrTypes.PATH_TYPE; // Type-name in the IR-serialized output
     
     //
     // This is the "root"-object of the Path. This is either an Array or Object.
@@ -56,14 +61,14 @@ public class Path extends OperonValue implements Node, AtomicOperonValue {
     // It can also be a Function, e.g. Path(foo().bin[1]), calls foo()
     // to get the root-value for the Path.
     // 
-    private String resolveTarget;
+    @Expose private String resolveTarget;
     
     //
     // This is the value of the Path. This may be any Operon-value.
     //
     private OperonValue valueLink;
     
-    private List<PathPart> pathParts;
+    @Expose private List<PathPart> pathParts;
     
     public Path(Statement stmnt) { 
         super(stmnt);

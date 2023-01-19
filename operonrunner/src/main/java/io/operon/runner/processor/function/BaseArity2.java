@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,19 @@ import io.operon.runner.node.FunctionNamedArgument;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
 
+import io.operon.runner.IrTypes;
+import com.google.gson.annotations.Expose;
+
 public abstract class BaseArity2 extends AbstractNode implements Arity2 {
-    private Node param1;
-    private Node param2;
-    private boolean param2Optional = false;
-    private String functionName;
-    private String param1Name;
-    private String param2Name;
+    @Expose private byte t = IrTypes.FUNCTION_2;
+    
+    @Expose private Node param1;
+    @Expose private Node param2;
+    @Expose private boolean param2Optional = false;
+    @Expose private String fn;
+    @Expose private byte ns;
+    @Expose private String param1Name;
+    @Expose private String param2Name;
     
     public BaseArity2(Statement statement) {
         super(statement);
@@ -54,14 +60,17 @@ public abstract class BaseArity2 extends AbstractNode implements Arity2 {
         }
         return this.param2;
     }
-    public void setFunctionName(String fn) {this.functionName = fn;}
+    public void setFunctionName(String fn) {this.fn = fn;}
     public void setParam1Name(String p1n) {this.param1Name = p1n;}
     public void setParam2Name(String p2n) {this.param2Name = p2n;}
-    public String getFunctionName() {return this.functionName;}
+    public String getFunctionName() {return this.fn;}
     public String getParam1Name() {return this.param1Name;}
     public String getParam2Name() {return this.param2Name;}
     public void setParam2AsOptional(boolean opt) {this.param2Optional = opt;}
     public boolean isParam2Optional() {return this.param2Optional;}
+
+    public void setNs(byte fns) {this.ns = fns;}
+    public byte getNs() {return this.ns;}
 
     public void setParams(List<Node> args, String funcName, String p1, String p2) throws OperonGenericException {
         this.setFunctionName(funcName);

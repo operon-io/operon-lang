@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,12 +52,9 @@ public class GenericPrevious extends BaseArity0 implements Node, Arity0 {
             PathPrevious pathPrevious = new PathPrevious(this.getStatement());
             PathValue pathValue = new PathValue(this.getStatement());
             
-            //
-            // Push in reverse order:
-            //
-            mn.addNode(pathValue);
-            mn.addNode(pathPrevious);
             mn.addNode(pathCurrent);
+            mn.addNode(pathPrevious);
+            mn.addNode(pathValue);
             
             OperonValue result = mn.evaluate();
             return result;

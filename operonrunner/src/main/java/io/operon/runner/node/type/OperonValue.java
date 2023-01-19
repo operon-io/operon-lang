@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,12 @@ import io.operon.runner.model.exception.OperonGenericException;
 
 import org.apache.logging.log4j.LogManager;
 
+import com.google.gson.annotations.SerializedName;
+import com.google.gson.annotations.Expose;
+
+import io.operon.runner.IrTypes;
+import com.google.gson.annotations.Expose;
+
 //
 // OperonValue is assignable.
 // Those Nodes that extend OperonValue, become also
@@ -39,8 +45,11 @@ import org.apache.logging.log4j.LogManager;
 //
 public class OperonValue extends AbstractNode implements Node {
      // no logger 
+
+    @Expose private byte baseType = IrTypes.OPERON_VALUE; // Type-name in the IR-serialized output
     
-    private Node value; // boxed value
+    @SerializedName("boxedValue")
+    @Expose private Node value; // boxed value
     
     // This means that the value has been calculated to atomic -json-value.
     //private boolean unboxed = false;

@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1180,6 +1180,12 @@ public class OperonCompiler extends OperonBaseListener {
                 //:OFF:log.debug("  Or()");
             }
             
+            else if ( (token = ctx.getToken(OperonParser.NOT, 0)) != null) {
+                op = new BinaryNot();
+                op.setSourceCodeLineNumber(ctx.start.getLine());
+                //:OFF:log.debug("  BinaryNot()");
+            }
+            
             BinaryNode bnode = new BinaryNode(this.currentStatement);
             bnode.setExpr(exprAsString);
             bnode.setLhs(lhs);
@@ -1253,6 +1259,7 @@ public class OperonCompiler extends OperonBaseListener {
                 }
                 //:OFF:log.debug("  MultiNode :: Stack size :: " + this.stack.size());
             }
+            Collections.reverse(mnode.getNodes());
             this.stack.push(mnode);
             //:OFF:log.debug("EXIT MultiNode");
         }
@@ -1276,6 +1283,7 @@ public class OperonCompiler extends OperonBaseListener {
                 }
                 //:OFF:log.debug("  MultiNode :: Stack size :: " + this.stack.size());
             }
+            Collections.reverse(mnode.getNodes());
             this.stack.push(mnode);
             
             //:OFF:log.debug("EXIT MultiNode");
@@ -1699,29 +1707,31 @@ public class OperonCompiler extends OperonBaseListener {
         if (subNodes.size() > 0 
             && subNodes.get(0) instanceof RuleNode 
             && subNodes.get(0) instanceof OperonParser.Json_objContext) {
+            //ObjectType objValue = (ObjectType) this.stack.pop();
+            //this.stack.push(objValue);
+            //return;
+            
             jsonValue.setValue(this.stack.pop()); // set ObjectType from stack
         }
 
         else if (subNodes.size() > 0 
             && subNodes.get(0) instanceof RuleNode 
             && subNodes.get(0) instanceof OperonParser.Json_arrayContext) {
-            //:OFF:log.debug("SETTING JSON VALUE --> JSON ARRAY.");
-            Node value = this.stack.pop();
-            if (value == null) {
-                //:OFF:log.error("WARNING:: POPPED NULL VALUE!!!");
-            }
-            jsonValue.setValue(value); // set ArrayType from stack   
+            ArrayType arrValue = (ArrayType) this.stack.pop();
+            this.stack.push(arrValue);
+            return;
         }
 
         else if (subNodes.size() > 0 
             && subNodes.get(0) instanceof RuleNode 
             && subNodes.get(0) instanceof OperonParser.Path_valueContext) {
             //:OFF:log.debug("SETTING VALUE --> Path-value.");
-            Node value = this.stack.pop();
+            io.operon.runner.node.type.Path value = (io.operon.runner.node.type.Path) this.stack.pop();
             if (value == null) {
                 //:OFF:log.error("WARNING:: POPPED NULL VALUE!!!");
             }
-            jsonValue.setValue(value); // set PathValue from stack   
+            this.stack.push(value);
+            return;
         }
 
         else if (subNodes.size() > 0 
@@ -1743,7 +1753,8 @@ public class OperonCompiler extends OperonBaseListener {
                 String symbolText = token.getSymbol().getText();
                 //:OFF:log.debug("TerminalNode: String. Text :: " + symbolText);
                 sNode.setValue(symbolText);
-                jsonValue.setValue(sNode);
+                this.stack.push(sNode);
+                return;
             }
             
             else if ( (token = ctx.getToken(OperonParser.NUMBER, 0)) != null) {
@@ -1768,22 +1779,26 @@ public class OperonCompiler extends OperonBaseListener {
                 }
                 
                 nNode.setPrecision(NumberType.getPrecisionFromStr(symbolText));
-                jsonValue.setValue(nNode);
+                this.stack.push(nNode);
+                return;
             }
             
             else if ( (token = ctx.getToken(OperonParser.JSON_FALSE, 0)) != null) {
                 FalseType jsonFalse = new FalseType(this.currentStatement);
-                jsonValue.setValue(jsonFalse);
+                this.stack.push(jsonFalse);
+                return;
             }
             
             else if ( (token = ctx.getToken(OperonParser.JSON_TRUE, 0)) != null) {
                 TrueType jsonTrue = new TrueType(this.currentStatement);
-                jsonValue.setValue(jsonTrue);
+                this.stack.push(jsonTrue);
+                return;
             }
             
             else if ( (token = ctx.getToken(OperonParser.JSON_NULL, 0)) != null) {
                 NullType jsonNull = new NullType(this.currentStatement);
-                jsonValue.setValue(jsonNull);
+                this.stack.push(jsonNull);
+                return;
             }
 
             else if ( (token = ctx.getToken(OperonParser.RAW_STRING, 0)) != null) {
@@ -1794,7 +1809,8 @@ public class OperonCompiler extends OperonBaseListener {
                 rawStr = rawStr.replaceAll("\\\\`", "`");
                 byte[] valueBytes = rawStr.getBytes(StandardCharsets.UTF_8);
                 raw.setValue(valueBytes);
-                jsonValue.setValue(raw);
+                this.stack.push(raw);
+                return;
             }
 
             //
@@ -1831,7 +1847,8 @@ public class OperonCompiler extends OperonBaseListener {
                 symbolText = "\"" + sb.toString() + "\"";
                 //System.out.println("symbolText :: " + symbolText);
                 sNode.setValue(symbolText);
-                jsonValue.setValue(sNode);
+                this.stack.push(sNode);
+                return;
             }
 
             //
@@ -1876,7 +1893,8 @@ public class OperonCompiler extends OperonBaseListener {
                 symbolText = "\"" + sb.toString() + "\"";
                 //System.out.println("symbolText :: " + symbolText);
                 sNode.setValue(symbolText);
-                jsonValue.setValue(sNode);
+                this.stack.push(sNode);
+                return;
             }
 
             //
@@ -1947,21 +1965,24 @@ public class OperonCompiler extends OperonBaseListener {
                 symbolText = "\"" + sb.toString() + "\"";
                 //System.out.println("symbolText :: " + symbolText);
                 sNode.setValue(symbolText);
-                jsonValue.setValue(sNode);
+                this.stack.push(sNode);
+                return;
             }
 
             else if ( (token = ctx.getToken(OperonParser.EMPTY_VALUE, 0)) != null) {
                 String symbolText = token.getSymbol().getText().toLowerCase();
                 ////:OFF:log.debug("TerminalNode: Empty. Text :: " + symbolText);
                 EmptyType jsonEmptyValue = new EmptyType(this.currentStatement);
-                jsonValue.setValue(jsonEmptyValue);
-                jsonValue.setIsEmptyValue(true);
+                jsonEmptyValue.setIsEmptyValue(true);
+                this.stack.push(jsonEmptyValue);
+                return;
             }
             
             else if ( (token = ctx.getToken(OperonParser.END_VALUE, 0)) != null) {
                 String symbolText = token.getSymbol().getText().toLowerCase();
                 EndValueType jsonEndValue = new EndValueType(this.currentStatement);
-                jsonValue.setValue(jsonEndValue);
+                this.stack.push(jsonEndValue);
+                return;
             }
         }
         
@@ -2849,6 +2870,7 @@ public class OperonCompiler extends OperonBaseListener {
                 catch (Exception e) {
                     throw new RuntimeException("Compiler :: IOCall :: failed to create mock");
                 }
+                Collections.reverse(mnode.getNodes());
                 this.stack.push(mnode);
             }
             
@@ -3462,66 +3484,100 @@ public class OperonCompiler extends OperonBaseListener {
     }
 
     @Override
-    public void exitJson_type_function_shortcut(OperonParser.Json_type_function_shortcutContext ctx) {
+    public void exitOperon_type_function_shortcut(OperonParser.Operon_type_function_shortcutContext ctx) {
         //:OFF:log.debug("Exit Json_type_function_shortcut. Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = this.getContextChildNodes(ctx);
         //:OFF:log.debug("    SubNodes size :: " + subNodes.size());
         //:OFF:log.debug("    SubNodes :: " + subNodes);
 
-        String jsonType = subNodes.get(0).toString();
-        //System.out.println("Type :: ["+ jsonType + "], stack size :: " + this.stack.size());
+        String operonType = subNodes.get(0).toString();
+        //System.out.println("Type :: ["+ operonType + "], stack size :: " + this.stack.size());
         
-        //:OFF:log.debug(jsonType);
+        //:OFF:log.debug(operonType);
     
-        if (jsonType.equals("Boolean") == false
-            && jsonType.equals("Lambda") == false
-            && jsonType.equals("Function") == false) {
+        if (operonType.equals("Boolean") == false
+            && operonType.equals("Lambda") == false
+            && operonType.equals("Function") == false) {
             try {
-                //System.out.println("Rewrite Type() == "+ jsonType);
-                //
-                // Rewrite to: Type() = jsonType
-                //
-                JsonType jsonTypeFunction = new JsonType(this.getCurrentStatement());
-                StringType jsonTypeNameStr = new StringType(this.currentStatement);
-                jsonTypeNameStr.setFromJavaString(jsonType);
-                
-                BinaryNodeProcessor op = new Eq();
-                BinaryNode bnode = new BinaryNode(this.currentStatement);
-                bnode.setLhs(jsonTypeFunction);
-                bnode.setRhs(jsonTypeNameStr);
-                bnode.setBinaryNodeProcessor(op);
-                this.stack.push(bnode);
+                if (operonType.equals("String")) {
+                    IsString isStringFunction = new IsString(this.getCurrentStatement());
+                    this.stack.push(isStringFunction);
+                }
+                else if (operonType.equals("Array")) {
+                    IsArray isArrayFunction = new IsArray(this.getCurrentStatement());
+                    this.stack.push(isArrayFunction);
+                }
+                else if (operonType.equals("Object")) {
+                    IsObject isObjectFunction = new IsObject(this.getCurrentStatement());
+                    this.stack.push(isObjectFunction);
+                }
+                else if (operonType.equals("EmptyString")) {
+                    IsEmptyString isEmptyStringFunction = new IsEmptyString(this.getCurrentStatement());
+                    this.stack.push(isEmptyStringFunction);
+                }
+                else if (operonType.equals("EmptyArray")) {
+                    IsEmptyArray isEmptyArrayFunction = new IsEmptyArray(this.getCurrentStatement());
+                    this.stack.push(isEmptyArrayFunction);
+                }
+                else if (operonType.equals("EmptyObject")) {
+                    IsEmptyObject isEmptyObjectFunction = new IsEmptyObject(this.getCurrentStatement());
+                    this.stack.push(isEmptyObjectFunction);
+                }
+                else if (operonType.equals("Null")) {
+                    IsNull isNullFunction = new IsNull(this.getCurrentStatement());
+                    this.stack.push(isNullFunction);
+                }
+                else if (operonType.equals("Empty")) {
+                    IsEmpty isEmptyFunction = new IsEmpty(this.getCurrentStatement());
+                    this.stack.push(isEmptyFunction);
+                }
+                else {
+                    //System.out.println("Rewrite type() == "+ operonType);
+                    //
+                    // Rewrite to: => type() = operonType
+                    //
+                    OperonType operonTypeFunction = new OperonType(this.getCurrentStatement());
+                    StringType operonTypeNameStr = new StringType(this.currentStatement);
+                    operonTypeNameStr.setFromJavaString(operonType);
+                    
+                    BinaryNodeProcessor op = new Eq();
+                    BinaryNode bnode = new BinaryNode(this.currentStatement);
+                    bnode.setLhs(operonTypeFunction);
+                    bnode.setRhs(operonTypeNameStr);
+                    bnode.setBinaryNodeProcessor(op);
+                    this.stack.push(bnode);
+                }
             } catch (Exception e) {
                 throw new RuntimeException("Error: OperonCompiler: could not create type-function.");
             }
         }
         
-        else if (jsonType.equals("Boolean")) {
+        else if (operonType.equals("Boolean")) {
             try {
                 //
                 // Rewrite Boolean-type to: Type() = "True" Or Type() = "False", as it satisfies both:
                 //
                 
                 // Or lhs:
-                JsonType orLhsJsonTypeFunction = new JsonType(this.getCurrentStatement());
-                StringType orLhsJsonTypeNameStr = new StringType(this.currentStatement);
-                orLhsJsonTypeNameStr.setFromJavaString("True");
+                OperonType orLhsOperonTypeFunction = new OperonType(this.getCurrentStatement());
+                StringType orLhsOperonTypeNameStr = new StringType(this.currentStatement);
+                orLhsOperonTypeNameStr.setFromJavaString("True");
                 
                 BinaryNodeProcessor orLhsOp = new Eq();
                 BinaryNode orLhsBnode = new BinaryNode(this.currentStatement);
-                orLhsBnode.setLhs(orLhsJsonTypeFunction);
-                orLhsBnode.setRhs(orLhsJsonTypeNameStr);
+                orLhsBnode.setLhs(orLhsOperonTypeFunction);
+                orLhsBnode.setRhs(orLhsOperonTypeNameStr);
                 orLhsBnode.setBinaryNodeProcessor(orLhsOp);
                 
                 // Or rhs:
-                JsonType orRhsJsonTypeFunction = new JsonType(this.getCurrentStatement());
-                StringType orRhsJsonTypeNameStr = new StringType(this.currentStatement);
-                orRhsJsonTypeNameStr.setFromJavaString("False");
+                OperonType orRhsOperonTypeFunction = new OperonType(this.getCurrentStatement());
+                StringType orRhsOperonTypeNameStr = new StringType(this.currentStatement);
+                orRhsOperonTypeNameStr.setFromJavaString("False");
                 
                 BinaryNodeProcessor orRhsOp = new Eq();
                 BinaryNode orRhsBnode = new BinaryNode(this.currentStatement);
-                orRhsBnode.setLhs(orRhsJsonTypeFunction);
-                orRhsBnode.setRhs(orRhsJsonTypeNameStr);
+                orRhsBnode.setLhs(orRhsOperonTypeFunction);
+                orRhsBnode.setRhs(orRhsOperonTypeNameStr);
                 orRhsBnode.setBinaryNodeProcessor(orRhsOp);
                 
                 // Or:
@@ -3537,12 +3593,12 @@ public class OperonCompiler extends OperonBaseListener {
             }
         }
         
-        else if (jsonType.equals("Lambda")) {
+        else if (operonType.equals("Lambda")) {
             try {
                 //
                 // Rewrite to: Type() => startsWith("lambda:")
                 //
-                JsonType jsonTypeFunction = new JsonType(this.getCurrentStatement());
+                OperonType operonTypeFunction = new OperonType(this.getCurrentStatement());
                 
                 StringType lambdaTypeNameStr = new StringType(this.currentStatement);
                 lambdaTypeNameStr.setFromJavaString("lambda:");
@@ -3555,20 +3611,21 @@ public class OperonCompiler extends OperonBaseListener {
                 
                 MultiNode mn = new MultiNode(this.getCurrentStatement());
                 mn.addNode(strStartsWithFunction);
-                mn.addNode(jsonTypeFunction);
+                mn.addNode(operonTypeFunction);
                 
+                Collections.reverse(mn.getNodes());
                 this.stack.push(mn);
             } catch (Exception e) {
                 throw new RuntimeException("Error: OperonCompiler could not create type-function for Lambda.");
             }
         }
         
-        else if (jsonType.equals("Function")) {
+        else if (operonType.equals("Function")) {
             try {
                 //
                 // Rewrite to: Type() => startsWith("function:")
                 //
-                JsonType jsonTypeFunction = new JsonType(this.getCurrentStatement());
+                OperonType operonTypeFunction = new OperonType(this.getCurrentStatement());
                 
                 StringType lambdaTypeNameStr = new StringType(this.currentStatement);
                 lambdaTypeNameStr.setFromJavaString("function:");
@@ -3581,8 +3638,9 @@ public class OperonCompiler extends OperonBaseListener {
                 
                 MultiNode mn = new MultiNode(this.getCurrentStatement());
                 mn.addNode(strStartsWithFunction);
-                mn.addNode(jsonTypeFunction);
+                mn.addNode(operonTypeFunction);
                 
+                Collections.reverse(mn.getNodes());
                 this.stack.push(mn);
             } catch (Exception e) {
                 throw new RuntimeException("Error: OperonCompiler could not create type-function for Function.");

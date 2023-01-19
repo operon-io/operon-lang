@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,10 @@ public interface Arity3 {
     public Node getParam2() throws OperonGenericException; // must throw if param is null
     public void setParam3(Node param3);
     public Node getParam3() throws OperonGenericException; // must throw if param is null
+
+    // Function namespace (see io.operon.runner.processor.function.Namespaces)
+    public void setNs(byte fns);
+    public byte getNs();
     
     // 
     // For arity-3 functions the current-value must be set between

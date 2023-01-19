@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,15 @@ import io.operon.runner.Context;
 import io.operon.runner.node.type.*;
 import io.operon.runner.model.exception.OperonGenericException;
 
+import com.google.gson.annotations.Expose;
+import io.operon.runner.IrTypes;
+
 public class BinaryNode extends AbstractNode implements Node {
     
-    private Node lhs;
-    private Node rhs;
-    private BinaryNodeProcessor proc;
+    @Expose private byte t = IrTypes.BINARY_NODE;
+    @Expose private Node lhs;
+    @Expose private Node rhs;
+    @Expose private BinaryNodeProcessor proc;
     
     public BinaryNode(Statement stmnt) {
         super(stmnt);

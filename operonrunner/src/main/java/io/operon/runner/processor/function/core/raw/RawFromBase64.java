@@ -1,5 +1,5 @@
 /*
- *   Copyright 2022, operon.io
+ *   Copyright 2022-2023, operon.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,8 +49,18 @@ public class RawFromBase64 extends BaseArity1 implements Node, Arity1 {
             if (this.getParam1() != null) {
                 Info info = this.resolve(currentValue);
                 if (info.decoder == Base64Decoder.URLSAFE) {
-                    byte[] resultBytes = RawValue.base64UrlSafeToBytes(currentValueStr.getJavaStringValue().getBytes());
-                    result.setValue(resultBytes);
+                    if (info.encoding == RawFromBase64.Encoding.UTF8) {
+                        byte[] resultBytes = RawValue.base64UrlSafeToBytes(currentValueStr.getJavaStringValue().getBytes("UTF-8"));
+                        result.setValue(resultBytes);
+                    }
+                    if (info.encoding == RawFromBase64.Encoding.UTF16) {
+                        byte[] resultBytes = RawValue.base64UrlSafeToBytes(currentValueStr.getJavaStringValue().getBytes("UTF-16"));
+                        result.setValue(resultBytes);
+                    }
+                    else if (info.encoding == RawFromBase64.Encoding.ANSI) {
+                        byte[] resultBytes = RawValue.base64UrlSafeToBytes(currentValueStr.getJavaStringValue().getBytes("ANSI"));
+                        result.setValue(resultBytes);
+                    }
                     return result;
                 }
                 // TODO: mime-encoder
@@ -85,6 +95,16 @@ public class RawFromBase64 extends BaseArity1 implements Node, Arity1 {
                     String decoderStr = ((StringType) pair.getValue().evaluate()).getJavaStringValue();
                     info.decoder = Base64Decoder.valueOf(decoderStr.toUpperCase());
                     break;
+                case "\"encoding\"":
+                    String encodingStr = ((StringType) pair.getValue().evaluate()).getJavaStringValue();
+                    if (encodingStr.toUpperCase().equals("UTF-8")) {
+                        encodingStr = "UTF8";
+                    }
+                    else if (encodingStr.toUpperCase().equals("UTF-16")) {
+                        encodingStr = "UTF16";
+                    }
+                    info.encoding = RawFromBase64.Encoding.valueOf(encodingStr.toUpperCase());
+                    break;
                 default:
                     throw new Exception("unknown option: " + key);
             }
@@ -95,10 +115,15 @@ public class RawFromBase64 extends BaseArity1 implements Node, Arity1 {
 
     private class Info {
         private Base64Decoder decoder = Base64Decoder.BASIC;
+        private RawFromBase64.Encoding encoding = RawFromBase64.Encoding.UTF8; // UTF8, ANSI, etc. If left empty, then assumes utf-8.
     }
     
     private enum Base64Decoder {
         BASIC, URLSAFE, MIME;
+    }
+
+    private enum Encoding {
+        UTF8, UTF16, ANSI;
     }
 
 }
