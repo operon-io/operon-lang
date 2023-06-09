@@ -27,6 +27,7 @@ import io.operon.runner.node.type.*;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity0;
 import io.operon.runner.processor.function.Arity0;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.processor.function.core.path.*;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.util.ErrorUtil;
@@ -37,6 +38,7 @@ public class GenericParent extends BaseArity0 implements Node, Arity0 {
     public GenericParent(Statement statement) {
         super(statement);
         this.setFunctionName("parent");
+        this.setNs(Namespaces.CORE);
     }
 
     public OperonValue evaluate() throws OperonGenericException {

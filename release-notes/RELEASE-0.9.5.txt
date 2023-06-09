@@ -1,0 +1,45 @@
+0.9.5-RELEASE :: NOTES
+======================
+
+FEATURE
+=======
+Added function string:isNumeric().
+Example:
+	Select: "123" => isNumeric()
+	#> true
+
+IMPROVEMENT
+===========
+Number-casting added options (Object). The old parameter $precision was renamed to $options.
+  - decimalSeparator <String>
+  - groupSeparator <String>
+  - precision <Number>
+When the $options is given with numeric-value, then it is interpreted as precision (as previously).
+Options decimalSeparator and groupSeparator are valid only when the input-value is String.
+Example:
+	Select: "1 000 000,00" => number({precision: 2, decimalSeparator: ",", groupSeparator: " "})
+	#> 1000000.00
+
+IMPROVEMENT
+===========
+On string-templating, the "Foo %s:foo;" % {foo: "bar"}
+uses Path instead of access by key. If value is not found,
+then empty-value is used.
+
+IMPROVEMENT
+===========
+On string-templating, the "Foo %s:key:expr;" % {key: "value"}
+Evaluates the expr against the value behind the key.
+
+IMPROVEMENT
+===========
+String-templating can be used against Raw-values.
+
+FIX
+===
+Checks if string-template is not terminated.
+
+FIX
+===
+PathValue.get returns EmptyType if the key is not found.
+Previously threw an error.

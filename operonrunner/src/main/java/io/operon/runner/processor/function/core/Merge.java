@@ -25,6 +25,7 @@ import io.operon.runner.node.type.*;
 import io.operon.runner.node.Build;
 import io.operon.runner.processor.function.BaseArity1;
 import io.operon.runner.processor.function.Arity1;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.processor.function.core.path.PathCommonSubPath;
 import io.operon.runner.processor.function.core.path.PathSubPath;
 import io.operon.runner.model.path.*;
@@ -48,6 +49,7 @@ public class Merge extends BaseArity1 implements Node, Arity1 {
     public Merge(Statement stmnt, List<Node> params) throws OperonGenericException {
         super(stmnt);
         this.setParams(params, "merge", "with");
+        this.setNs(Namespaces.CORE);
     }
 
     public OperonValue evaluate() throws OperonGenericException {

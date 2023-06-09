@@ -25,6 +25,7 @@ import io.operon.runner.node.type.*;
 import io.operon.runner.model.path.*;
 import io.operon.runner.processor.function.BaseArity2;
 import io.operon.runner.processor.function.Arity2;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.util.ErrorUtil;
 
@@ -44,6 +45,7 @@ public class SpliceRange extends BaseArity2 implements Node, Arity2 {
     public SpliceRange(Statement stmnt, List<Node> params) throws OperonGenericException {
         super(stmnt);
         this.setParams(params, "spliceRange", "start", "count");
+        this.setNs(Namespaces.CORE);
     }
 
     public OperonValue evaluate() throws OperonGenericException {

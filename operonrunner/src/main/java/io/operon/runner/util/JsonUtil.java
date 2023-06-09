@@ -84,6 +84,8 @@ public class JsonUtil {
         }
 
         ArrayType result = new ArrayType(stmt);
+        //System.out.println("JSON :: " + json.getArrayValueType());
+        result.setArrayValueType(json.getArrayValueType());
 
         for (int i = 0; i < arrayNodes.size(); i ++) {
             Node n = arrayNodes.get(i);
@@ -468,9 +470,9 @@ public class JsonUtil {
             else {
                 /*
                 try {
-                    System.out.println("  >> Value was not evaluated, deep-copying the Node");
+                    //System.out.println("  >> Value was not evaluated, deep-copying the Node");
                     Node copyValue = AbstractNode.deepCopyNode(n);
-                    System.out.println("  >> Node copied");
+                    //System.out.println("  >> Node copied");
                     return copyValue;
                 } catch (java.io.IOException | ClassNotFoundException e) {
                     throw new OperonGenericException(e.getMessage());

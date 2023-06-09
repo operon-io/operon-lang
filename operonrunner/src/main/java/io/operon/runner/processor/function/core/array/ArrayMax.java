@@ -29,6 +29,7 @@ import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity1;
 import io.operon.runner.processor.function.Arity1;
 import io.operon.runner.processor.function.Namespaces;
+import io.operon.runner.IrTypes;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.util.ErrorUtil;
 
@@ -58,26 +59,26 @@ public class ArrayMax extends BaseArity1 implements Node, Arity1 {
         try {
             // comparator was not given:
             if (this.getParam1() == null) {
-                OperonValue ev1 = (OperonValue) arrayToSeek.getValues().get(0).evaluate();
-                if (ev1 instanceof NumberType) {
-                    NumberType numberResult = new NumberType(this.getStatement());
-                    List<NumberType> numbers = new ArrayList<NumberType>();
-                    for (Node n : arrayToSeek.getValues()) {
-                        numbers.add( (NumberType) n.evaluate() );
+                if (arrayToSeek.getArrayValueType() != IrTypes.MISSING_TYPE) {
+                    if (arrayToSeek.getArrayValueType() == IrTypes.NUMBER_TYPE) {
+                        return maxFromNumbers(arrayToSeek);
                     }
-                    numberResult = Collections.max(numbers);
-                    return numberResult;
+                    else if (arrayToSeek.getArrayValueType() == IrTypes.STRING_TYPE) {
+                        return maxFromStrings(arrayToSeek);
+                    }
                 }
-                else if (ev1 instanceof StringType) {
-                    StringType stringResult = new StringType(this.getStatement());
-                    List<StringType> strings = new ArrayList<StringType>();
-                    for (Node n : arrayToSeek.getValues()) {
-                        strings.add( (StringType) n.evaluate() );
+                
+                else {
+                    OperonValue ev1 = (OperonValue) arrayToSeek.getValues().get(0).evaluate();
+                    if (ev1 instanceof NumberType) {
+                        return maxFromNumbers(arrayToSeek);
                     }
-                    stringResult = Collections.max(strings);
-                    return stringResult;
+                    else if (ev1 instanceof StringType) {
+                        return maxFromStrings(arrayToSeek);
+                    }
                 }
             }
+
             // comparator was given. Evaluate it.
             else {
                 ArrayType.ArrayComparator ac = new ArrayType.ArrayComparator();
@@ -91,4 +92,23 @@ public class ArrayMax extends BaseArity1 implements Node, Arity1 {
         }
     }
 
+    private NumberType maxFromNumbers(ArrayType arrayToSeek) throws OperonGenericException {
+        NumberType numberResult = new NumberType(this.getStatement());
+        List<NumberType> numbers = new ArrayList<NumberType>();
+        for (Node n : arrayToSeek.getValues()) {
+            numbers.add( (NumberType) n.evaluate() );
+        }
+        numberResult = Collections.max(numbers);
+        return numberResult;
+    }
+
+    private StringType maxFromStrings(ArrayType arrayToSeek) throws OperonGenericException {
+        StringType stringResult = new StringType(this.getStatement());
+        List<StringType> strings = new ArrayList<StringType>();
+        for (Node n : arrayToSeek.getValues()) {
+            strings.add( (StringType) n.evaluate() );
+        }
+        stringResult = Collections.max(strings);
+        return stringResult;
+    }
 }

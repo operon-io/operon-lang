@@ -34,6 +34,7 @@ import io.operon.runner.OperonContext;
 import io.operon.runner.model.OperonConfigs;
 import io.operon.runner.processor.function.BaseArity0;
 import io.operon.runner.processor.function.Arity0;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
 
@@ -45,6 +46,7 @@ public class DateNow extends BaseArity0 implements Node, Arity0 {
     public DateNow(Statement statement) {
         super(statement);
         this.setFunctionName("now");
+        this.setNs(Namespaces.DATE);
     }
 
     public ObjectType evaluate() throws OperonGenericException {        
@@ -241,13 +243,45 @@ public class DateNow extends BaseArity0 implements Node, Arity0 {
         else {
             c = Calendar.getInstance();
         }
-        c.set(Calendar.YEAR, year);
-        c.set(Calendar.MONTH, month - 1);
-        c.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-        c.set(Calendar.HOUR_OF_DAY, hours);
-        c.set(Calendar.MINUTE, minutes);
-        c.set(Calendar.SECOND, seconds);
-        c.set(Calendar.MILLISECOND, millis);
+        if (year != null) {
+            c.set(Calendar.YEAR, year);
+        }
+        if (month != null) {
+            c.set(Calendar.MONTH, month - 1);
+        }
+        else {
+            c.set(Calendar.MONTH, 0);
+        }
+        if (dayOfMonth != null) {
+            c.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        }
+        else {
+            c.set(Calendar.DAY_OF_MONTH, 1);
+        }
+        if (hours != null) {
+            c.set(Calendar.HOUR_OF_DAY, hours);
+        }
+        else {
+            c.set(Calendar.HOUR_OF_DAY, 0);
+        }
+        if (minutes != null) {
+            c.set(Calendar.MINUTE, minutes);
+        }
+        else {
+            c.set(Calendar.MINUTE, 0);
+        }
+        if (seconds != null) {
+            c.set(Calendar.SECOND, seconds);
+        }
+        else {
+            c.set(Calendar.SECOND, 0);
+        }
+        if (millis != null) {
+            c.set(Calendar.MILLISECOND, millis);
+        }
+        else {
+            c.set(Calendar.MILLISECOND, 0);
+        }
         
         Date result = c.getTime();
         return result; 

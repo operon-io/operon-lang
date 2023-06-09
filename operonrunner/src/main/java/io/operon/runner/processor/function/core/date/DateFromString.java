@@ -37,6 +37,7 @@ import io.operon.runner.node.type.PairType;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity1;
 import io.operon.runner.processor.function.Arity1;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.StringUtil;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
@@ -48,6 +49,7 @@ public class DateFromString extends BaseArity1 implements Node, Arity1 {
     public DateFromString(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
         this.setParams(params, "fromString", "pattern");
+        this.setNs(Namespaces.DATE);
     }
 
     public ObjectType evaluate() throws OperonGenericException {        

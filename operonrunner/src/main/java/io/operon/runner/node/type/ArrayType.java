@@ -45,11 +45,27 @@ public class ArrayType extends OperonValue implements Node {
     @Expose private byte t = IrTypes.ARRAY_TYPE; // Type-name in the IR-serialized output
     
     @Expose private List<Node> values; // Refactor to use OperonValue
+    
+    // The array-values may be optionally typed, which gives an optimization hint
+    // for some operations (e.g. min/max/sort/modulus)
+    //
+    // Value is one of IrTypes or null if not given.
+    //
+    @Expose private byte arrayValueType = IrTypes.MISSING_TYPE;
+    
     private int arrayId;
     
     public ArrayType(Statement stmt) {
         super(stmt);
         this.values = new ArrayList<Node>(); // RF
+    }
+
+    public byte getArrayValueType() {
+        return this.arrayValueType;
+    }
+    
+    public void setArrayValueType(byte type) {
+        this.arrayValueType = type;
     }
 
     public void addValue(Node value) throws OperonGenericException {
@@ -126,6 +142,7 @@ public class ArrayType extends OperonValue implements Node {
         }
 
         ArrayType result = new ArrayType(this.getStatement());
+        result.setArrayValueType(this.getArrayValueType());
         //result.setParentObj(this.getParentObj());
         //result.setPosition(this.getPosition());
         //result.setParentKey(this.getParentKey());

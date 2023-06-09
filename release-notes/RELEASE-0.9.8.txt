@@ -1,0 +1,18 @@
+0.9.8-RELEASE :: NOTES
+======================
+
+FIX
+===
+Worked a bug from path:retain()
+
+FIX
+===
+Worked a bug from IOCall
+
+IMPROVEMENT 1
+=============
+* path:reclude can take paths as param.
+
+IMPROVEMENT 2
+=============
+* path:retain can take paths as param.

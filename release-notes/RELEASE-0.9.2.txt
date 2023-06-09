@@ -1,0 +1,116 @@
+0.9.2-RELEASE :: NOTES
+======================
+
+IMPROVEMENT
+===========
+Named values.
+* evaluate-type can be shortened to "eager" or "lazy".
+* Example:
+    $a {eager}: => date:now();
+    $b {lazy}: => date:now();
+    $c {evaluate: "eager"}: => date:now();
+    $d {evaluate: "lazy"}: => date:now();
+
+IMPROVEMENT
+===========
+PairType
+* allow config-object, with option "hidden" to hide the field from serialization
+* Examples:
+    Select: {foo: "bar", score {hidden}: 98}
+    Select: {foo: "bar", score {hidden} <Number>: 98}
+
+FEATURE
+=======
+Added TestUtil, which allows to test Operon-queries from Java's unit-tests.
+* Example:
+    String query = "Select: (1 + 2) -> out:result";
+    String test = "Assert {required} Component out:result With @ = 3 End";
+    assertEquals("3", TestUtil.doTestQuery(query, test).toString());
+
+FEATURE
+=======
+Function string:urlEncode
+* Example:
+    Select: "Foo Bar" => string:urlEncode()
+    #> "Foo+Bar"
+
+FEATURE
+=======
+Function string:urlDecode
+* Example:
+    Select: "Foo+Bar" => string:urlDecode()
+    #> "Foo Bar"
+
+FIX
+===
+Throw an error on division by zero instead of allowing value "Infinite".
+
+FIX
+===
+Fix on object's self-reference
+* Example:
+    Select: {bin: 100, bai: _.bin, baa: _.bin}
+
+IMPROVEMENT
+===========
+Object's self is set, so object's pairs can access the root-object,
+instead of only being limited to the surrounding object.
+* Example:
+    Select: {bin: {foo: 100}, baa: => root().bin.foo}
+
+FEATURE
+=======
+String formatting
+* Examples:
+    :"Foo %s %s" % ["Bin", "Bai"]
+    #> "Foo Bin Bai"
+    
+    :"%s,age=%.0f" % ["Foo", 9]
+    #> "Foo,age=9"
+
+    : "Foo %s:bin;, age=%.0f:age;" % {bin: "Bar", age: 9}
+    #> "Foo Bar, age=9"
+
+IMPROVEMENT
+===========
+Update object. This works as an "upsert", adding the missing key-value pair.
+* Examples:
+    : {bin: 100, bai: 200, baa: 300} << {bai: "foo"};
+    #> {"bin": 100, "bai": "foo", "baa": 300}
+    : [{bin: 100, bai: 200}, {bin: 100, bai: 200}] << {bai: "foo"};
+    #> [{"bin": 100, "bai": "foo"}, {"bin": 100, "bai": "foo"}]
+
+IMPROVEMENT
+===========
+Allow the file -output component to write data as YAML with the "writeAs"-option.
+
+FIX
+===
+Fixed Yaml-serialization issue
+
+IMPROVEMENT
+===========
+CastRaw allows to cast the value to YAML and TOML.
+* Example:
+    Select: {bin: 100, bai: 200, baa: 300} => raw({yaml})
+    #> bin: 100
+       bai: 200
+       baa: 300
+
+RENAMING
+========
+IntegrationCall --> IOCall
+
+IMPROVEMENT
+===========
+Update can use the upsert-option to add a missing value.
+* Example:
+    Select: {bin: 100, bai: 200} << {upsert}: ~.baa: "foo";
+    #> {"bin": 100, "bai": 200, "baa": "foo"}
+
+FIX
+===
+PathMatches, added missing match-rule
+* Example:
+    : ~.books[1].book ~= ?+.book.name
+    #> false

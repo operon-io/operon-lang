@@ -17,6 +17,8 @@
 package io.operon.runner.processor.binary;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Formatter;
 
@@ -30,6 +32,7 @@ import io.operon.runner.processor.function.core.path.PathValue;
 import io.operon.runner.processor.function.core.raw.RawEvaluate;
 import io.operon.runner.processor.function.core.string.StringToRaw;
 import io.operon.runner.statement.Statement;
+import io.operon.runner.IrTypes;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
 
@@ -74,95 +77,165 @@ public class Modulus extends BaseBinaryNodeProcessor implements BinaryNodeProces
             return result;
         }
         
-        // complement of intersection (logically minus-operation) (done with EQ-op)
+        //
+        // Complement of intersection (logically minus-operation) (done with EQ-op)
+        //
+        // Warning: this is very inefficient solution and must be optimized by using
+        //          the Of -method (use HashTables).
+        //
         else if (lhsResult instanceof ArrayType && rhsResult instanceof ArrayType) {
             ArrayType lhsArray = (ArrayType) lhsResult;
             ArrayType rhsArray = (ArrayType) rhsResult;
-            
-            //System.out.println("lhs=" + lhsArray);
-            //System.out.println("rhs=" + rhsArray);
             
             List<Node> lhsValues = lhsArray.getValues();
             List<Node> rhsValues = rhsArray.getValues();
             List<Node> resultArray = new ArrayList<Node>();
             
-            List<Integer> skipLhsPositions = new ArrayList<Integer>();
-            List<Integer> skipRhsPositions = new ArrayList<Integer>();
-            
-            for (int i = 0; i < lhsValues.size(); i ++) {
-                //System.out.println("=====================");
-                boolean found = false;
-                for (int j = 0; j < rhsValues.size(); j ++) {
-                    Eq eqOp = new Eq();
-                    try {
-                        //System.out.println("compare: " + lhsValues.get(i) + " :: " + rhsValues.get(j));
-                        Node eqOpResult = eqOp.process(statement, lhsValues.get(i), rhsValues.get(j));
-                        if (eqOpResult instanceof TrueType) {
-                            found = true;
-                            skipRhsPositions.add(j);
-                            //System.out.println("  --> FOUND");
-                            break;
-                        }
-                        else {
-                            //System.out.println("  - x");
-                        }
-                    } catch (OperonGenericException oge) {
-                        // Some EQ-operations are not defined.
-                        // In this case also complement.
+            //
+            // Optimized modulus for StringType
+            //
+            if (lhsArray.getArrayValueType() == IrTypes.STRING_TYPE && rhsArray.getArrayValueType() == IrTypes.STRING_TYPE) {
+                Map<String, Integer> lhsMap = new HashMap<String, Integer>();
+                Map<String, Integer> rhsMap = new HashMap<String, Integer>();
+                Map<String, Boolean> deleteMap = new HashMap<String, Boolean>();
+                
+                for (int i = 0; i < lhsValues.size(); i ++) {
+                    String value = ((StringType) lhsValues.get(i).evaluate()).getJavaStringValue();
+                    Integer count = lhsMap.get(value);
+                    if (count == null) {
+                        lhsMap.put(value, 1);
+                    }
+                    else {
+                        lhsMap.put(value, count + 1);
                     }
                 }
-                if (found == false) {
-                    //System.out.println("  --> ADDING");
-                    skipLhsPositions.add(i);
-                    resultArray.add(lhsValues.get(i));
+                
+                for (int i = 0; i < rhsValues.size(); i ++) {
+                    String value = ((StringType) rhsValues.get(i).evaluate()).getJavaStringValue();
+                    if (lhsMap.get(value) == null) {
+                        Integer count = rhsMap.get(value);
+                        if (count == null) {
+                            rhsMap.put(value, 1);
+                        }
+                        else {
+                            rhsMap.put(value, count + 1);
+                        }
+                    }
+                    else {
+                        deleteMap.put(value, true);
+                    }
                 }
-                else {
-                    //System.out.println("  --> SKIPPING");
+                
+                for (Map.Entry<String, Boolean> entry : deleteMap.entrySet()) {
+                    lhsMap.remove(entry.getKey());
+                    rhsMap.remove(entry.getKey());
                 }
+                
+                for (Map.Entry<String, Integer> entry : lhsMap.entrySet()) {
+                    Integer count = entry.getValue();
+                    String key = entry.getKey();
+                    for (int i = 0; i < count; i ++) {
+                        StringType strValue = StringType.create(statement, key);
+                        resultArray.add(strValue);
+                    }
+                }
+                
+                for (Map.Entry<String, Integer> entry : rhsMap.entrySet()) {
+                    Integer count = entry.getValue();
+                    String key = entry.getKey();
+                    for (int i = 0; i < count; i ++) {
+                        StringType strValue = StringType.create(statement, key);
+                        resultArray.add(strValue);
+                    }
+                }
+                
+                ArrayType result = new ArrayType(statement);
+                result.getValues().addAll(resultArray);
+                return result;
             }
-
-            for (int i = 0; i < rhsValues.size(); i ++) {
-                //System.out.println("=====================");
-                boolean found = false;
-                if (skipRhsPositions.contains(i)) {
-                    continue;
+            
+            else {
+                //System.out.println("lhs=" + lhsArray);
+                //System.out.println("rhs=" + rhsArray);
+                
+                List<Integer> skipLhsPositions = new ArrayList<Integer>();
+                List<Integer> skipRhsPositions = new ArrayList<Integer>();
+                Eq eqOp = new Eq();
+                
+                for (int i = 0; i < lhsValues.size(); i ++) {
+                    //System.out.println("=====================");
+                    boolean found = false;
+                    for (int j = 0; j < rhsValues.size(); j ++) {
+                        
+                        try {
+                            //System.out.println("compare: " + lhsValues.get(i) + " :: " + rhsValues.get(j));
+                            Node eqOpResult = eqOp.process(statement, lhsValues.get(i), rhsValues.get(j));
+                            if (eqOpResult instanceof TrueType) {
+                                found = true;
+                                skipRhsPositions.add(j);
+                                //System.out.println("  --> FOUND");
+                                //break; // do not stop eagerly, otherwise the duplicates might remain
+                            }
+                            else {
+                                //System.out.println("  - x");
+                            }
+                        } catch (OperonGenericException oge) {
+                            // Some EQ-operations are not defined.
+                            // In this case also complement.
+                        }
+                    }
+                    if (found == false) {
+                        //System.out.println("  --> ADDING");
+                        skipLhsPositions.add(i);
+                        resultArray.add(lhsValues.get(i));
+                    }
+                    else {
+                        //System.out.println("  --> SKIPPING");
+                    }
                 }
-                //System.out.println("* Check rhs :: " + i + " --> " + rhsValues.get(i));
-                for (int j = 0; j < lhsValues.size(); j ++) {
-                    if (skipLhsPositions.contains(j)) {
-                        //System.out.println("  --> SKIP :: " + j + " --> " + lhsValues.get(j));
+    
+                for (int i = 0; i < rhsValues.size(); i ++) {
+                    //System.out.println("=====================");
+                    boolean found = false;
+                    if (skipRhsPositions.contains(i)) {
                         continue;
                     }
-                    Eq eqOp = new Eq();
-                    try {
-                        //System.out.println("compare: " + rhsValues.get(i) + " :: " + lhsValues.get(j));
-                        Node eqOpResult = eqOp.process(statement, rhsValues.get(i), lhsValues.get(j));
-                        if (eqOpResult instanceof TrueType) {
-                            found = true;
-                            //System.out.println("  --> FOUND");
-                            break;
+                    //System.out.println("* Check rhs :: " + i + " --> " + rhsValues.get(i));
+                    for (int j = 0; j < lhsValues.size(); j ++) {
+                        if (skipLhsPositions.contains(j)) {
+                            //System.out.println("  --> SKIP :: " + j + " --> " + lhsValues.get(j));
+                            continue;
                         }
-                        else {
-                            //System.out.println("  - x");
+                        try {
+                            //System.out.println("compare: " + rhsValues.get(i) + " :: " + lhsValues.get(j));
+                            Node eqOpResult = eqOp.process(statement, rhsValues.get(i), lhsValues.get(j));
+                            if (eqOpResult instanceof TrueType) {
+                                found = true;
+                                //System.out.println("  --> FOUND");
+                                break;
+                            }
+                            else {
+                                //System.out.println("  - x");
+                            }
+                        } catch (OperonGenericException oge) {
+                            // Some EQ-operations are not defined.
+                            // In this case also complement.
                         }
-                    } catch (OperonGenericException oge) {
-                        // Some EQ-operations are not defined.
-                        // In this case also complement.
+                    }
+                    if (found == false) {
+                        //System.out.println("  --> ADDING");
+                        skipLhsPositions.add(i);
+                        resultArray.add(rhsValues.get(i));
+                    }
+                    else {
+                        //System.out.println("  --> SKIPPING");
                     }
                 }
-                if (found == false) {
-                    //System.out.println("  --> ADDING");
-                    skipLhsPositions.add(i);
-                    resultArray.add(rhsValues.get(i));
-                }
-                else {
-                    //System.out.println("  --> SKIPPING");
-                }
+    
+                ArrayType result = new ArrayType(statement);
+                result.getValues().addAll(resultArray);
+                return result;
             }
-
-            ArrayType result = new ArrayType(statement);
-            result.getValues().addAll(resultArray);
-            return result;
         }
         
         else if (lhsResult instanceof ObjectType && rhsResult instanceof ArrayType) {

@@ -112,8 +112,20 @@ public class InEq extends BaseBinaryNodeProcessor implements BinaryNodeProcessor
             return resultFalse;
         }
 */
-        else if (lhsResult instanceof NullType && rhsResult instanceof NullType) {
-            if ( ((NullType) lhsResult).toString().equals( ((NullType) rhsResult).toString()) == false) {
+        else if (lhsResult instanceof NullType) {
+            if (rhsResult instanceof NullType == false) {
+                TrueType resultTrue = new TrueType(statement);
+                statement.setCurrentValue(resultTrue);
+                return resultTrue;
+            }
+
+            FalseType resultFalse = new FalseType(statement);
+            statement.setCurrentValue(resultFalse);
+            return resultFalse;
+        }
+        
+        else if (rhsResult instanceof NullType) {
+            if (lhsResult instanceof NullType == false) {
                 TrueType resultTrue = new TrueType(statement);
                 statement.setCurrentValue(resultTrue);
                 return resultTrue;

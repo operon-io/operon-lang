@@ -1,0 +1,14 @@
+0.9.11-RELEASE :: NOTES
+======================
+
+FIX
+===
+splitBy-function.
+
+Example:
+    Select: "FooBar" => splitBy("o")
+    #> ["F", "", "Bar"]
+    
+NEW FUNCTION
+============
+date:daysBetween($date1, $date2)

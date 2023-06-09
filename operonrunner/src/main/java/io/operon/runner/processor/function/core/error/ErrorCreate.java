@@ -27,6 +27,7 @@ import io.operon.runner.node.type.*;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity1;
 import io.operon.runner.processor.function.Arity1;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.node.FunctionRegularArgument;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
@@ -42,6 +43,7 @@ public class ErrorCreate extends BaseArity1 implements Node, Arity1 {
         super(statement);
         this.setParam1AsOptional(true);
         this.setParams(params, "create", "options");
+        this.setNs(Namespaces.ERROR);
     }
 
     public ErrorValue evaluate() throws OperonGenericException {        

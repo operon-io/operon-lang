@@ -1,0 +1,67 @@
+0.9.6-RELEASE :: NOTES
+======================
+
+FEATURE
+=======
+Paths now support linking the root-value from named-value or from function.
+Examples:
+	$foo: {bin: 10};
+	Select: Path($foo.bin)
+	#> 10
+	
+	$foo: {bin: 10};
+	Select: ~($foo.bin)
+	#> 10
+	
+	$foo: {bin: 10};
+	Select: ~$foo.bin
+	#> 10
+	
+	Function foo():
+		{bin: 10}
+	;
+	Select: Path(foo().bin)
+	#> 10
+
+	Function foo():
+		{bin: 10}
+	;
+	Select: ~(foo().bin)
+	#> 10
+	
+	Function foo():
+		{bin: 10}
+	;
+	Select: ~foo().bin
+	#> 10
+
+IMPROVEMENT
+===========
+JSONParser supports Paths.
+
+IMPROVEMENT
+===========
+More error messages on class-casting exceptions.
+
+IMPROVEMENT
+===========
+object:remove -function supports removing keys by array and object.
+Examples:
+	Select:
+		{bin: 7, bai: 77, baa: 777}
+		=> remove(["bin", "bai"])
+	#> {"baa": 777}
+	
+	Select:
+		{bin: 7, bai: 77, baa: 777}
+		=> remove([1, "bai"])
+	#> {"baa": 777}
+	
+	Select:
+		{bin: 7, bai: 77, baa: 777}
+		=> remove({bin, bai})
+	#> {"baa": 777}
+
+FIX
+===
+Division-operator for using as "has" to function properly.

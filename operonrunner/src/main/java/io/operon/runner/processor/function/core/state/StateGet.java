@@ -29,6 +29,7 @@ import io.operon.runner.node.type.*;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity2;
 import io.operon.runner.processor.function.Arity2;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.model.exception.OperonGenericException;
@@ -42,6 +43,7 @@ public class StateGet extends BaseArity2 implements Node, Arity2 {
         // param: value :: the value to get
         // param: initialValue :: the value to set and get if the state was not already set
         this.setParams(params, "get", "value", "initialValue");
+        this.setNs(Namespaces.STATE);
     }
 
     public OperonValue evaluate() throws OperonGenericException {        

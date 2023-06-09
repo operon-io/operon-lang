@@ -28,6 +28,7 @@ import io.operon.runner.node.type.*;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity2;
 import io.operon.runner.processor.function.Arity2;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.processor.function.core.array.ArrayUpdate;
 import io.operon.runner.processor.function.core.object.ObjectUpdate;
 import io.operon.runner.processor.function.core.path.PathValue;
@@ -65,6 +66,7 @@ public class GenericUpdate extends BaseArity2 implements Node, Arity2 {
         super(statement);
         this.setParam2AsOptional(true);
         this.setParams(params, "update", "value", "target");
+        this.setNs(Namespaces.CORE);
     }
 
     public OperonValue evaluate() throws OperonGenericException {        

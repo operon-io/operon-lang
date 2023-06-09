@@ -1,0 +1,24 @@
+0.9.4-RELEASE :: NOTES
+======================
+
+FIX
+===
+String-templating use dot always as decimal-separator.
+Example:
+	* Select: \"PI=%.2f\" % 3.141592
+	  #> "PI=3.141592"
+
+FIX
+===
+Multiline padded strings with """> now align the new lines better.
+
+IMPROVEMENT
+===========
+Logical-operators and multiple nodes: improved error message (e.g. when types do not match):
+  - added the sourceCodeLineNumber, and lhs and rhs -values into the message for binary-operators.
+  - added the sourceCodeLineNumber for multiple nodes, making it easier to locate the error quickly.
+
+FEATURE
+=======
+Added function: array:contains($test) <Boolean>.
+This behaves the same as array:forAtLeast(1, $test).

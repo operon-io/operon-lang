@@ -1,0 +1,116 @@
+0.9.9-RELEASE :: NOTES
+======================
+
+IMPROVEMENT 1
+=============
+Using ObjAccess is now possible with shorter form,
+without having to refer to root- or current value.
+
+Example:
+    $: {bin, bai, baa} Select: .bin
+
+
+IMPROVEMENT 2
+=============
+Using ObjDynamicAccess is now possible with shorter form,
+without having to refer to root- or current value.
+
+Example:
+    $: {bin, bai, baa} Select: .("bin")
+
+IMPROVEMENT 3
+=============
+Using ObjDeepScan is now possible with shorter form,
+without having to refer to root- or current value.
+
+Example:
+    $: {bin: {bai, baa} Select: ..bai
+
+IMPROVEMENT 4
+=============
+Using ObjDynamicDeepScan is now possible with shorter form,
+without having to refer to root- or current value.
+
+Example:
+    $: {bin: {bai, baa} Select: ..("bai")
+
+NEW FUNCTION
+============
+isString()
+Example:
+    Select: "foo" => isString()
+    #> true
+
+NEW FUNCTION
+============
+isArray()
+Example:
+    Select: ["foo"] => isArray()
+    #> true
+
+NEW FUNCTION
+============
+isObject()
+Example:
+    Select: {foo: 1} => isObject()
+    #> true
+
+NEW FUNCTION
+============
+isEmptyString()
+Example:
+    Select: "" => isEmptyString()
+    #> true
+
+NEW FUNCTION
+============
+isEmptyArray()
+Example:
+    Select: [] => isEmptyArray()
+    #> true
+
+NEW FUNCTION
+============
+isEmptyObject()
+Example:
+    Select: {} => isEmptyObject()
+    #> true
+
+NEW FUNCTION
+============
+isNull()
+Example:
+    Select: null => isNull()
+    #> true
+
+NEW FUNCTION
+============
+isEmpty()
+Example:
+    Select: => isEmpty()
+    #> true
+
+NEW FEATURE
+===========
+EmptyString
+Example:
+    Select: "" EmptyString
+    #> true
+
+NEW FEATURE
+===========
+EmptyArray
+Example:
+    Select: [] EmptyString
+    #> true
+
+NEW FEATURE
+===========
+EmptyObject
+Example:
+    Select: {} EmptyObject
+    #> true
+
+INTERNAL
+========
+Working to output IR-model of the query.

@@ -165,8 +165,29 @@ public class Where extends AbstractNode implements Node, java.io.Serializable {
             
             //debug("    Is match: " + isMatch);
             if (isMatch instanceof TrueType) {
-                //debug("    - Match: adding to matchedPaths");
-                this.matchedPaths.add(this.currentPath.copy());
+                //
+                // evaluate whereExpr
+                //
+                Node expr = this.getWhereExpr();
+                if (expr != null) {
+                    try {
+                        expr.getStatement().setCurrentValue(obj);
+                        expr.getStatement().setCurrentPath(currentPath);
+                        isMatch = expr.evaluate();
+                        
+                        if (isMatch instanceof TrueType) {
+                            //debug("    - Match: adding to matchedPaths");
+                            this.matchedPaths.add(this.currentPath.copy());
+                        }
+                    } catch (OperonGenericException oge) {
+                        // noop
+                    }
+                }
+
+                else {
+                    //debug("    - Match: adding to matchedPaths");
+                    this.matchedPaths.add(this.currentPath.copy());                    
+                }
             }
 
             if (info.maxResults != null && matchedPaths.size() >= info.maxResults) {
@@ -282,7 +303,31 @@ public class Where extends AbstractNode implements Node, java.io.Serializable {
             
             //debug("    Is match: " + isMatch);
             if (isMatch instanceof TrueType /*&& truncated == false*/) {
-                this.matchedPaths.add(this.currentPath.copy());
+                //
+                // evaluate whereExpr
+                //
+                Node expr = this.getWhereExpr();
+                if (expr != null) {
+                    try {
+                        OperonValue pathValue = PathValue.get(array, currentPath);
+                        expr.getStatement().setCurrentValue(pathValue);
+                        expr.getStatement().setCurrentPath(currentPath);
+                        isMatch = expr.evaluate();
+                        
+                        if (isMatch instanceof TrueType) {
+                            //debug("    - Match: adding to matchedPaths");
+                            this.matchedPaths.add(this.currentPath.copy());
+                        }
+                    }
+                    catch (OperonGenericException oge) {
+                        // noop
+                    }
+                }
+
+                else {
+                    //debug("    - Match: adding to matchedPaths");
+                    this.matchedPaths.add(this.currentPath.copy());                    
+                }
             }
             
             if (info.maxResults != null && matchedPaths.size() >= info.maxResults) {

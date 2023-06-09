@@ -1,0 +1,15 @@
+0.9.3-RELEASE :: NOTES
+======================
+
+FIX
+===
+Map with path:next() / path:previous()
+
+IMPROVEMENT
+===========
+Aggregate tries to set the heartBeat -default value 1000ms
+if timeoutMillis was used but no explicit heartBeat was given.
+
+FIX
+===
+Fixed multiline-strings -terminating issue.

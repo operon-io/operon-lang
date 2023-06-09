@@ -25,6 +25,7 @@ import io.operon.runner.node.type.*;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity1;
 import io.operon.runner.processor.function.Arity1;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.processor.function.core.string.StringToRaw;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
@@ -38,6 +39,7 @@ public class SRawCollect extends BaseArity1 implements Node, Arity1 {
     public SRawCollect(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
         this.setParams(params, "collect", "regex");
+        this.setNs(Namespaces.RAW);
     }
 
     public ArrayType evaluate() throws OperonGenericException {        

@@ -29,6 +29,7 @@ import io.operon.runner.statement.Statement;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.processor.function.BaseArity0;
 import io.operon.runner.processor.function.Arity0;
+import io.operon.runner.processor.function.Namespaces;
 
 import org.apache.logging.log4j.Logger;
 import io.operon.runner.model.exception.OperonGenericException;
@@ -46,6 +47,7 @@ public class Copy extends BaseArity0 implements Node, Arity0 {
     public Copy(Statement statement) throws OperonGenericException {
         super(statement);
         this.setFunctionName("copy");
+        this.setNs(Namespaces.CORE);
     }
 
     public OperonValue evaluate() throws OperonGenericException {

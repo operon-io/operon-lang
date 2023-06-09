@@ -29,6 +29,7 @@ import io.operon.runner.node.type.*;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity0;
 import io.operon.runner.processor.function.Arity0;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.ErrorUtil;
 
 import org.apache.logging.log4j.Logger;
@@ -47,6 +48,7 @@ public class OperonType extends BaseArity0 implements Node, Arity0 {
     public OperonType(Statement statement) throws OperonGenericException {
         super(statement);
         this.setFunctionName("type");
+        this.setNs(Namespaces.CORE);
     }
 
     public StringType evaluate() throws OperonGenericException {        

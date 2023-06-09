@@ -30,6 +30,7 @@ import io.operon.runner.node.type.ObjectType;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity0;
 import io.operon.runner.processor.function.Arity0;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
@@ -39,6 +40,7 @@ public class StringLength extends BaseArity0 implements Node, Arity0 {
     public StringLength(Statement statement) {
         super(statement);
         this.setFunctionName("length");
+        this.setNs(Namespaces.STRING);
     }
 
     public NumberType evaluate() throws OperonGenericException {        

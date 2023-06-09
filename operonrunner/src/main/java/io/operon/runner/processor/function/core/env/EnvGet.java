@@ -28,6 +28,7 @@ import io.operon.runner.node.type.*;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity1;
 import io.operon.runner.processor.function.Arity1;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.processor.function.core.raw.RawToStringType;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.util.ErrorUtil;
@@ -38,6 +39,7 @@ public class EnvGet extends BaseArity1 implements Node, Arity1 {
     public EnvGet(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
         this.setParams(params, "get", "name");
+        this.setNs(Namespaces.ENV);
     }
 
     public OperonValue evaluate() throws OperonGenericException {

@@ -1,0 +1,46 @@
+0.9.10-RELEASE :: NOTES
+======================
+
+IMPROVEMENT 1
+=============
+Map -option {outputObject}
+Example:
+    $: [{key: "bin", value: "foo"}, {key: "bai", value: "bar"}] Select: Map {outputObject}: => createPair(.key, .value + "!") End
+    #> {"bin": "foo!", "bai": "bar!"}
+
+IMPROVEMENT 2
+=============
+Comparing null to other value.
+Example:
+    Select: "foo" = null
+    #> false
+
+Example:
+    Select: "foo" != null
+    #> true
+
+CHANGE
+======
+Value $foo: "bar" End:Value --> Let $foo: "bar" End:Let
+
+FIX
+===
+Where -statement evaluates the optional expr.
+Example:
+    Select: [{value: 123}, {value: 222}, {value: 333}] Where ~=?*: => object:value() = 222 End:Where
+    #> ["[2]", "[2].value"]
+    
+In the example above, the optional expr is => object:value() = 222  Where ~=?*: => object:value() = 222 End:Where
+
+NEW FEATURE
+===========
+Of <type>, which is used to give Operon hint of the type that array contains.
+This is used to optimize algorithms, such as intersection, complement of intersection,
+min, max and sort.
+Example:
+    #
+    # Complement of intersection:
+    #
+    Select: ["foo", "bar", "baz"] Of <String> % ["bar"] Of <String>
+    #> ["foo", "baz"]
+

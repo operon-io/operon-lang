@@ -38,7 +38,8 @@ import io.operon.runner.model.exception.OperonGenericException;
 import org.apache.logging.log4j.LogManager;
 
 //
-// TODO: this is a work in progress!
+// TODO: this is a work in progress
+// TODO: this should use the Key -expression
 //
 public class ArrayMaxByPath extends BaseArity1 implements Node, Arity1 {
      // no logger 

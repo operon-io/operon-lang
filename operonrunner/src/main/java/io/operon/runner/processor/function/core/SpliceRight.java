@@ -26,6 +26,7 @@ import io.operon.runner.model.path.*;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.processor.function.BaseArity1;
 import io.operon.runner.processor.function.Arity1;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.ErrorUtil;
 
 import org.apache.logging.log4j.Logger;
@@ -44,6 +45,7 @@ public class SpliceRight extends BaseArity1 implements Node, Arity1 {
     public SpliceRight(Statement stmnt, List<Node> params) throws OperonGenericException {
         super(stmnt);
         this.setParams(params, "spliceRight", "start");
+        this.setNs(Namespaces.CORE);
     }
 
     public OperonValue evaluate() throws OperonGenericException {

@@ -31,6 +31,7 @@ import io.operon.runner.model.path.*;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity1;
 import io.operon.runner.processor.function.Arity1;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
@@ -40,6 +41,7 @@ public class PathCreate extends BaseArity1 implements Node, Arity1 {
     public PathCreate(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
         this.setParams(params, "create", "path");
+        this.setNs(Namespaces.PATH);
     }
 
     public Path evaluate() throws OperonGenericException {

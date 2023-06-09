@@ -32,6 +32,8 @@ import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.util.ErrorUtil;
 
+import io.operon.runner.IrTypes;
+
 import org.apache.logging.log4j.Logger;
 import io.operon.runner.model.exception.OperonGenericException;
 
@@ -51,6 +53,9 @@ public class ArrayMin extends BaseArity1 implements Node, Arity1 {
     public OperonValue evaluate() throws OperonGenericException {
         OperonValue currentValue = this.getStatement().getCurrentValue();
         ArrayType arrayToSeek = (ArrayType) currentValue.evaluate();
+        
+        //System.out.println(arrayToSeek.getArrayValueType());
+        
         if (arrayToSeek.getValues().size() == 0) {
             return currentValue;
         }
@@ -58,24 +63,23 @@ public class ArrayMin extends BaseArity1 implements Node, Arity1 {
         try {
             // comparator was not given:
             if (this.getParam1() == null) {
-                OperonValue ev1 = (OperonValue) arrayToSeek.getValues().get(0).evaluate();
-                if (ev1 instanceof NumberType) {
-                    NumberType numberResult = new NumberType(this.getStatement());
-                    List<NumberType> numbers = new ArrayList<NumberType>();
-                    for (Node n : arrayToSeek.getValues()) {
-                        numbers.add( (NumberType) n.evaluate() );
+                if (arrayToSeek.getArrayValueType() != IrTypes.MISSING_TYPE) {
+                    if (arrayToSeek.getArrayValueType() == IrTypes.NUMBER_TYPE) {
+                        return minFromNumbers(arrayToSeek);
                     }
-                    numberResult = Collections.min(numbers);
-                    return numberResult;
+                    else if (arrayToSeek.getArrayValueType() == IrTypes.STRING_TYPE) {
+                        return minFromStrings(arrayToSeek);
+                    }
                 }
-                else if (ev1 instanceof StringType) {
-                    StringType stringResult = new StringType(this.getStatement());
-                    List<StringType> strings = new ArrayList<StringType>();
-                    for (Node n : arrayToSeek.getValues()) {
-                        strings.add( (StringType) n.evaluate() );
+                
+                else {
+                    OperonValue ev1 = (OperonValue) arrayToSeek.getValues().get(0).evaluate();
+                    if (ev1 instanceof NumberType) {
+                        return minFromNumbers(arrayToSeek);
                     }
-                    stringResult = Collections.min(strings);
-                    return stringResult;
+                    else if (ev1 instanceof StringType) {
+                        return minFromStrings(arrayToSeek);
+                    }
                 }
             }
             // comparator was given. Evaluate it.
@@ -90,5 +94,24 @@ public class ArrayMin extends BaseArity1 implements Node, Arity1 {
             return ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION", "array:" + this.getFunctionName(), e.getMessage());
         }
     }
+    
+    private NumberType minFromNumbers(ArrayType arrayToSeek) throws OperonGenericException {
+        NumberType numberResult = new NumberType(this.getStatement());
+        List<NumberType> numbers = new ArrayList<NumberType>();
+        for (Node n : arrayToSeek.getValues()) {
+            numbers.add( (NumberType) n.evaluate() );
+        }
+        numberResult = Collections.min(numbers);
+        return numberResult;
+    }
 
+    private StringType minFromStrings(ArrayType arrayToSeek) throws OperonGenericException {
+        StringType stringResult = new StringType(this.getStatement());
+        List<StringType> strings = new ArrayList<StringType>();
+        for (Node n : arrayToSeek.getValues()) {
+            strings.add( (StringType) n.evaluate() );
+        }
+        stringResult = Collections.min(strings);
+        return stringResult;
+    }
 }

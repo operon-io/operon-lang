@@ -1,0 +1,54 @@
+0.9.7-RELEASE :: NOTES
+======================
+
+FEATURE
+=======
+Added function string:split($regex), which allows splitting the string-value by regular expression.
+
+IMPROVEMENT 1
+=============
+* array:contains -function can have Lambda-function reference with any param-names.
+Example:
+  $:[1,2,3] Select: @ => array:contains( Lambda($t: ?): $t < 10; )
+  #> true
+
+IMPROVEMENT 2
+=============
+* array:groupBy -function can have Lambda-function reference with any param-names.
+Example:
+  $:[1,2,3] Select: 
+    => array:groupBy(
+      Lambda($a: ?):
+        When @ = 1: "foo"; 
+        Otherwise "bar";
+      End
+    )
+  #> {"bar": [2, 3], "foo": [1]}
+
+IMPROVEMENT 3
+=============
+* array:forAll -function can have Lambda-function reference with any param-names.
+
+IMPROVEMENT 4
+=============
+* array:forAtLeast -function can have Lambda-function reference with any param-names.
+
+IMPROVEMENT 5
+=============
+* array:forAtMost -function can have Lambda-function reference with any param-names.
+
+IMPROVEMENT 6
+=============
+* array:forEach -function can have Lambda-function reference with any param-names.
+
+IMPROVEMENT 7
+=============
+* array:forEachPair -function can have Lambda-function reference with any param-names.
+
+IMPROVEMENT 8
+=============
+* array:reduce -function can have Lambda-function reference with any param-names.
+
+IMPROVEMENT 9
+=============
+* array:search -function can have Lambda-function reference with any param-names.

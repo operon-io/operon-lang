@@ -30,6 +30,7 @@ import io.operon.runner.node.type.OperonValue;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity0;
 import io.operon.runner.processor.function.Arity0;
+import io.operon.runner.processor.function.Namespaces;
 
 import org.apache.logging.log4j.Logger;
 import io.operon.runner.model.exception.OperonGenericException;
@@ -47,6 +48,7 @@ public class Uuid extends BaseArity0 implements Node, Arity0 {
     public Uuid(Statement statement) throws OperonGenericException {
         super(statement);
         this.setFunctionName("uuid");
+        this.setNs(Namespaces.CORE);
     }
 
     public StringType evaluate() throws OperonGenericException {

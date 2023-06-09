@@ -29,6 +29,7 @@ import io.operon.runner.model.path.*;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity0;
 import io.operon.runner.processor.function.Arity0;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
@@ -57,6 +58,7 @@ public class PathNext extends BaseArity0 implements Node, Arity0 {
     public PathNext(Statement statement) throws OperonGenericException {
         super(statement);
         this.setFunctionName("next");
+        this.setNs(Namespaces.PATH);
     }
 
     public OperonValue evaluate() throws OperonGenericException {

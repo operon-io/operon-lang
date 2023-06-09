@@ -39,6 +39,9 @@ import io.operon.runner.util.ErrorUtil;
 import org.apache.logging.log4j.Logger;
 import io.operon.runner.model.exception.OperonGenericException;
  
+import io.operon.runner.IrTypes;
+import com.google.gson.annotations.Expose;
+
 import org.apache.logging.log4j.LogManager; 
  
 /** 
@@ -49,11 +52,12 @@ import org.apache.logging.log4j.LogManager;
 public class Map extends AbstractNode implements Node {
      // no logger  
 
-    private Node mapExpr; // i.e. "[1,2,3] Map map_expr End" (here the mapExpr is the map_expr)
+    @Expose private byte t = IrTypes.MAP; // Type-name in the IR-serialized output
+    @Expose private Node mapExpr; // i.e. "[1,2,3] Map map_expr End" (here the mapExpr is the map_expr)
 
     // SplicingLeft, SplicingRight, or SplicingRange
     //private Node mappingRange; // e.g. [1,2,3] Map(::2): 0 End ==> [0, 0, 3]
-    private Node configs;
+    @Expose private Node configs;
 
     public Map(Statement stmnt) {
         super(stmnt);
@@ -230,13 +234,14 @@ public class Map extends AbstractNode implements Node {
         return resultArray;
     }
 
-    public ArrayType handleArray(OperonValue currentValueCopy, Info info) throws OperonGenericException {
+    public OperonValue handleArray(OperonValue currentValueCopy, Info info) throws OperonGenericException {
         //System.out.println("Map :: handleArray");
         //System.out.println("  Map :: expr=" + this.getMapExpr().getExpr()); // OK this far
         ArrayType arr = (ArrayType) currentValueCopy;
         List<Node> arrayValues = arr.getValues();
         //System.out.println("  >> " + arr);
         ArrayType resultArray = new ArrayType(this.getStatement());
+        ObjectType resultObject = new ObjectType(this.getStatement());
         
         if (info.parallel == false) {
             ArrayType window = null;
@@ -348,7 +353,21 @@ public class Map extends AbstractNode implements Node {
                     continue; 
                 }
                 //System.out.println("  >> Map res: " + mapExprResult);
-                resultArray.addValue(((OperonValue) mapExprResult).copy()); // Add the deep-copy instead of the value-reference to prevent modifation from memory.
+                if (info.outputObject == false) {
+                    resultArray.addValue(((OperonValue) mapExprResult).copy()); // Add the deep-copy instead of the value-reference to prevent modifation from memory.
+                }
+                else {
+                    if (mapExprResult instanceof ObjectType) {
+                        ObjectType resultObj = (ObjectType) mapExprResult;
+                        PairType resultPair = new PairType(this.getStatement());
+                        String key = resultObj.getKeyByIndex(0);
+                        OperonValue value = (OperonValue) resultObj.getByIndex(0);
+                        if (value != null) {
+                            resultPair.setPair(key, value.copy());
+                            resultObject.addPair(resultPair);
+                        }
+                    }
+                }
                 this.synchronizeState();
             }
         }
@@ -409,9 +428,31 @@ public class Map extends AbstractNode implements Node {
                     }
                 }    
             ).collect(Collectors.toList());
-            resultArray.getValues().addAll(parallelResults);
+            
+            if (info.outputObject == false) {
+                resultArray.getValues().addAll(parallelResults);
+            }
+            else {
+                for (int i = 0; i < parallelResults.size(); i ++) {
+                    if (parallelResults.get(i) instanceof ObjectType) {
+                        ObjectType resultObj = (ObjectType) parallelResults.get(i);
+                        PairType resultPair = new PairType(this.getStatement());
+                        String key = resultObj.getKeyByIndex(0);
+                        OperonValue value = (OperonValue) resultObj.getByIndex(0);
+                        if (value != null) {
+                            resultPair.setPair(key, value.copy());
+                            resultObject.addPair(resultPair);
+                        }
+                    }
+                }
+            }
         }
-        return resultArray;
+        if (info.outputObject == false) {
+            return resultArray;
+        }
+        else {
+            return resultObject;
+        }
     }
 
     public OperonValue handleObject(OperonValue currentValueCopy, Info info) throws OperonGenericException, IOException, ClassNotFoundException {
@@ -955,6 +996,15 @@ public class Map extends AbstractNode implements Node {
                         System.err.println("ERROR SIGNAL: direction-property");
                     }
                     break;
+                case "\"outputobject\"":
+                    OperonValue outputObjectValue = pair.getEvaluatedValue();
+                    if (outputObjectValue instanceof FalseType) {
+                        info.outputObject = false;
+                    }
+                    else {
+                        info.outputObject = true;
+                    }
+                    break;
                 default:
                     break;
             }
@@ -984,9 +1034,14 @@ public class Map extends AbstractNode implements Node {
         
         //
         // from which direction to start the mapping? LEFT = from left to right.
-        // NOTE: the final result reflects this, so that [1,2,3] Map {"direction": "right"} @; will become [3,2,1]
+        // NOTE: the final result reflects this, so that [1,2,3] Map {direction: "right"} @; will become [3,2,1]
         //
         public Direction direction = Direction.LEFT;
+        //
+        // Applicaple for mapping Arrays. When true, then the result is an Object (instead of an Array).
+        // This requires that the mapping produces valid object -pairs (e.g. with => createPair(key, pair) -function)
+        //
+        public boolean outputObject = false;
     }
     
     //

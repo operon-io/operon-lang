@@ -27,6 +27,7 @@ import io.operon.runner.statement.Statement;
 import io.operon.runner.statement.DefaultStatement;
 import io.operon.runner.processor.function.BaseArity2;
 import io.operon.runner.processor.function.Arity2;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
 
@@ -35,6 +36,7 @@ public class StringReplaceFirst extends BaseArity2 implements Node, Arity2 {
     public StringReplaceFirst(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
         this.setParams(params, "replaceFirst", "search", "replace");
+        this.setNs(Namespaces.STRING);
     }
 
     public StringType evaluate() throws OperonGenericException {        

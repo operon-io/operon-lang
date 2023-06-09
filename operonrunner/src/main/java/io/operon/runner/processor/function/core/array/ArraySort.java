@@ -32,6 +32,7 @@ import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity1;
 import io.operon.runner.processor.function.Arity1;
 import io.operon.runner.processor.function.Namespaces;
+import io.operon.runner.IrTypes;
 import io.operon.runner.processor.function.SupportsAttributes;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.util.ErrorUtil;
@@ -62,33 +63,27 @@ public class ArraySort extends BaseArity1 implements Node, Arity1 /*, SupportsAt
             return arrayToSort;
         }
         
-        List<Node> resultList = new ArrayList<Node>();
-        
         try {
             // comparator was not given:
             if (this.getParam1() == null) {
-                OperonValue ev1 = (OperonValue) arrayToSort.getValues().get(0).evaluate();
-                if (ev1 instanceof NumberType) {
-                    List<NumberType> numbers = new ArrayList<NumberType>();
-                    for (Node n : arrayToSort.getValues()) {
-                        numbers.add( (NumberType) n.evaluate() );
+                if (arrayToSort.getArrayValueType() != IrTypes.MISSING_TYPE) {
+                    if (arrayToSort.getArrayValueType() == IrTypes.NUMBER_TYPE) {
+                        return sortFromNumbers(arrayToSort);
                     }
-                    Collections.sort(numbers);
-                    for (NumberType num : numbers) {
-                        resultList.add(num);
+                    else if (arrayToSort.getArrayValueType() == IrTypes.STRING_TYPE) {
+                        return sortFromStrings(arrayToSort);
                     }
                 }
-                else if (ev1 instanceof StringType) {
-                    List<StringType> strings = new ArrayList<StringType>();
-                    for (Node n : arrayToSort.getValues()) {
-                        strings.add( (StringType) n.evaluate() );
+                
+                else {
+                    OperonValue ev1 = (OperonValue) arrayToSort.getValues().get(0).evaluate();
+                    if (ev1 instanceof NumberType) {
+                        return sortFromNumbers(arrayToSort);
                     }
-                    Collections.sort(strings);
-                    for (StringType string : strings) {
-                        resultList.add(string);
+                    else if (ev1 instanceof StringType) {
+                        return sortFromStrings(arrayToSort);
                     }
                 }
-                arrayToSort.setValues(resultList);
             }
             // comparator was given. Evaluate it.
             else {
@@ -103,4 +98,29 @@ public class ArraySort extends BaseArity1 implements Node, Arity1 /*, SupportsAt
         }
     }
 
+    private ArrayType sortFromNumbers(ArrayType arrayToSort) throws OperonGenericException {
+        List<NumberType> numbers = new ArrayList<NumberType>();
+        List<Node> resultList = new ArrayList<Node>();
+        for (Node n : arrayToSort.getValues()) {
+            numbers.add( (NumberType) n.evaluate() );
+        }
+        Collections.sort(numbers);
+        
+        resultList.addAll(numbers);
+        arrayToSort.setValues(resultList);
+        return arrayToSort;
+    }
+
+    private ArrayType sortFromStrings(ArrayType arrayToSort) throws OperonGenericException {
+        List<StringType> strings = new ArrayList<StringType>();
+        List<Node> resultList = new ArrayList<Node>();
+        for (Node n : arrayToSort.getValues()) {
+            strings.add( (StringType) n.evaluate() );
+        }
+        Collections.sort(strings);
+        
+        resultList.addAll(strings);
+        arrayToSort.setValues(resultList);
+        return arrayToSort;
+    }
 }

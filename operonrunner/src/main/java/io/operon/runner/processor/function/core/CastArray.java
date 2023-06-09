@@ -28,6 +28,7 @@ import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.core.path.PathParts;
 import io.operon.runner.processor.function.BaseArity0;
 import io.operon.runner.processor.function.Arity0;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.node.FunctionRegularArgument;
 import io.operon.runner.util.ErrorUtil;
 
@@ -47,6 +48,7 @@ public class CastArray extends BaseArity0 implements Node, Arity0 {
     public CastArray(Statement statement) throws OperonGenericException {
         super(statement);
         this.setFunctionName("array");
+        this.setNs(Namespaces.CORE);
     }
 
     public ArrayType evaluate() throws OperonGenericException {

@@ -30,6 +30,7 @@ import io.operon.runner.node.type.ObjectType;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity1;
 import io.operon.runner.processor.function.Arity1;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.ErrorUtil;
 
 import org.apache.logging.log4j.Logger;
@@ -48,6 +49,7 @@ public class Wait extends BaseArity1 implements Node, Arity1 {
     public Wait(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
         this.setParams(params, "wait", "millis");
+        this.setNs(Namespaces.CORE);
     }
 
     public OperonValue evaluate() throws OperonGenericException {

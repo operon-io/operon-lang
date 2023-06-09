@@ -29,6 +29,7 @@ import io.operon.runner.statement.DefaultStatement;
 import io.operon.runner.processor.function.core.string.StringToRaw;
 import io.operon.runner.processor.function.BaseArity2;
 import io.operon.runner.processor.function.Arity2;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
 
@@ -43,6 +44,7 @@ public class SRawReplaceAll extends BaseArity2 implements Node, Arity2 {
     public SRawReplaceAll(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
         this.setParams(params, "replaceAll", "search", "replace");
+        this.setNs(Namespaces.RAW);
     }
 
     public RawValue evaluate() throws OperonGenericException {        

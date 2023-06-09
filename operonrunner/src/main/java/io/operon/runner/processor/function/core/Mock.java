@@ -36,6 +36,7 @@ import io.operon.runner.statement.Statement;
 import io.operon.runner.model.test.MockComponent;
 import io.operon.runner.processor.function.BaseArity1;
 import io.operon.runner.processor.function.Arity1;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.Main;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.util.ErrorUtil;
@@ -54,6 +55,7 @@ public class Mock extends BaseArity1 implements Node, Arity1 {
     public Mock(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
         this.setParams(params, "mock", "value");
+        this.setNs(Namespaces.CORE);
     }
 
     public OperonValue evaluate() throws OperonGenericException {        

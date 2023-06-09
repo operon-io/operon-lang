@@ -32,6 +32,7 @@ import io.operon.runner.model.pathmatch.*;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity1;
 import io.operon.runner.processor.function.Arity1;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
@@ -48,6 +49,7 @@ public class PathReclude extends BaseArity1 implements Node, Arity1 {
         this.setParam1AsOptional(true);
         //this.setFunctionName("reclude");
         this.setParams(params, "reclude", "paths");
+        this.setNs(Namespaces.PATH);
     }
 
     public OperonValue evaluate() throws OperonGenericException {

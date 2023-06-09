@@ -18,6 +18,8 @@ package io.operon.runner.processor.binary;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 import io.operon.runner.node.Node;
 import io.operon.runner.node.type.*;
@@ -25,6 +27,7 @@ import io.operon.runner.processor.BaseBinaryNodeProcessor;
 import io.operon.runner.processor.BinaryNodeProcessor;
 import io.operon.runner.processor.function.core.path.PathRetain;
 import io.operon.runner.statement.Statement;
+import io.operon.runner.IrTypes;
 import io.operon.runner.processor.binary.logical.Eq;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
@@ -77,7 +80,12 @@ public class Division extends BaseBinaryNodeProcessor implements BinaryNodeProce
             return result;
         }
         
+        //
         // intersection (with EQ-op)
+        //
+        // NOTE: this intersection-operation does keep the duplicates. If no duplicates are desired, they should be
+        //       removed prior to applying this operation.
+        //
         else if (lhsResult instanceof ArrayType && rhsResult instanceof ArrayType) {
             ArrayType lhsArray = (ArrayType) lhsResult;
             ArrayType rhsArray = (ArrayType) rhsResult;
@@ -86,23 +94,71 @@ public class Division extends BaseBinaryNodeProcessor implements BinaryNodeProce
             List<Node> rhsValues = rhsArray.getValues();
             List<Node> resultArray = new ArrayList<Node>();
             
-            for (int i = 0; i < lhsValues.size(); i ++) {
-                for (int j = 0; j < rhsValues.size(); j ++) {
-                    Eq eqOp = new Eq();
-                    try {
-                        Node eqOpResult = eqOp.process(statement, lhsValues.get(i), rhsValues.get(j));
-                        if (eqOpResult instanceof TrueType) {
-                            resultArray.add(lhsValues.get(i));
-                        }
-                    } catch (OperonGenericException oge) {
-                        // Some EQ-operations are not defined.
+            //
+            // Optimized intersection for StringType
+            //
+            if (lhsArray.getArrayValueType() == IrTypes.STRING_TYPE && rhsArray.getArrayValueType() == IrTypes.STRING_TYPE) {
+                Map<String, Integer> lhsMap = new HashMap<String, Integer>();
+                Map<String, Integer> rhsMap = new HashMap<String, Integer>();
+                
+                for (int i = 0; i < lhsValues.size(); i ++) {
+                    String value = ((StringType) lhsValues.get(i).evaluate()).getJavaStringValue();
+                    Integer count = lhsMap.get(value);
+                    if (count == null) {
+                        lhsMap.put(value, 1);
+                    }
+                    else {
+                        lhsMap.put(value, count + 1);
                     }
                 }
+                
+                for (int i = 0; i < rhsValues.size(); i ++) {
+                    String value = ((StringType) rhsValues.get(i).evaluate()).getJavaStringValue();
+                    Integer isValid = lhsMap.get(value);
+                    if (isValid != null) {
+                        Integer count = rhsMap.get(value);
+                        if (count == null) {
+                            rhsMap.put(value, 1);
+                        }
+                        else {
+                            rhsMap.put(value, count + 1);
+                        }
+                    }
+                }
+                
+                for (Map.Entry<String, Integer> entry : rhsMap.entrySet()) {
+                    Integer count = entry.getValue();
+                    String key = entry.getKey();
+                    for (int i = 0; i < count; i ++) {
+                        StringType strValue = StringType.create(statement, key);
+                        resultArray.add(strValue);
+                    }
+                }
+                
+                ArrayType result = new ArrayType(statement);
+                result.getValues().addAll(resultArray);
+                return result;
             }
-
-            ArrayType result = new ArrayType(statement);
-            result.getValues().addAll(resultArray);
-            return result;
+            
+            else {
+                for (int i = 0; i < lhsValues.size(); i ++) {
+                    for (int j = 0; j < rhsValues.size(); j ++) {
+                        Eq eqOp = new Eq();
+                        try {
+                            Node eqOpResult = eqOp.process(statement, lhsValues.get(i), rhsValues.get(j));
+                            if (eqOpResult instanceof TrueType) {
+                                resultArray.add(lhsValues.get(i));
+                            }
+                        } catch (OperonGenericException oge) {
+                            // Some EQ-operations are not defined.
+                        }
+                    }
+                }
+    
+                ArrayType result = new ArrayType(statement);
+                result.getValues().addAll(resultArray);
+                return result;
+            }
         }
         
         else if (lhsResult instanceof ObjectType && rhsResult instanceof ArrayType) {

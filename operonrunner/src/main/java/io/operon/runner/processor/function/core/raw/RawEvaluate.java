@@ -32,6 +32,7 @@ import io.operon.runner.node.type.ObjectType;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity1;
 import io.operon.runner.processor.function.Arity1;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
@@ -45,6 +46,7 @@ public class RawEvaluate extends BaseArity1 implements Node, Arity1 {
         super(statement);
         this.setParam1AsOptional(true);
         this.setParams(params, "evaluate", "expr");
+        this.setNs(Namespaces.RAW);
     }
 
     public OperonValue evaluate() throws OperonGenericException {        

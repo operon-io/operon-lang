@@ -34,6 +34,7 @@ import io.operon.runner.statement.DefaultStatement;
 import io.operon.runner.statement.FunctionStatement;
 import io.operon.runner.processor.function.BaseArity1;
 import io.operon.runner.processor.function.Arity1;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
 
@@ -47,6 +48,7 @@ public class ModuleAdd extends BaseArity1 implements Node, Arity1 {
     public ModuleAdd(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
         this.setParams(params, "add", "namespace");
+        this.setNs(Namespaces.MODULE);
     }
 
     // String or Error

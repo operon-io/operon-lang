@@ -27,6 +27,7 @@ import io.operon.runner.node.type.*;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity1;
 import io.operon.runner.processor.function.Arity1;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.processor.function.core.raw.RawToStringType;
 import io.operon.runner.node.FunctionRegularArgument;
 import io.operon.runner.util.ErrorUtil;
@@ -48,6 +49,7 @@ public class CastString extends BaseArity1 implements Node, Arity1 {
         super(statement);
         this.setParam1AsOptional(true);
         this.setParams(params, "string", "options");
+        this.setNs(Namespaces.CORE);
     }
 
     public StringType evaluate() throws OperonGenericException {

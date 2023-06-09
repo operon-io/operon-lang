@@ -5,6 +5,7 @@ package io.operon.runner;
 // These appear in the serialized output
 // 
 public class IrTypes {
+    public static byte MISSING_TYPE = -1;
     public static byte NUMBER_TYPE = 0;
     public static byte STRING_TYPE = 1;
     public static byte OBJECT_TYPE = 2;
@@ -33,6 +34,11 @@ public class IrTypes {
     public static byte AGGREGATE = 34;
     public static byte FUNCTION_CALL = 35;
     public static byte FUNCTION_REF = 36;
+<<<<<<< HEAD
+=======
+    public static byte MAP = 37;
+    public static byte OF = 38;
+>>>>>>> b86b905 (0.9.11-RELEASE)
     
     public static byte FUNCTION_0 = 100;
     public static byte FUNCTION_1 = 101;

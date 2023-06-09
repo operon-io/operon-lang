@@ -30,6 +30,7 @@ import io.operon.runner.node.type.*;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity1;
 import io.operon.runner.processor.function.Arity1;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.ErrorUtil;
 import org.apache.logging.log4j.Logger;
 import io.operon.runner.model.exception.OperonGenericException;
@@ -57,6 +58,7 @@ public class MappableTo extends BaseArity1 implements Node, Arity1 {
     public MappableTo(Statement statement, List<Node> params) throws OperonGenericException {
         super(statement);
         this.setParams(params, "mappableTo", "value");
+        this.setNs(Namespaces.CORE);
     }
 
     public OperonValue evaluate() throws OperonGenericException {        

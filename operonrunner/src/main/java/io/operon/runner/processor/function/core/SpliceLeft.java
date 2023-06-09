@@ -25,6 +25,7 @@ import io.operon.runner.node.type.*;
 import io.operon.runner.model.path.*;
 import io.operon.runner.processor.function.BaseArity1;
 import io.operon.runner.processor.function.Arity1;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.util.ErrorUtil;
 
@@ -47,6 +48,7 @@ public class SpliceLeft extends BaseArity1 implements Node, Arity1 {
     public SpliceLeft(Statement stmnt, List<Node> params) throws OperonGenericException {
         super(stmnt);
         this.setParams(params, "spliceLeft", "until");
+        this.setNs(Namespaces.CORE);
     }
 
     public OperonValue evaluate() throws OperonGenericException {

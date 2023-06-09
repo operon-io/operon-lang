@@ -28,6 +28,7 @@ import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.core.array.ArrayGroupBy;
 import io.operon.runner.processor.function.BaseArity1;
 import io.operon.runner.processor.function.Arity1;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.node.FunctionRegularArgument;
 import io.operon.runner.util.ErrorUtil;
 
@@ -48,6 +49,7 @@ public class CastObject extends BaseArity1 implements Node, Arity1 {
         super(statement);
         this.setParam1AsOptional(true);
         this.setParams(params, "object", "groupBy"); // TODO: expr | func (xor-param name)?
+        this.setNs(Namespaces.CORE);
     }
 
     public ObjectType evaluate() throws OperonGenericException {

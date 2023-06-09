@@ -30,6 +30,7 @@ import io.operon.runner.node.type.OperonValue;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity0;
 import io.operon.runner.processor.function.Arity0;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
 
@@ -43,6 +44,7 @@ public class CastNull extends BaseArity0 implements Node, Arity0 {
     public CastNull(Statement statement) {
         super(statement);
         this.setFunctionName("null");
+        this.setNs(Namespaces.CORE);
     }
 
     public NullType evaluate() throws OperonGenericException {        

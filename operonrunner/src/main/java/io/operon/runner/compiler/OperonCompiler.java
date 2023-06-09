@@ -1297,6 +1297,27 @@ public class OperonCompiler extends OperonBaseListener {
     }
 
     @Override
+    public void exitOf_expr(OperonParser.Of_exprContext ctx) {
+        //:OFF:log.debug("EXIT Of_expr :: Stack size :: " + this.stack.size());
+        List<ParseTree> subNodes = getContextChildNodes(ctx);
+        Of ofNode = new Of(this.currentStatement);
+        //System.out.println("Of-expr");
+        String typeName = null;
+        
+        //System.out.println("Of-expr data: " + subNodes.get(2).getText() + ", stack size=" + this.stack.size());
+        
+        Node n = this.stack.pop(); // remove Operon_value_type_shortcut from the stack
+        
+        if (subNodes.get(1).getText().charAt(0) == '<') {
+            typeName = subNodes.get(2).getText();
+            //System.out.println("Of-expr typeName: " + typeName);
+        }
+        
+        ofNode.setTypeName(typeName);
+        this.stack.push(ofNode);
+    }
+
+    @Override
     public void exitAssign_expr(OperonParser.Assign_exprContext ctx) {
         //:OFF:log.debug("EXIT Assign_expr :: Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = getContextChildNodes(ctx);
@@ -3485,7 +3506,7 @@ public class OperonCompiler extends OperonBaseListener {
 
     @Override
     public void exitOperon_type_function_shortcut(OperonParser.Operon_type_function_shortcutContext ctx) {
-        //:OFF:log.debug("Exit Json_type_function_shortcut. Stack size :: " + this.stack.size());
+        //:OFF:log.debug("Exit Operon_type_function_shortcut. Stack size :: " + this.stack.size());
         List<ParseTree> subNodes = this.getContextChildNodes(ctx);
         //:OFF:log.debug("    SubNodes size :: " + subNodes.size());
         //:OFF:log.debug("    SubNodes :: " + subNodes);

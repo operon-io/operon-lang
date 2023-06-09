@@ -34,6 +34,7 @@ import io.operon.runner.statement.Statement;
 import io.operon.runner.statement.FunctionStatement;
 import io.operon.runner.processor.function.BaseArity0;
 import io.operon.runner.processor.function.Arity0;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
 
@@ -47,6 +48,7 @@ public class FunctionList extends BaseArity0 implements Arity0 {
     public FunctionList(Statement statement) {
         super(statement);
         this.setFunctionName("list");
+        this.setNs(Namespaces.FUNCTION);
     }
 
     @SuppressWarnings("unchecked")

@@ -1,0 +1,40 @@
+0.9.1-RELEASE :: NOTES
+======================
+
+FIX, IMPROVEMENT
+================
+Function: CastRaw
+* Fix from array to raw, unescapes the strings and separator.
+* Added option "unescapeSeparator", defaults to true.
+* Example:
+	Select: ["bin", "bai", "baa"] => raw({separator: "\n", unescapeSeparator: false})
+
+IMPROVEMENT
+===========
+Timer input component
+* Now supports cron-expressions.
+*   - See: https://github.com/asahaf/javacron
+* Example:
+    # At hour 1, 5, and 23 every day and every month
+    $:timer:{cron: "0 0 1,5,23 * * *"} Select: $
+
+
+FIX
+===
+StringType
+* Allow multiline-strings contain the double-quote -character.
+* Examples:
+  Select: """foo\"bar"""
+  Select: """|
+             foo"
+             bar
+          """
+  Select: """>
+             foo"
+             bar
+          """
+
+FIX
+===
+ObjectType
+* Fix serialization issue

@@ -27,6 +27,7 @@ import io.operon.runner.node.type.ObjectType;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity0;
 import io.operon.runner.processor.function.Arity0;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
 
@@ -40,6 +41,7 @@ public class FunctionNamespace extends BaseArity0 implements Arity0 {
     public FunctionNamespace(Statement statement) {
         super(statement);
         this.setFunctionName("namespace");
+        this.setNs(Namespaces.FUNCTION);
     }
 
     public StringType evaluate() throws OperonGenericException {        

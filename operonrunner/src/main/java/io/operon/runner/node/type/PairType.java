@@ -51,7 +51,7 @@ public class PairType extends OperonValue implements Node {
     } 
 
     //
-    // TODO: this requires the double-quotes. Refactor so that this is not required anymore!
+    // TODO: this requires the double-quotes for the key. Refactor so that this is not required anymore!
     //      --> this should add the double-quotes itself.
     public void setPair(String key, OperonValue value ) { 
         this.key = key;

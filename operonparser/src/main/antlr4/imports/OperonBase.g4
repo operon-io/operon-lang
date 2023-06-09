@@ -29,7 +29,7 @@ function_stmt
 //  "bind": bind-configuration
 // NOTE: using '(' json_obj ')' instead of pattern_configs, since pattern_configs caused recognizing problem
 let_stmt
-    : VALUE? (CONST_ID | ID ':' CONST_ID) json_obj? json_value_constraint? ':' exception_stmt? expr (END | END_MARK | 'End:Value')
+    : LET? (CONST_ID | ID ':' CONST_ID) json_obj? json_value_constraint? ':' exception_stmt? expr (END | END_MARK | 'End:Let')
     ;
 
 select
@@ -56,8 +56,8 @@ expr
     | function_ref
     | function_ref_invoke           continuation*
     | function_ref_invoke_full      continuation*
-    | operon_type_function_shortcut   continuation*
-    | io_call              continuation*
+    | operon_type_function_shortcut continuation*
+    | io_call                       continuation*
     | choice                        continuation*
     | map_expr                      continuation*
     | filter_full_expr              continuation*
@@ -72,6 +72,7 @@ expr
     | while_expr                    continuation*
     | try_catch                     continuation*
     | parentheses_expr              continuation*
+    | of_expr                       continuation*
     | throw_exception
     | aggregate_expr                continuation*
     | flow_break
@@ -155,6 +156,14 @@ obj_dynamic_deep_scan
 //
 map_expr
     : 'Map' (':' | pattern_configs)? let_stmt* expr (END | END_MARK | 'End:Map')
+    ;
+
+//
+// "Of" is used for advising that Array contains certain type of data.
+//  Example: Select: .foo Of <String>
+//
+of_expr
+    : 'Of' '<' operon_type_function_shortcut '>'
     ;
 
 //
@@ -524,8 +533,8 @@ END_MARK
     : ';'
     ;
 
-VALUE
-    : 'Value'
+LET
+    : 'Let'
     ;
 
 CONST_ID

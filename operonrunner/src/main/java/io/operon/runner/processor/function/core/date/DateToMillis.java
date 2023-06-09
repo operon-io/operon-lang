@@ -38,6 +38,7 @@ import io.operon.runner.node.type.PairType;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity0;
 import io.operon.runner.processor.function.Arity0;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.StringUtil;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.model.exception.OperonGenericException;
@@ -47,6 +48,7 @@ public class DateToMillis extends BaseArity0 implements Node, Arity0 {
     public DateToMillis(Statement statement) throws OperonGenericException {
         super(statement);
         this.setFunctionName("toMillis");
+        this.setNs(Namespaces.DATE);
     }
 
     public NumberType evaluate() throws OperonGenericException {        

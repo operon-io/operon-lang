@@ -27,6 +27,7 @@ import io.operon.runner.processor.function.core.path.*;
 import io.operon.runner.statement.Statement;
 import io.operon.runner.processor.function.BaseArity0;
 import io.operon.runner.processor.function.Arity0;
+import io.operon.runner.processor.function.Namespaces;
 import io.operon.runner.util.JsonUtil;
 import io.operon.runner.util.ErrorUtil;
 import io.operon.runner.processor.function.core.array.ArrayGet;
@@ -43,6 +44,7 @@ public class GenericNext extends BaseArity0 implements Node, Arity0 {
     public GenericNext(Statement statement) {
         super(statement);
         this.setFunctionName("next");
+        this.setNs(Namespaces.CORE);
     }
 
     public OperonValue evaluate() throws OperonGenericException {        

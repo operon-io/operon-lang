@@ -241,6 +241,9 @@ public class CoreFunctionResolver {
                 || fqFunctionName.equals("date:add:1") || fqFunctionName.equals("date:add:2") || fqFunctionName.equals("date:add:3")
                 || fqFunctionName.equals(":add:1") || fqFunctionName.equals(":add:2") || fqFunctionName.equals(":add:3")
             || fqFunctionName.equals("core:date:toString:1") || fqFunctionName.equals("date:toString:1")
+            || fqFunctionName.equals("core:date:lastDayOfMonth:0") || fqFunctionName.equals("date:lastDayOfMonth:0") || fqFunctionName.equals(":lastDayOfMonth:0")
+                || fqFunctionName.equals("core:date:lastDayOfMonth:1") || fqFunctionName.equals("date:lastDayOfMonth:1") || fqFunctionName.equals(":lastDayOfMonth:1")
+            || fqFunctionName.equals("core:date:daysBetween:2") || fqFunctionName.equals("date:daysBetween:2") || fqFunctionName.equals(":daysBetween:2")
             || fqFunctionName.equals("core:date:toMillis:0") || fqFunctionName.equals("date:toMillis:0") || fqFunctionName.equals(":toMillis:0")
             || fqFunctionName.equals("core:date:fromMillis:0") || fqFunctionName.equals("date:fromMillis:0") || fqFunctionName.equals(":fromMillis:0")
             || fqFunctionName.equals("core:date:fromString:1") || fqFunctionName.equals("date:fromString:1") || fqFunctionName.equals(":fromString:1")
@@ -482,6 +485,8 @@ public class CoreFunctionResolver {
         
         else if (fqFunctionName.equals("core:date:now") || fqFunctionName.equals("date:now") || fqFunctionName.equals(":now")) { return new DateNow(currentStatement); }
         else if (fqFunctionName.equals("core:date:add") || fqFunctionName.equals("date:add") || fqFunctionName.equals(":add")) { return new DateAdd(currentStatement, functionParams); }
+        else if (fqFunctionName.equals("core:date:lastDayOfMonth") || fqFunctionName.equals("date:lastDayOfMonth") || fqFunctionName.equals(":lastDayOfMonth")) { return new DateLastDayOfMonth(currentStatement, functionParams); }
+        else if (fqFunctionName.equals("core:date:daysBetween") || fqFunctionName.equals("date:daysBetween") || fqFunctionName.equals(":daysBetween")) { return new DateDaysBetween(currentStatement, functionParams); }
         else if (fqFunctionName.equals("core:date:toString") || fqFunctionName.equals("date:toString")) { return new DateToString(currentStatement, functionParams); }
         else if (fqFunctionName.equals("core:date:toMillis") || fqFunctionName.equals("date:toMillis") || fqFunctionName.equals(":toMillis")) { return new DateToMillis(currentStatement); }
         else if (fqFunctionName.equals("core:date:fromMillis") || fqFunctionName.equals("date:fromMillis") || fqFunctionName.equals(":fromMillis")) { return new DateFromMillis(currentStatement); }
