@@ -34,11 +34,8 @@ public class IrTypes {
     public static byte AGGREGATE = 34;
     public static byte FUNCTION_CALL = 35;
     public static byte FUNCTION_REF = 36;
-<<<<<<< HEAD
-=======
     public static byte MAP = 37;
     public static byte OF = 38;
->>>>>>> b86b905 (0.9.11-RELEASE)
     
     public static byte FUNCTION_0 = 100;
     public static byte FUNCTION_1 = 101;
