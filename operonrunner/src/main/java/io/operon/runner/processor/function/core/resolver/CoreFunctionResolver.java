@@ -297,6 +297,7 @@ public class CoreFunctionResolver {
             || fqFunctionName.equals("core:update:1") || fqFunctionName.equals(":update:1") || fqFunctionName.equals("core:update:2") || fqFunctionName.equals(":update:2") // array:, object:
             || fqFunctionName.equals("core:value:0") || fqFunctionName.equals(":value:0") // path:, object:
             || fqFunctionName.equals("core:collect:1") || fqFunctionName.equals(":collect:1")
+            || fqFunctionName.equals("core:in:1") || fqFunctionName.equals(":in:1")
             || fqFunctionName.equals("core:organize:0") || fqFunctionName.equals(":organize:0") 
                 || fqFunctionName.equals("core:organize:1") || fqFunctionName.equals(":organize:1")// input: (String | Raw), output: array of string.
             // 
@@ -348,6 +349,7 @@ public class CoreFunctionResolver {
         else if (fqFunctionName.equals("core:previous") || fqFunctionName.equals(":previous")) { return new GenericPrevious(currentStatement); }
         else if (fqFunctionName.equals("core:next") || fqFunctionName.equals(":next")) { return new GenericNext(currentStatement); }
         else if (fqFunctionName.equals("core:parent") || fqFunctionName.equals(":parent")) { return new GenericParent(currentStatement); }
+        else if (fqFunctionName.equals("core:in") || fqFunctionName.equals(":in")) { return new InArray(currentStatement, functionParams); }
         
         // function
         else if (fqFunctionName.equals("core:function:name") || fqFunctionName.equals("function:name")) { return new FunctionName(currentStatement); }

@@ -1,0 +1,35 @@
+0.9.12-RELEASE :: NOTES
+======================
+
+NEW FUNCTION
+============
+in($array)
+
+Checks if the given current-value is found from the given array.
+Parameter is named as $array.
+
+Note that the current-value may also be a Function-reference with one parameter 
+or LambdaFunction-reference with one parameter. In this case the produced output
+is checked against the currently iterated array-value.
+
+Example:
+    Select: 10 => in([10, 20, 30])
+    #> true
+
+IMPROVED FUNCTION
+=================
+string:random($options). Added options:
+    - lower <Boolean> -> allow generating lower-case characters
+    - upper <Boolean> -> allow generating upper-case characters
+    - number <Boolean> -> allow generating number characters
+    - special <Boolean> -> allow generating special characters
+    - overrideSpecial <String> -> an array of the special characters that should be used instead of the default
+    - minLower <Number> -> tell how many lower-case characters should be at minimum
+    - minUpper <Number> -> tell how many upper-case characters should be at minimum
+    - minNumber <Number> -> tell how many numbert-characters should be at minimum
+    - minSpecial <Number> -> tell how many special-characters should be at minimum
+
+IMPROVED FUNCTION
+=================
+boolean:random($options). Added option:
+    - probability <Number> -> the probability for the result to be true

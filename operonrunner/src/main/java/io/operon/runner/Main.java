@@ -52,7 +52,7 @@ import org.apache.logging.log4j.LogManager;
 public class Main {
      // no logger 
     
-    public static final String VERSION = "0.9.10.0";
+    public static final String VERSION = "0.9.13";
     public static final boolean isNative = false;
     
     public static final int SUCCESS_VALUE = 0;

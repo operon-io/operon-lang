@@ -1,0 +1,8 @@
+0.9.13-RELEASE :: NOTES
+======================
+
+FIX
+===
+=> date:fromString($pattern)
+
+Parse the hour by using Calendar.HOUR_OF_DATE instead of Calendar.HOUR.

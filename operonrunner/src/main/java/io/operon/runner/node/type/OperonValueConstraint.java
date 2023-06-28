@@ -50,7 +50,7 @@ public class OperonValueConstraint extends AbstractNode implements Node {
     @Expose private Node constraintExpr;
     private String constraintAsString;
     private OperonValue valueToEvaluateAgainst;
-    private OperonValue evaluatedValue; // Evaluates to TrueType or FalseType
+    private OperonValue constraintEvaluatedValue; // Evaluates to TrueType or FalseType
 
     public OperonValueConstraint(Statement stmnt) {
         super(stmnt);
@@ -58,11 +58,11 @@ public class OperonValueConstraint extends AbstractNode implements Node {
 
     public OperonValue evaluate() throws OperonGenericException {
         //:OFF:log.debug("OperonValueConstraint :: evaluate :: against value :: " + this.getValueToEvaluateAgainst().getClass().getName());
-        this.evaluatedValue = (OperonValue) this.getValueToEvaluateAgainst().evaluate();
-        //:OFF:log.debug("    evaluatedValue :: " + this.evaluatedValue);
+        this.constraintEvaluatedValue = (OperonValue) this.getValueToEvaluateAgainst().evaluate();
+        //:OFF:log.debug("    constraintEvaluatedValue :: " + this.constraintEvaluatedValue);
         
         // Set the currentValue (valueToEvaluateAgainst) and evaluate the constraintExpr
-        this.getStatement().setCurrentValue(this.getEvaluatedValue());
+        this.getStatement().setCurrentValue(this.getConstraintEvaluatedValue());
     
         OperonValue result = null;
         try {
@@ -74,12 +74,12 @@ public class OperonValueConstraint extends AbstractNode implements Node {
         }
         
         if (result instanceof TrueType) {
-            //:OFF:log.debug("OperonValueConstraint :: constraint evaluation returned TrueType for value :: " + this.getEvaluatedValue());
+            //:OFF:log.debug("OperonValueConstraint :: constraint evaluation returned TrueType for value :: " + this.getConstraintEvaluatedValue());
             return result;
         }
         
         else if (result instanceof FalseType) {
-            //:OFF:log.debug("OperonValueConstraint :: constraint evaluation returned FalseType for value :: " + this.getEvaluatedValue());
+            //:OFF:log.debug("OperonValueConstraint :: constraint evaluation returned FalseType for value :: " + this.getConstraintEvaluatedValue());
             return result;
         }
         
@@ -87,7 +87,7 @@ public class OperonValueConstraint extends AbstractNode implements Node {
             //:OFF:log.debug("OperonValueConstraint :: constraint evaluation returned instanceof :: " + result.getClass().getName());
             List<Node> params = new ArrayList<Node>();
             params.add(result);
-            this.getStatement().setCurrentValue(this.evaluatedValue);
+            this.getStatement().setCurrentValue(this.constraintEvaluatedValue);
             MappableTo mapTo = new MappableTo(this.getStatement(), params);
             this.setValueConstraint(mapTo);
             return this.getValueConstraint().evaluate();
@@ -113,8 +113,8 @@ public class OperonValueConstraint extends AbstractNode implements Node {
         return this.valueToEvaluateAgainst;
     }
 
-    public OperonValue getEvaluatedValue() {
-        return this.evaluatedValue;
+    public OperonValue getConstraintEvaluatedValue() {
+        return this.constraintEvaluatedValue;
     }
 
     public void setConstraintAsString(String jvc) {

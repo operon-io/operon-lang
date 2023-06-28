@@ -42,10 +42,6 @@ public class FunctionStatement extends BaseStatement implements Statement {
     
     private List<FunctionStatementParam> params; // used to check the param order and their names
     
-    private OperonValue evaluatedValue;
-    
-    private OperonValueConstraint constraint;
-    
     public FunctionStatement(Context ctx) {
         super(ctx);
         this.params = new ArrayList<FunctionStatementParam>();
@@ -120,22 +116,6 @@ public class FunctionStatement extends BaseStatement implements Statement {
     
     private void setParams(List<FunctionStatementParam> p) {
         this.params = p;
-    }
-    
-    public void setEvaluatedValue(OperonValue ev) {
-        this.evaluatedValue = ev;
-    }
-    
-    public OperonValue getEvaluatedValue() {
-        return this.evaluatedValue;
-    }
-    
-    public void setOperonValueConstraint(OperonValueConstraint c) {
-        this.constraint = c;
-    }
-
-    public OperonValueConstraint getOperonValueConstraint() {
-        return this.constraint;
     }
 
 }

@@ -44,6 +44,7 @@ public class BooleanRandom extends BaseArity1 implements Node, Arity1 {
         try {
             long seed = 0;
             ObjectType options = null;
+            double probability = 0.5; // Default probability value
             
             if (this.getParam1() != null) {
                 options = (ObjectType) this.getParam1().evaluate();
@@ -51,24 +52,29 @@ public class BooleanRandom extends BaseArity1 implements Node, Arity1 {
                 if (options.hasKey("\"seed\"")) {
                     seed = (long) ((NumberType) options.getByKey("seed").evaluate()).getDoubleValue();
                 }
+                
+                if (options.hasKey("\"probability\"")) {
+                    probability = ((NumberType) options.getByKey("probability").evaluate()).getDoubleValue();
+                }
+            }
+            
+            if (probability < 0 || probability > 1) {
+                ErrorUtil.createErrorValueAndThrow(this.getStatement(), "FUNCTION", "boolean:" + this.getFunctionName(), "Invalid probability value. Probability must be between 0 and 1.");
             }
             
             Random r;
             
             if (seed != 0) {
                 r = new Random(seed);
-            }
-            
-            else {
+            } else {
                 r = new Random();
             }
             
-            boolean randomBoolean = r.nextBoolean();
+            boolean randomBoolean = r.nextDouble() > probability;
             
-            if (randomBoolean == true) {
+            if (randomBoolean) {
                 return new TrueType(this.getStatement());
-            }
-            else {
+            } else {
                 return new FalseType(this.getStatement());
             }
         } catch (Exception e) {
@@ -76,5 +82,6 @@ public class BooleanRandom extends BaseArity1 implements Node, Arity1 {
             return null;
         }
     }
+
 
 }

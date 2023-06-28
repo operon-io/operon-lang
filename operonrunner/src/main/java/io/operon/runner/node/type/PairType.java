@@ -39,8 +39,7 @@ public class PairType extends OperonValue implements Node {
     @Expose private String key;
     
     @Expose private OperonValue value;
-    private OperonValue evaluatedValue; 
-    private OperonValueConstraint constraint; 
+
     private int position; // Required in Filter
     @Expose private Node configs; // for "hidden" -option
     
@@ -56,7 +55,7 @@ public class PairType extends OperonValue implements Node {
     public void setPair(String key, OperonValue value ) { 
         this.key = key;
         this.value = value;
-        this.evaluatedValue = value; // set evaluated value already before evaluating, avoids null-pointer from toString(), which is called before evaluate()
+        this.setEvaluatedValue(value); // set evaluated value already before evaluating, avoids null-pointer from toString(), which is called before evaluate()
         if (value.isEmptyValue()) {
             this.setIsEmptyValue(true);
         }
@@ -129,24 +128,7 @@ public class PairType extends OperonValue implements Node {
 
     public OperonValue getValue() { 
         return this.value;
-    } 
- 
-    public void setEvaluatedValue(OperonValue ev) { 
-        this.evaluatedValue = ev; 
-    } 
-     
-    public OperonValue getEvaluatedValue() { 
-        return this.evaluatedValue; 
-    } 
- 
-    public void setOperonValueConstraint(OperonValueConstraint c) { 
-        this.constraint = c; 
-    } 
- 
-    public OperonValueConstraint getOperonValueConstraint() { 
-        return this.constraint; 
-    } 
-
+    }
 
     //
     // REMOVE

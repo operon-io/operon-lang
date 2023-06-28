@@ -52,8 +52,6 @@ public class LetStatement extends BaseStatement implements Statement {
 
     private ResetType resetType = ResetType.AFTER_SCOPE;
     private EvaluateType evaluateType = EvaluateType.LAZY;
-    private OperonValue evaluatedValue;
-    private OperonValueConstraint constraint;
     private boolean configsResolved = false;
     
     // NOTE: this is used only to set the bind-value (operator-overloading),
@@ -82,9 +80,9 @@ public class LetStatement extends BaseStatement implements Statement {
         if (this.getResetType() == ResetType.ALWAYS) {
             this.reset();
         }
-        if (this.getEvaluatedValue() != null) {
+        if (this.getLetEvaluatedValue() != null) {
             //System.out.println("Let-statement :: evaluate() :: return evaluated value");
-            return this.getEvaluatedValue();
+            return this.getLetEvaluatedValue();
         }
 
         //System.out.println("In Let-evaluate(), CV still null");
@@ -152,11 +150,11 @@ public class LetStatement extends BaseStatement implements Statement {
             // Apply constraint-check (for the expr-output):
             //
             OperonValueConstraint jvc = this.getOperonValueConstraint();
-            OperonValueConstraint.evaluateConstraintAgainstOperonValue(this.getEvaluatedValue(), jvc);
+            OperonValueConstraint.evaluateConstraintAgainstOperonValue(this.getLetEvaluatedValue(), jvc);
         }
         
-        //:OFF:log.debug("LET STATEMENT RETURN :: " + this.getEvaluatedValue());
-        return this.getEvaluatedValue();
+        //:OFF:log.debug("LET STATEMENT RETURN :: " + this.getLetEvaluatedValue());
+        return this.getLetEvaluatedValue();
     }
     
     public void resolveConfigs() throws OperonGenericException {
@@ -289,19 +287,11 @@ public class LetStatement extends BaseStatement implements Statement {
         if (ev != null) {
             ev.setPreventReEvaluation(true);
         }
-        this.evaluatedValue = ev;
+        super.setEvaluatedValue(ev);
     }
     
-    public OperonValue getEvaluatedValue() {
-        return this.evaluatedValue;
-    }
-    
-    public void setOperonValueConstraint(OperonValueConstraint c) {
-        this.constraint = c;
-    }
-
-    public OperonValueConstraint getOperonValueConstraint() {
-        return this.constraint;
+    public OperonValue getLetEvaluatedValue() {
+        return super.getEvaluatedValue();
     }
     
     public void setConfigs(Node conf) {
